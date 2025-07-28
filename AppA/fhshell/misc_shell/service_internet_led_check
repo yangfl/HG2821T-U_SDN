@@ -1,0 +1,208 @@
+#!/bin/sh
+#create by hubo 2012-5-25
+#check internet led status and set it
+
+COMMON_CONF=/etc/fh_common.conf
+FHBOX_PATH=/usr/bin
+INTER_WEB=$FHBOX_PATH/inter_web
+GETCFG=/rom/fhshell/misc_shell/getcfg
+
+#get internet route interface
+Wancc_File_Path=/var/wanintf.conf
+Param_File_Path=/var/misc_run_param.conf
+
+if [ -f /usr/local/fh/mf/factory_mode -o -f /var/factory_mode ]
+then
+	exit 1
+fi
+
+phyauthstates=`cat /var/phyauthstates 2>&1`
+if [ "$phyauthstates" != "1" ]; then
+	Curr_Led_Status=`/usr/bin/led_ctrl get internet`
+	if [ "$Curr_Led_Status" == "on" ]
+	then
+		/usr/bin/led_ctrl set internet off
+	fi
+	exit 1
+fi
+    
+if [ ! -f $Wancc_File_Path ]
+then
+	echo "$Wancc_File_Path does not exist"
+	exit 1
+fi
+
+Last_RX=0
+Curr_RX=0
+Last_B_RX=0
+Curr_B_RX=0
+INTERNET_LED_B_STATUS=0
+INTERNET_LED_STATUS=0
+LED_ON=1
+LED_OFF=0
+
+########internet bridge###################
+Internet_B_Name=`$GETCFG $Wancc_File_Path internetbridge`
+#echo "Internet_B_Name=$Internet_B_Name"
+tmpsubID=0
+subwanID=0
+IPC_wanStatus=0
+IPC_Nat_Enabled=0
+PPC_wanStatus=0
+PPC_Nat_Enabled=0
+if [ "$Internet_B_Name" != "-1" ]
+then
+	#if get ip and tx or rx have data,then set internet route led on
+	matchline=`cat $Wancc_File_Path | grep "${Internet_B_Name}$" | sed -n '1p'`
+	tmpID=`echo $matchline | awk -F '=' '{print $1}' | awk -F 'w' '{print $2}'`
+	wanID=`expr $tmpID / 4 + 1`
+	tmpsubID=`expr $tmpID % 8 % 4`
+	subwanID=`expr $tmpsubID % 2 + 1`
+	#echo "tmpID=$tmpID wanID=$wanID tmpsubID =$tmpsubID subwanID=$subwanID"
+	if [ `expr $tmpsubID` -gt 1 ]
+	then
+		PPC_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANPPPC_${subwanID}_ConnectionStatus" |cut -d "=" -f 2`
+		PPC_Num_v6=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANPPPC_${subwanID}_X_CT_COM_IPv6ConnStatus" |cut -d "=" -f 2`
+		PPC_wanStatus=`$INTER_WEB get $PPC_Num` 
+		PPC_wanStatus_v6=`$INTER_WEB get $PPC_Num_v6` 
+		#echo "PPC_Num=$PPC_Num"
+		#echo "PPC_wanStatus=$PPC_wanStatus"
+		#echo "PPC_wanStatus_v6=$PPC_wanStatus_v6"
+	else
+		IPC_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANIPC_${subwanID}_ConnectionStatus"|cut -d "=" -f 2`
+		IPC_Num_v6=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANIPC_${subwanID}_X_CT_COM_IPv6ConnStatus"|cut -d "=" -f 2`
+		IPC_wanStatus=`$INTER_WEB get $IPC_Num`
+		IPC_wanStatus_v6=`$INTER_WEB get $IPC_Num_v6`
+		#echo "IPC_Num=$IPC_Num"
+		#echo "IPC_wanStatus=$IPC_wanStatus"
+		#echo "IPC_wanStatus_v6=$IPC_wanStatus_v6"
+	fi	
+	#dhcp or static ip
+	if [ "$Internet_B_Name" == "pon0" ]
+	then
+		tmp_Internet_name=`echo "pon0.4093"`
+	else
+		tmp_Internet_name=$Internet_B_Name
+	fi
+	tmp_Internet_name=`ifconfig ${tmp_Internet_name} | grep "$tmp_Internet_name" | awk -F " " '{print $1}'`
+	#echo "tmp_Internet_name=$tmp_Internet_name"
+	if [ -n $tmp_Internet_name ]
+	then
+		if [ `expr $tmpsubID` -le 1 ]
+		then
+			#echo "IPC_wanStatus=$IPC_wanStatus"
+			if [ "$IPC_wanStatus" == "Connected&" ] || [ "$IPC_wanStatus_v6" == "Connected&" ]
+			then
+				INTERNET_LED_B_STATUS=$LED_ON
+			else
+				INTERNET_LED_B_STATUS=$LED_OFF
+			fi
+		else
+			#pppoe
+			#echo "PPC_wanStatus=$PPC_wanStatus"
+			if [ "$PPC_wanStatus" == "Connected&" ] || [ "$PPC_wanStatus_v6" == "Connected&" ]
+			then
+				INTERNET_LED_B_STATUS=$LED_ON
+			else
+				INTERNET_LED_B_STATUS=$LED_ON
+			fi
+		fi
+	else
+		INTERNET_LED_B_STATUS=$LED_OFF
+	fi
+else
+	INTERNET_LED_B_STATUS=$LED_OFF
+fi
+#echo "INTERNET_LED_B_STATUS=$INTERNET_LED_B_STATUS"
+########internet route####################
+Internet_R_Name=`$GETCFG $Wancc_File_Path internetroute`
+#echo "Internet_R_Name=$Internet_R_Name"
+tmpsubID=0
+subwanID=0
+IPC_wanStatus=0
+IPC_Nat_Enabled=0
+PPC_wanStatus=0
+PPC_Nat_Enabled=0
+if [ "$Internet_R_Name" != "-1" ]
+then
+	#if get ip and tx or rx have data,then set internet route led on
+	matchline=`cat $Wancc_File_Path | grep "${Internet_R_Name}$" | sed -n '1p'`
+	tmpID=`echo $matchline | awk -F '=' '{print $1}' | awk -F 'w' '{print $2}'`
+	wanID=`expr $tmpID / 4 + 1`
+	tmpsubID=`expr $tmpID % 8 % 4`
+	subwanID=`expr $tmpsubID % 2 + 1`
+	#echo "tmpID=$tmpID wanID=$wanID tmpsubID =$tmpsubID subwanID=$subwanID"
+	if [ `expr $tmpsubID` -gt 1 ]
+	then
+		PPC_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANPPPC_${subwanID}_ConnectionStatus" |cut -d "=" -f 2`
+		PPC_Num_v6=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANPPPC_${subwanID}_X_CT_COM_IPv6ConnStatus" |cut -d "=" -f 2`
+		PPC_Nat_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANPPPC_${subwanID}_NATEnabled" |cut -d "=" -f 2`
+		PPC_Nat_Enabled=`$INTER_WEB get $PPC_Nat_Num`
+		PPC_wanStatus=`$INTER_WEB get $PPC_Num`
+		PPC_wanStatus_v6=`$INTER_WEB get $PPC_Num_v6`
+		#echo "PPC_Num=$PPC_Num PPC_Nat_Num=$PPC_Nat_Num"
+		#echo "PPC_Nat_Enabled=$PPC_Nat_Enabled PPC_wanStatus=$PPC_wanStatus PPC_wanStatus_v6=$PPC_wanStatus_v6"
+	else
+		IPC_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANIPC_${subwanID}_ConnectionStatus"|cut -d "=" -f 2`
+		IPC_Num_v6=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANIPC_${subwanID}_X_CT_COM_IPv6ConnStatus"|cut -d "=" -f 2`
+		IPC_Nat_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANIPC_${subwanID}_NATEnabled"|cut -d "=" -f 2`
+		IPC_Nat_Enabled=`$INTER_WEB get $IPC_Nat_Num`
+		IPC_wanStatus=`$INTER_WEB get $IPC_Num`
+		IPC_wanStatus_v6=`$INTER_WEB get $IPC_Num_v6`
+		#echo "IPC_Num=$IPC_Num IPC_Nat_Num=$IPC_Nat_Num"
+		#echo "IPC_Nat_Enabled=$IPC_Nat_Enabled IPC_wanStatus=$IPC_wanStatus IPC_wanStatus_v6=$IPC_wanStatus_v6"
+	fi	
+	#dhcp or static ip
+	if [ "$Internet_R_Name" == "pon0" ]
+	then
+		tmp_Internet_name=`echo "pon0.4093"`
+	else
+		tmp_Internet_name=$Internet_R_Name
+	fi
+	tmp_Internet_name=`ifconfig $tmp_Internet_name | grep "$tmp_Internet_name" | awk -F " " '{print $1}'`
+	#echo "tmp_Internet_name=$tmp_Internet_name"
+	if [ -n $tmp_Internet_name ]
+	then
+		if [ `expr $tmpsubID` -le 1 ]
+		then
+			#echo "IPC_wanStatus=$IPC_wanStatus IPC_Nat_Enabled=$IPC_Nat_Enabled"
+			if [ "$IPC_wanStatus_v6" == "Connected&" ] || [ "$IPC_wanStatus" == "Connected&" -a "$IPC_Nat_Enabled" == "1&" ]
+			then
+				#if in transmission,then set internet route led blk
+				INTERNET_LED_STATUS=$LED_ON
+			else
+				INTERNET_LED_STATUS=$LED_OFF
+			fi
+		else	
+			#pppoe
+			#echo "PPC_wanStatus=$PPC_wanStatus PPC_Nat_Enabled=$PPC_Nat_Enabled"
+			if [ "$PPC_wanStatus_v6" == "Connected&" ] || [ "$PPC_wanStatus" == "Connected&" -a "$PPC_Nat_Enabled" == "1&" ]
+			then
+				#if in transmission,then set internet route led blk
+				INTERNET_LED_STATUS=$LED_ON
+			else
+				INTERNET_LED_STATUS=$LED_OFF
+			fi
+		fi
+	else
+		INTERNET_LED_STATUS=$LED_OFF
+	fi
+else
+	INTERNET_LED_STATUS=$LED_OFF
+fi
+#echo "INTERNET_LED_STATUS=$INTERNET_LED_STATUS"
+if [ "$INTERNET_LED_B_STATUS" -eq 1 ] || [ "$INTERNET_LED_STATUS" -eq 1 ]
+then
+	Curr_Led_Status=`/usr/bin/led_ctrl get internet`
+	if [ "$Curr_Led_Status" == "off" ]
+	then
+	    sleep 20
+		/usr/bin/led_ctrl set internet on
+	fi
+else
+	Curr_Led_Status=`/usr/bin/led_ctrl get internet`
+	if [ "$Curr_Led_Status" == "on" ]
+	then
+		/usr/bin/led_ctrl set internet off
+	fi
+fi

@@ -1,0 +1,22 @@
+#!/bin/sh
+#for wlan button
+
+
+XMLCONF=/rom/fhshell/web/web_gui/hgcxml_wlcfgfactory.conf
+
+if [ ! -f ${XMLCONF} ]; then
+	echo "${XMLCONF} is missing ..."
+	exit 1
+fi
+
+ID1=`/rom/fhbin/getcfgx ${XMLCONF} IGD_LAND_1_WLANC_1_Enable`
+wlan_up=`ifconfig | grep ra0`
+if [ "${wlan_up}" = "" ]; then
+	/rom/fhbin/inter_web set ${ID1} 1
+#	/rom/fhbin/wifi up
+	touch /var/wlan/.wifi_reload_2g
+else
+	/rom/fhbin/inter_web set ${ID1} 0
+#	/rom/fhbin/wifi down
+	touch /var/wlan/.wifi_reload_2g
+fi

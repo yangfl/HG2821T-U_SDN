@@ -1,0 +1,8 @@
+Package: luci-base
+Version: R1707
+Depends: libc, lua, libuci-lua, luci-lib-nixio, luci-lib-ip, libubus-lua
+Source: feeds/luci/modules/luci-base
+Section: luci
+Architecture: mt7526
+Installed-Size: 1460797
+Description:  LuCI core libraries

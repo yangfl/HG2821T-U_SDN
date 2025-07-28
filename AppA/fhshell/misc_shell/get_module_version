@@ -1,0 +1,21 @@
+#!/bin/sh
+
+#
+# Parameters are MODULE_NAME.
+#
+
+if [ $# != 1 ]; then
+    echo Usage: $0 MODULE_NAME >&2
+    exit 1
+fi
+
+MODULE_NAME=$1
+
+if [ ! -e /root/ver_info/record_version_hubei_unipon ]
+then
+	echo "record_version file does not exist" >&2 && exit 1
+fi
+
+cat /root/ver_info/record_version_hubei_unipon | grep "$MODULE_NAME=" | awk -F '=' '{print $2}'| awk -F '|' '{for(i=1;i<=NF;i++)print $i}' 
+
+exit 0

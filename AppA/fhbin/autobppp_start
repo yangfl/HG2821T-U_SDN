@@ -1,0 +1,7 @@
+#!/bin/sh
+#cli /home/cli/hal/chip/phymem_write -v addr 0x12380050 data 0x0
+touch /var/bridge_ponstatus_info
+sleep 30
+/usr/bin/autobppp &
+
+

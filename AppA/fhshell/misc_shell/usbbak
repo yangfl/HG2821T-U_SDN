@@ -1,0 +1,46 @@
+#!/bin/sh
+COMMON_CONF=/etc/fh_common.conf 
+NAME=`grep "DeviceType=" $COMMON_CONF | cut -d = -f 2`
+FACTORY_CONF=`grep "MANAGER_INC_CONF_PATH_FACTORY=" $COMMON_CONF | cut -d = -f 2`
+XML=`grep "APP_CONF_PATH_TR069_XML=" $COMMON_CONF | cut -d = -f 2`
+CONF=`grep "APP_CONF_PATH_TR069_FACTORY=" $COMMON_CONF | cut -d = -f 2`
+PATH=`grep "APP_CONF_PATH_TR069=" $COMMON_CONF | cut -d = -f 2`
+
+
+if [ -n $1 ]
+	then
+			if [ "${1}" == "bak" ]
+			then
+				/bin/cp -rf $XML  /var/
+				/bin/cp -rf $CONF  /var/
+				/bin/cp -rf $PATH/param.log  /var/
+				/bin/tar -cvf /var/ctce8_$NAME.cfg  -C /var/ param.xml factory.conf param.log
+				/bin/rm -rf /var/factory.conf
+				/bin/rm -rf /var/param.xml
+				/bin/rm -rf /var/param.log
+			elif [ "${1}" == "recovery" ]
+			then
+				cd /var/
+				/bin/tar -xvf /var/ctce8_$NAME.cfg
+				if [ -f /var/param.xml ]&&[ -f /var/factory.conf ]
+				then
+					if [ -f /var/param.log ]
+						then
+						/bin/cp -rf $PATH/param.log  $PATH/logfbac
+						/bin/cp -rf /var/param.log  $PATH/param.log
+					fi
+					/bin/cp -rf $XML $PATH/xmlbac
+					/bin/cp -rf $CONF  $PATH/confbac
+					/bin/cp -rf /var/param.xml $XML
+					/bin/cp -rf /var/factory.conf $CONF
+					/bin/rm -rf /var/factory.conf
+					/bin/rm -rf /var/param.xml
+					/bin/rm -rf /var/param.log
+					/bin/rm -rf /var/ctce8_$NAME.cfg
+				fi
+			else
+				echo "useage:[bak] [recovery]"
+			fi	
+	else
+	echo "useage:[bak] [recovery]"
+fi

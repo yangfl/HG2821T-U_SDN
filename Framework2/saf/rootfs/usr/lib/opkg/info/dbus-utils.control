@@ -1,0 +1,10 @@
+Package: dbus-utils
+Version: 1.10.8-1
+Depends: libc, dbus
+Source: feeds/packages/utils/dbus
+License: AFL-2.1
+Section: utils
+Maintainer: Steven Barth <cyrus@openwrt.org>
+Architecture: mt7526
+Installed-Size: 14672
+Description:  Simple interprocess messaging system (utilities)

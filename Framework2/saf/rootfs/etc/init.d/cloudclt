@@ -1,0 +1,29 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2013-2014 OpenWrt.org
+
+START=16
+USE_PROCD=1
+PROG=/sbin/cloudclient
+
+start_localserver()
+{
+	procd_open_instance
+	procd_set_param command "$PROG"
+	procd_append_param command localserver
+	procd_set_param respawn 3600 5 0
+	procd_close_instance
+}
+
+start_cloudclient()
+{
+	procd_open_instance
+	procd_set_param command "$PROG"
+	procd_set_param respawn 3600 5 0
+	procd_close_instance
+}
+
+start_service(){
+	start_localserver
+	start_cloudclient
+}
+

@@ -1,0 +1,1374 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <title>中国电信智能网关</title>
+	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta HTTP-EQUIV='Pragma' CONTENT='no-cache'/>
+    <link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+    <link href='<%=resource%>/css/storage_settings.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+    <script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+	<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+	<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+	<script language="javascript" src="<%=resource%>/js/highcharts.js?version=<%=version%>"></script>
+	<script language="javascript" src="<%=resource%>/js/jquery.nicescroll.min.js?version=<%=version%>"></script> 
+	<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"></script>   
+</head>
+<script language="javascript">
+var path = "";
+var rootpath = "";
+var jdata = "";
+var oldHtml = "";
+var diagfolders = "";
+var diagpath = "";
+var copymove = "";
+var dtype = "all";
+var newFlg = false;
+var newDiagFlg = false;
+var activeTimeout = setTimeout("Timeout()", 300000);   
+
+function alertNewFolder(){
+	if (newFlg) {
+		alert("请确认或者取消新建文件夹操作然后再执行其它操作");
+		return true;
+	} else
+		return false;
+}
+
+function alertNewDiagFolder(){
+	if (newDiagFlg) {
+		alert("请确认或者取消新建文件夹操作然后再执行其它操作");
+		return true;
+	} else
+		return false;
+}
+  
+function Timeout() {
+	(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+		{ token: '<%=token%>' }, 
+		function(x){
+		parent.location = "/cgi-bin/luci";
+		});	
+}
+
+function removeCheckedFlag()
+{
+	$(".fileList_head input[type='checkbox']").removeAttr('checked');
+	$(".fileList_head-sec input[type='checkbox']").removeAttr('checked');
+	$("#checkNum").text(0);
+	$(".fileList_head-sec").hide();
+	$(".fileList_head").show();
+	$(".fileList > div.common:visible").find("input").removeAttr("checked");	
+}
+
+function removeAllFiles()
+{
+	$(".fileList > div.common").each(function(){
+		$(this).remove();
+	});	
+}
+
+function get_path_files(getpath)
+{
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/openFolder')%>',{path:getpath},
+		function(x, json){
+			if (x.responseText.substr(2, 7) == "DOCTYPE")
+				parent.location = "/cgi-bin/luci";
+			else
+			{		
+				removeAllFiles();
+				path = json.filePath;
+				jdata = json;
+				for (var i = 0; i < json.fileNum; i++){
+					eval("fileList = json.file" + (i + 1));
+					addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+				}
+				
+				sortFiles();
+
+				if (path != rootpath)
+					$("#backShowOr").show();
+				else
+					$("#backShowOr").hide();
+
+				if (path.length > 36)
+				{
+					var path_item = path.split('/');
+					if (path_item[path_item.length - 1].length > 24)
+					{
+						var str_after= path_item[path_item.length - 1].substring(path_item[path_item.length - 1].length-15, path_item[path_item.length - 1].length); 
+						var pathway = "/" + path_item[1] + "/..." + str_after;
+					}
+					else
+					    var pathway = "/" + path_item[1] + "/.../" + path_item[path_item.length - 1];
+					    
+					$("#curpath").html(pathway);
+			    }
+			    else
+					$("#curpath").html(path);
+			}
+		});	
+}
+
+function openfile(val, fallback)
+{
+	if (alertNewFolder())
+		return;
+	
+	var getpath = "";
+	removeCheckedFlag();
+	if (fallback)
+	{
+		var arr = path.split('/');
+		for (var i = 1; i < arr.length - 1; i++)
+		getpath += ("/" + arr[i]);
+	} 
+	else
+	{
+		getpath = path + "/" + val;
+	}
+
+	get_path_files(getpath);
+}
+
+function addFileList(_fname, fsize, fmode, moditime)
+{
+    fname = _fname.replace(/\'/g, "&#39;");
+		
+	if (fmode)
+	{
+		$(".fileList").children(":last").prev().after("<div class='row folder common' data-option='{\"name\":\"" + fname +"\",\"time\":\"" + moditime +"\",\"length\":0,\"type\":\"folder\"}'><div class=\"col-xs-7\"><input type='checkbox'/></div><div class=\"col-xs-55\"><img src=\"<%=resource%>/image/folder.png\" alt=\"\" class=\"img-left\"/><span><a href='javascript:;' style='color:#535353;' onClick='openfile(\"" + fname + "\", false)' title=\"" + fname + "\">" + fname + "</a></span></div><div class=\"col-xs-18\">"+moditime+"</div><div class=\"col-xs-10\">文件夹</div><div class=\"col-xs-10\"></div></div>");	
+	}
+    else
+    {
+		var fileExtension = fname.substring(fname.lastIndexOf('.') + 1).toUpperCase();
+		if ((fileExtension == "MP3") || (fileExtension == "WAV") || (fileExtension == "AAC") || (fileExtension == "FLAC") || (fileExtension == "APE") || (fileExtension == "M4A") || (fileExtension == "M4R") || (fileExtension == "MMF") || (fileExtension == "MP2") || (fileExtension == "OGG") || (fileExtension == "MID"))
+		$(".fileList").children(":last").prev().after("<div class='row audio common' data-option='{\"name\":\"" + fname +"\",\"time\":\"" + moditime +"\",\"length\":"+fsize+",\"type\":\"audio\"}'><div class=\"col-xs-7\"><input type='checkbox'/></div><div class=\"col-xs-55\"><img src=\"<%=resource%>/image/audio.png\" alt=\"\" class=\"img-left\"/><span title=\"" + fname + "\">" + fname + "</span></div><div class=\"col-xs-18\">"+moditime+"</div><div class=\"col-xs-10\">"+fileExtension+"文件</div><div class=\"col-xs-10\">"+fsize+"KB</div></div>");
+		else if ((fileExtension == "AVI") || (fileExtension == "WMA") || (fileExtension == "RM") || (fileExtension == "RMVB") || (fileExtension == "FLASH") || (fileExtension == "MP4") || (fileExtension == "MKV") || (fileExtension == "WMV") || (fileExtension == "MPG") || (fileExtension == "MPEG") || (fileExtension == "MOV") || (fileExtension == "ASF") || (fileExtension == "MPE") || (fileExtension == "VOB"))
+		$(".fileList").children(":last").prev().after("<div class='row video common' data-option='{\"name\":\"" + fname +"\",\"time\":\"" + moditime +"\",\"length\":"+fsize+",\"type\":\"video\"}'><div class=\"col-xs-7\"><input type='checkbox'/></div><div class=\"col-xs-55\"><img src=\"<%=resource%>/image/video.png\" alt=\"\" class=\"img-left\"/><span title=\"" + fname + "\">" + fname + "</span></div><div class=\"col-xs-18\">"+moditime+"</div><div class=\"col-xs-10\">"+fileExtension+"文件</div><div class=\"col-xs-10\">"+fsize+"KB</div></div>");
+		else if ((fileExtension == "PNG") || (fileExtension == "JPG") || (fileExtension == "GIF") || (fileExtension == "BMP") || (fileExtension == "JPEG") || (fileExtension == "RAW"))
+		$(".fileList").children(":last").prev().after("<div class='row image common' data-option='{\"name\":\"" + fname +"\",\"time\":\"" + moditime +"\",\"length\":"+fsize+",\"type\":\"image\"}'><div class=\"col-xs-7\"><input type='checkbox'/></div><div class=\"col-xs-55\"><img src=\"<%=resource%>/image/image.png\" alt=\"\" class=\"img-left\"/><span title=\"" + fname + "\">" + fname + "</span></div><div class=\"col-xs-18\">"+moditime+"</div><div class=\"col-xs-10\">"+fileExtension+"文件</div><div class=\"col-xs-10\">"+fsize+"KB</div></div>");
+		else
+		$(".fileList").children(":last").prev().after("<div class='row file common' data-option='{\"name\":\"" + fname +"\",\"time\":\"" + moditime +"\",\"length\":"+fsize+",\"type\":\"other." + fileExtension + "\"}'><div class=\"col-xs-7\"><input type='checkbox'/></div><div class=\"col-xs-55\"><img src=\"<%=resource%>/image/file.png\" alt=\"\" class=\"img-left\"/><span title=\"" + fname + "\">" + fname + "</span></div><div class=\"col-xs-18\">"+moditime+"</div><div class=\"col-xs-10\">"+fileExtension+"文件</div><div class=\"col-xs-10\">"+fsize+"KB</div></div>");
+    }
+}	
+
+function createNewFolder(foldername)
+{
+	if (!isValidFileName(foldername))
+	{
+		alert("文件夹名字不能包含特殊字符，请重新修改！");
+		return false;
+	}
+		
+	for (var i = 0; i < jdata.fileNum; i++)
+	{
+		eval("fileList = jdata.file" + (i + 1));
+		if ((fileList.isFolder) && (fileList.name == foldername))
+		{
+			alert("文件夹已存在，请重新命名！");
+			return false;
+		}
+	}
+
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);			
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/newFolder')%>',{path:path + "/" + foldername, diag:'0'},
+		function(x, json){
+			if (x.responseText.substr(2, 7) == "DOCTYPE")
+				parent.location = "/cgi-bin/luci";
+			else
+			{		
+				if (json.fileNum > 0)
+				{
+				    removeAllFiles();
+				    jdata = json;
+					for (var i = 0; i < json.fileNum; i++){
+						eval("fileList = json.file" + (i + 1));
+						addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+				    }
+					sortFiles();	
+			    }
+				else
+					$(".addinput").parent().parent().remove();
+      		}
+		});
+}
+
+function doDeleteFiles()
+{
+	cleanPopWindowContentFromIframe();
+	
+	//填充内容
+	$("#pop_window_title", window.parent.document).html("删除确认");
+	$("#pop_window_icon", window.parent.document).html('<div class="pop_window_icon_alert"></div>');
+	$("#pop_window_message", window.parent.document).html("请确认删除");
+	
+	//更改确认操作函数
+	var eid = parent.document.getElementById("confirm");
+	if ( isIE7 )
+	{
+		eid.onclick = function() { realDeleteFiles() };
+	}
+	else
+	{
+		eid.setAttribute("onclick","document.getElementById('storage_iframe').contentWindow.realDeleteFiles()");
+	}
+	showOrHidePopWindowFromIframe("show");
+}
+
+function realDeleteFiles()
+{
+	showOrHidePopWindowFromIframe("hide");
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);	
+	
+	var data = "";
+	$(".fileList > div.common:visible").find("input").each(function(index,ele){
+		if(this.checked)
+			data += $(this).parent().next().text() + '/';
+	});
+
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/deleteFiles')%>',{path:path, fileLists:data},
+		function(x, json){
+			if (x.responseText.substr(2, 7) == "DOCTYPE")
+				parent.location = "/cgi-bin/luci";
+			else
+			{		
+			    removeAllFiles();
+				if (json.fileNum > 0)
+				{
+					jdata = json;
+					
+					for (var i = 0; i < json.fileNum; i++){
+						eval("fileList = json.file" + (i + 1));
+						addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+					}
+					sortFiles();
+					showType();
+					$(".fileList_head").show();					
+				}
+			}
+		});
+}
+
+function cancelModify()
+{
+  	$(".fileList > div.common:visible").find("input").each(function(){
+		if (this.checked)
+		{
+			$(this).parent().next().replaceWith("<div class=\"col-xs-55\">" + oldHtml + "</div>");
+			return;
+		}
+  	});	
+}
+
+function modifyName(old, filetype)
+{
+	var data_option, found;
+	if (!isValidFileName($("#needToModify").val()))
+	{
+		alert("重命名名字不能包含特殊字符，请重新修改！");
+		return false;
+	}
+		
+	$(".fileList > div.common").each(function(){
+		if ($(this).children(":first").checked)
+			return true;
+			
+		data_option = JSON.parse($(this).attr("data-option"));
+		if ((filetype == data_option.type) && ($(this).children().find("span").text() == $("#needToModify").val()))
+		{
+			alert("重命名名字重复，请重新修改！");
+			found = true;
+			return false;
+		}
+	});	
+	
+	if (found)
+		return;
+
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);		
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/rename')%>',{oldName:path + "/" + old, newName:path + "/" + $("#needToModify").val()},
+		function(x, json){
+			if (x.responseText.substr(2, 7) == "DOCTYPE")
+				parent.location = "/cgi-bin/luci";
+			else
+			{		
+				if (json.fileNum > 0)
+				{
+					removeAllFiles();
+					jdata = json;
+					for (var i = 0; i < json.fileNum; i++){
+						eval("fileList = json.file" + (i + 1));
+						addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+					}
+					sortFiles();
+					showType();
+					$(".fileList_head").show();
+				}
+			}
+		});	 
+}
+
+function openDialogFile(folderName, fallback)
+{
+	if (alertNewDiagFolder())
+		return;
+	
+	var getpath = "";
+	if (fallback)
+	{
+		if (diagpath == rootpath)
+		{
+			if ($("#fallback").parent().children().length > 1)
+				return;
+			
+			$("#fallback").parent().append("<span id='comment'>当前 <strong>\""+diagpath+"\"</strong> 是根目录.</span>");
+			return;
+		}		
+		var arr = folderName.split('/');
+		for (var i = 1; i < arr.length - 1; i++)
+			getpath += ("/" + arr[i]);			
+	}
+	else
+	    getpath = diagpath + "/" + folderName;
+
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);		
+	diagpath = getpath;
+	(new XHR()).get('<%=url('admin/storage/getDiagFolders')%>', { path: diagpath }, 
+		function(x, json){
+			if (x.responseText.substr(2, 7) == "DOCTYPE")
+				parent.location = "/cgi-bin/luci";
+			else
+			{		
+				diagfolders = json;
+				$("#comment").remove();
+					$(".file-tree-container").children().each(function(){
+						$(this).remove();
+					});				
+				if (!fallback && (json.folderNum == 0))
+					$("#fallback").parent().append("<span id='comment'>&nbsp;该目录是空目录.</span>");
+				else
+				{													
+					for (var i = 0; i < json.folderNum; i++){
+						eval("diagfolder = json.folder" + (i + 1));
+						addFileDialog(diagfolder);
+					}
+				}
+			}
+		});	
+}
+
+function addFileDialog(folderName)
+{
+	$(".file-tree-container").append("<div class='row1'><div class=\"col-xs-7\"><input class='diag-check' type='checkbox'/></div><div class=\"col-xs-55\"><a href='javascript:;' style='color:#535353;' onClick='openDialogFile(\"" + folderName + "\", false)'>" + folderName + "</a></div></div>");
+}
+
+function copyORmoveto(btn) 
+{
+	if (alertNewFolder())
+		return;
+	copymove = btn.name;
+	if (copymove == "copy")	
+		$(".title_left").text("复制到");
+	else
+		$(".title_left").text("移动到");
+	var objDiv = document.getElementById("copymoveDiv"); 
+	objDiv.style.position = "absolute"; //zIndex依赖于该属性
+	objDiv.style.top = "12%";//设置弹出层距离上边界的距礿
+	objDiv.style.left = "30%";//设置弹出层距离左边界的距礿
+	objDiv.style.width = "526px";//设置弹出层的宽度 
+	objDiv.style.height = "395px";//设置弹出层的高度 
+	objDiv.style.zIndex = "9999999"; //设置弹出层重叠顺序
+	objDiv.style.visibility = "visible"; 
+
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);	
+	diagpath = rootpath;
+	(new XHR()).get('<%=url('admin/storage/getDiagFolders')%>',
+		{ path: diagpath  }, 
+		function(x, json){
+			if (x.responseText.substr(2, 7) == "DOCTYPE")
+				parent.location = "/cgi-bin/luci";
+			else
+			{		
+				diagfolders = json;
+				if (json.folderNum == 0)
+					$("#fallback").parent().append("<span id='comment'>&nbsp;该目录是空目录.</span>");
+				else
+				{									
+					for (var i = 0; i < json.folderNum; i++){
+						eval("diagfolder = json.folder" + (i + 1));
+						addFileDialog(diagfolder);
+					}
+				}
+			}
+		});	
+} 
+
+function hidePopup()
+{
+	$("#comment").remove();
+	$(".file-tree-container").children().each(function(){
+		$(this).remove();
+	});		
+	var objDiv = document.getElementById("copymoveDiv"); 
+	objDiv.style.visibility = "hidden"; 	  
+} 
+
+window.onload = function () 
+{
+	var div = document.getElementById('copymoveDiv');
+	var disX = 0;
+	var disY = 0;
+	document.getElementById('popTitle').onmousedown = function (ev) {  //鼠标按下
+		var oEvent = ev || event;       //判断浏览器兼嬿      
+		disX = oEvent.clientX - copymoveDiv.offsetLeft;    //鼠标横坐标点到div的offsetLeft距离
+		disY = oEvent.clientY - copymoveDiv.offsetTop;     //鼠标纵坐标点到div的offsetTop距离
+			document.onmousemove = function (ev) {      //鼠标移动
+			var oEvent = ev || event;       
+			var l = oEvent.clientX - disX;          //获取div左边的距礿           
+			var t = oEvent.clientY - disY;          //获取div上边的距礿           
+			if (l < 0)        //判断div的可视区，为避免DIV失去鼠标瀿              
+				l = 0;
+			else if (l > document.documentElement.clientWidth - div.offsetWidth)
+				l = document.documentElement.clientWidth - div.offsetWidth;
+			if (t < 0)
+				t = 0;
+			else if (t > document.documentElement.clientHeight - div.offsetHeight)
+				t = document.documentElement.clientHeight - div.offsetHeight;
+			div.style.left = l + 'px';      //确定DIV的左边位绿           
+			div.style.top = t + 'px';       //确定DIV的上边位绿       
+		}
+		document.onmouseup = function () {      //当鼠标松开后关闭移动事件和自身事件
+			document.onmousemove = null;
+			document.onmouseup = null;
+		}
+		return false;
+	}
+}
+
+var sortObjDataOption = {
+	"sort":[
+		{"orderProperty":"time","orderDirection":"asc"},
+		{"orderProperty":"time","orderDirection":"desc"},
+		{"orderProperty":"length","orderDirection":"asc"},
+		{"orderProperty":"length","orderDirection":"desc"},
+		{"orderProperty":"name","orderDirection":"asc"},
+		{"orderProperty":"name","orderDirection":"desc"},
+		{"orderProperty":"type","orderDirection":"asc"}
+	]
+};
+
+function addUsbDevsList()
+{
+	var usbname = "";
+	if (jdata.usbLabel.length > 6)
+		usbname = jdata.usbLabel.substring(0, 5) + "...";
+	else
+		usbname = jdata.usbLabel;
+	$(".storage_type_list").append("<div><span class='actvie'>" + usbname + "</span><span style=\"display:none;\">" + jdata.usbLabelInst + "</span></div>");
+	
+	if (jdata.usbCnt > 5)
+	{
+		customScrollBar("#usblistscroll");
+		$("#usblistscroll").addClass("scroll_usblist");
+	}	
+	for (var i = 0; i < jdata.usbCnt; i++){
+		eval("usbdev = jdata.storage" + (i + 1));
+		eval("usbinstno = jdata.instno" + (i + 1));
+		if (parseInt($("#instno").val()) != parseInt(usbinstno))
+		{
+			if (usbdev.length > 6)
+				usbname = usbdev.substring(0, 5) + "...";
+			else
+				usbname = usbdev;
+			$(".storage_type_list").append("<div><span>" + usbname + "</span><span style=\"display:none;\">" + usbinstno + "</span></div>");
+		}
+	}
+}
+
+function realFormat()
+{
+	showOrHidePopWindowFromIframe("hide");	
+
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/usbFormat')%>', {usbdev : $("#instno").val()},
+		function(x,json){
+			if (x.responseText.substr(2, 7) == "DOCTYPE")
+				parent.location = "/cgi-bin/luci";
+			else
+			{		
+				removeCheckedFlag();
+				removeAllFiles();
+				$("#backShowOr").hide();
+				rootpath = path = json.filePath;
+				jdata = json;
+				$("#"+dtype+"_type").removeClass("active");
+				$("#all_type").addClass("active");			
+				dtype = "all";
+				for (var i = 0; i < json.fileNum; i++){
+					eval("fileList = json.file" + (i + 1));
+					addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+				}
+				sortFiles();
+						
+				$("#curpath").html(path);
+			}
+		});
+}
+
+var specifiedUsb = "";
+	
+function getSpecifiedUsb()
+{
+	var queryString = location.search;
+	if (queryString != '' && queryString != undefined )
+	{
+		specifiedUsb = queryString.substring(queryString.indexOf("=")+1, queryString.length);
+	}else{
+		specifiedUsb = "";
+	}
+}
+
+function compare(orderDirection, orderProperty) {
+    return function (o1, o2) {
+        var d1 = JSON.parse($(o1).attr("data-option")),
+            d2 = JSON.parse($(o2).attr("data-option"));
+        if (orderDirection == 'asc') {
+			if (orderProperty == 'length')
+            	return d1[orderProperty] > d2[orderProperty] ? 1 : (d1[orderProperty] < d2[orderProperty] ? -1 : 0)
+            else
+				return d1[orderProperty].localeCompare(d2[orderProperty]);
+        } else {
+        	if (orderProperty == 'length')
+            	return d1[orderProperty] > d2[orderProperty] ? -1 : (d1[orderProperty] < d2[orderProperty] ? 1 : 0)
+            else
+				return d2[orderProperty].localeCompare(d1[orderProperty]);
+        }
+    }
+}
+
+function sortFiles()
+{
+	var jsonObj = eval("sortObjDataOption.sort");
+    fileList = $(".fileList .row:not(.fileList_head,.fileList_head-sec,.addfloderlist)");
+    if (dtype == 'all')
+    {
+        if ($(".fileList > div.common").length > 0)
+        	$(".fileList_head-sec").next().css("margin-top", "0px");
+    }
+    else if ($(".fileList > div." + dtype).length > 0)
+    	$(".fileList > div." + dtype).first().css("margin-top", "0px");
+    fileList.sort(compare(jsonObj[$("#sort_value").val()].orderDirection, jsonObj[$("#sort_value").val()].orderProperty));
+    $(".fileList").find(".row:not(.fileList_head,.fileList_head-sec,.addfloderlist)").remove();
+    $(".fileList_head-sec").after(fileList);
+      
+    if (dtype == 'all')
+    {
+        if ($(".fileList > div.common").length > 0)
+        	$(".fileList_head-sec").next().css("margin-top", "44px");
+    }
+    else if ($(".fileList > div." + dtype).length > 0)
+    	$(".fileList > div." + dtype).first().css("margin-top", "44px");
+}
+
+var progressInterval;
+var transId = 0;
+function displayProgressBar()
+{
+	var objDiv = document.getElementById("copyProgress"); 
+	objDiv.style.position = "absolute"; //zIndex依赖于该属性
+	objDiv.style.top = "40%";//设置弹出层距离上边界的距礿
+	objDiv.style.left = "30%";//设置弹出层距离左边界的距礿
+	
+	objDiv.style.zIndex = "9999999"; //设置弹出层重叠顺序
+	objDiv.style.visibility = "visible"; 	
+}
+
+function getCopyMoveProgress()
+{
+	clearTimeout(activeTimeout);
+	activeTimeout = setTimeout("Timeout()", 300000);
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/getProgress')%>', {transId : transId}, 
+	function(x, json){
+		if (parseInt(json.percent) >= 100)
+		{
+			$("#progressBarItem").css("width", "100%");
+			clearInterval(progressInterval);
+			setTimeout("hideProgressBar()", 300);
+		}
+		else
+			$("#progressBarItem").css("width", parseInt(json.percent)+"%");
+	});
+}
+
+function hideProgressBar()
+{
+	var objDiv = document.getElementById("copyProgress"); 
+	objDiv.style.visibility = "hidden";
+	$("#progressBarItem").css("width", 0); 		
+}
+
+function showType() {
+    if (dtype == 'all') {
+    	  if (rootpath != path)
+    	  	$("#backShowOr").show();
+        $(".fileList .row").show();
+        $(".fileList_head-sec").hide();
+        $(".make-new-file").show();
+        $("#classification").text("");
+        $(".fileList > div.common[data-selectId-copy]").hide();
+        if ($(".fileList > div.common").length > 0)
+        	$(".fileList_head-sec").next().css("margin-top", "44px");
+    } else {
+        $(".make-new-file").hide();
+        $(".fileList .row." + dtype).show();
+        $(".fileList .row:not(." + dtype + ",.fileList_head)").hide();
+        //分类动态显示
+        if (dtype == "image")            
+        	$("#classification").text(" >图片");
+        else if (dtype == "video") 
+        	$("#classification").text(" >视频");
+        else
+        	$("#classification").text(" >音频");
+
+				if ($(".fileList > div." + dtype).length > 0)
+    			$(".fileList > div." + dtype).first().css("margin-top", "44px");
+    }
+}
+
+$(document).ready(function () {
+	getSpecifiedUsb();
+    customScrollBar("#containerScroll");
+    customScrollBar("#cmDidlog");
+    
+    $(".storage_type .current_storage").click(function () {
+        $(".storage_type_list").slideToggle();
+    });
+	customSelectInit();
+
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/getFiles')%>', {usbdev : specifiedUsb}, 
+		function(x, json){
+			if (json.usbCnt > 0) 
+			{
+			    $(".main").show();
+				rootpath = path = json.filePath;
+				jdata = json;
+				$("#instno").val(jdata.usbLabelInst);
+				addUsbDevsList();
+				var usbname = "";
+				if (jdata.usbLabel.length > 6)
+					usbname = jdata.usbLabel.substring(0, 5) + "...";
+				else
+					usbname = jdata.usbLabel;				
+				$(".storage_type .current_storage").text(usbname);
+				
+				for (var i = 0; i < json.fileNum; i++){
+					eval("fileList = json.file" + (i + 1));
+					addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+				}
+
+				sortFiles();
+				
+		    	$("#curpath").html(path);		    	
+	    	}
+	    	else
+	    	{
+				  $("#container").show();	    		
+	    	}
+		    var width = parseInt($("#containerScroll").css("width")) * 0.99;
+		    $(".row .fileList_head").css({"width": width});
+		    $(".row .fileList_head-sec").css({"width": width});	 	    	
+		});	
+
+    // 存储设备选择
+    $(".storage_type_list div").live("click", function () {
+        $(".storage_type .current_storage").text($(this).children(":first").text());
+		$("#instno").val($(this).children(":last").text());
+        $(".storage_type_list div").children().removeClass("actvie");
+        $(this).children(":first").addClass("actvie")
+
+        $(".storage_type_list").slideToggle();
+        removeCheckedFlag();
+		clearTimeout(activeTimeout);
+		activeTimeout = setTimeout("Timeout()", 300000);		
+		(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/getSelectedUsb')%>', {usbdev : $(this).children(":last").text()}, 
+			function(x, json){
+				if (x.responseText.substr(2, 7) == "DOCTYPE")
+					parent.location = "/cgi-bin/luci";
+				else
+				{			
+					removeAllFiles();
+					$("#backShowOr").hide();
+					if (dtype != "all")
+					{
+						$(".make-new-file").show();
+						$("#"+dtype+"_type").removeClass("active");
+						$("#all_type").addClass("active");
+						$("#classification").text("");
+						dtype = "all";
+					}
+											  
+					rootpath = path = json.filePath;
+					jdata = json;
+					
+					for (var i = 0; i < json.fileNum; i++){
+						eval("fileList = json.file" + (i + 1));
+						addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+					}
+
+					sortFiles();
+						
+				    $("#curpath").html(path); 
+				}
+			});						       
+    });
+
+    //左侧导航栏点击事件
+    $(".container_body .left div").click(function () {
+		if (alertNewFolder())
+			return;    
+        $(this).siblings().removeClass("left_current");
+        $(this).addClass("left_current");
+        var data_option = JSON.parse($(this).attr("data-option")),
+		type = data_option.type;
+        console.log(data_option)
+        switch (type) {
+            case 1:
+                $(".fileManager").show();
+                $(".fomat").hide();
+                if (dtype == "all")
+                {
+                	$(".make-new-file").show();
+	        	    if (rootpath != path)
+	        	  		$("#backShowOr").show();                	
+                }
+                else
+                { 
+		            if (dtype == "image")            
+		            	$("#classification").text(" >图片");
+		            else if (dtype == "video") 
+		            	$("#classification").text(" >视频");
+		            else
+		            	$("#classification").text(" >音频");   
+		        }             	               
+                break;
+            case 2:
+                $(".fileManager").hide();
+                $(".fomat").show();
+                $("#backShowOr").hide();
+                if (dtype == "all")
+                	$(".make-new-file").hide();
+                $("#classification").text("");
+                break;
+        }
+    });
+
+    //文件分类导航点击事件
+    $(".main_container_title .filetype span").click(function () {
+		if (alertNewFolder())
+			return;
+        $(".fileList_head-sec").hide();
+        $(".fileList_head").show();
+        $("#moveButton").hide();
+        $(".innerButton").hide();
+        $("#backShowOr").hide();
+        $(".fileList > div.common:visible").find("span").removeAttr("contenteditable").css({"border":"0","padding":"0px"});
+        //初始化checkbox默认值 undefined
+       $(".container").find("input[type='checkbox']").removeAttr("checked");
+        if (dtype == 'all')
+        {
+	        if ($(".fileList > div.common").length > 0)
+	        	$(".fileList_head-sec").next().css("margin-top", "0px");
+        }
+        else if ($(".fileList > div." + dtype).length > 0)
+        	$(".fileList > div." + dtype).first().css("margin-top", "0px");
+
+        $(this).siblings().removeClass("active");
+        $(this).addClass("active");
+        var data_option = JSON.parse($(this).attr("data-option"));
+            dtype = data_option.type;
+        showType();
+        checkedSelect();
+    })
+
+    // 弹出格式化窗口
+    $(".J_fomat").click(function () {
+        cleanPopWindowContentFromIframe();
+					
+        $("#pop_window_title", window.parent.document).text("格式化提醒");
+        $("#pop_window_icon", window.parent.document).html('<div class="pop_window_icon_alert"></div>');
+        $("#pop_window_message", window.parent.document).html("警告：格式化将删除该磁盘上的所有数据。所有数据不可恢复，请及时备份重要的数据。<br/>若想格式化磁盘，请单击“确认”，若想退出，请单击“取消”。");
+		var eid = parent.document.getElementById("confirm");
+		if ( isIE7 )
+		{
+			eid.onclick = function() { realFormat() };
+		}
+		else
+		{
+			eid.setAttribute("onclick","parent.document.getElementById('storage_iframe').contentWindow.realFormat()");
+		}				
+      
+        showOrHidePopWindowFromIframe("show");
+    })
+	
+	$("#sort").bind("click", function(){
+		sortFiles();
+        	          
+        //checkedSelect();
+	});
+    
+    function checkedSelect(){
+        //可见的个数
+        var visibleLength;
+        $(".fileList_head input[type='checkbox']").change(function(){
+            var allCkeck = $(".fileList_head input[type='checkbox']").attr('checked');
+            if(allCkeck){
+               //button 除 重命名 可编辑
+               $(".button-all button:not('#newNme')").removeAttr("disabled").addClass("button-pointer");
+               $(".button-all button#newNme").attr("disabled","disabled").removeClass("button-pointer");
+               $(".fileList_head").hide();
+               $(".fileList_head-sec").show();
+               $(".fileList > div:visible").find("input").attr("checked","checked");
+               visibleLength = $(".fileList > div.common:visible").find("input:checked").length;
+               $("#checkNum").text(visibleLength);
+
+               var allcheckLength=$(".fileList > div.common:visible").find("input:checked").length;
+               if(allcheckLength == 0){
+                    $(".button-all button").attr("disabled","disabled").removeClass("button-pointer");
+                }else if(allcheckLength == 1){
+                    $(".button-all button").removeAttr("disabled").addClass("button-pointer");
+                }
+                else if(allcheckLength > 1){
+                    $(".button-all button:not('#newNme')").removeAttr("disabled").addClass("button-pointer");
+                    $(".button-all button#newNme").attr("disabled","disabled").removeClass("button-pointer");
+                }
+            }
+        });
+        $(".fileList_head-sec input[type='checkbox']").change(function(){
+            var allCkeckTwo = $(".fileList_head-sec input[type='checkbox']")[0].checked;
+            if(allCkeckTwo){
+               //button 除 重命名 可编辑
+               $(".button-all button:not('#newNme')").removeAttr("disabled").addClass("button-pointer");
+               $(".button-all button#newNme").attr("disabled","disabled").removeClass("button-pointer");
+               $(".fileList_head input[type='checkbox']").removeAttr('checked');
+               $(".fileList_head-sec").show();
+               $(".fileList_head").hide();
+               $(".fileList > div.common:visible").find("input").attr("checked","checked");
+               visibleLength = $(".fileList > div.common:visible").find("input:checked").length;
+               $("#checkNum").text(visibleLength);
+
+               var allcheckLength=$(".fileList > div.common:visible").find("input:checked").length;
+               if(allcheckLength == 0){
+                    $(".button-all button").attr("disabled","disabled").removeClass("button-pointer");
+                }else if(allcheckLength == 1){
+                    $(".button-all button").removeAttr("disabled").addClass("button-pointer");
+                }
+                else if(allcheckLength > 1){
+                    $(".button-all button:not('#newNme')").removeAttr("disabled").addClass("button-pointer");
+                    $(".button-all button#newNme").attr("disabled","disabled").removeClass("button-pointer");
+                }
+            }else{
+               removeCheckedFlag();
+            }
+        });
+
+        $(".fileList > div.common:visible").find("input").live("click", function(){
+            var sumChecked=0;
+            var allCheckOr=true;
+            var firstcheck=false;
+            var divVisibleLength = $(".fileList > div.common:visible").length;
+            var checkLength=$(".fileList > div.common:visible").find("input:checked").length;
+            //console.log(checkLength);
+            if(checkLength == 0){
+                $(".button-all button").attr("disabled","disabled").removeClass("button-pointer");
+				$(".addok").removeAttr("disabled").addClass("button-pointer");
+				$(".addcancel").removeAttr("disabled").addClass("button-pointer");				
+            }else if(checkLength == 1){
+                $(".button-all button").removeAttr("disabled").addClass("button-pointer");
+                $(".button-all button#newNme").css("color","#666");
+            }
+            else if(checkLength > 1){
+                $(".button-all button:not('#newNme')").removeAttr("disabled").addClass("button-pointer");
+                $(".button-all button#newNme").attr("disabled","disabled").removeClass("button-pointer");
+                $(".button-all button#newNme").css("color","grey");
+            }
+            //alert(divVisibleLength);
+            for(var i=0;i<divVisibleLength;i++){
+                //alert($(".container > div.common:visible").find('input')[i].checked);
+                if($(".fileList > div.common:visible").find('input')[i].checked){
+                    sumChecked+=1;
+                    firstcheck=true;
+                }else{
+                   allCheckOr=false;
+                }
+           }
+           $("#checkNum").text(sumChecked);
+           if(allCheckOr){
+              $(".fileList_head-sec").show();
+              $(".fileList_head").hide(); 
+              $(".fileList_head-sec input[type='checkbox']").attr('checked','checked'); 
+           }else{
+             $(".fileList_head input[type='checkbox']").removeAttr('checked');
+             $(".fileList_head-sec input[type='checkbox']").removeAttr('checked');
+             $(".fileList_head-sec").hide();
+             $(".fileList_head").show();
+           }
+           if(firstcheck){
+               $(".fileList_head-sec").show();
+               $(".fileList_head").hide();
+           }else{
+               $(".fileList_head-sec").hide();
+               $(".fileList_head").show();
+           }
+        });
+    }
+    checkedSelect();
+    //新建文件夹
+    var j=0;
+    var folderFun;
+	
+    $(".make-new-file").click(function(){
+		if (alertNewFolder())
+			return;
+		newFlg = true;
+		removeCheckedFlag();
+        j++;
+        $(".innerButton").hide();
+        $(".addfloderlist").find("span").removeAttr("contenteditable").css({"border":"0","padding":"0px"});
+        $("#moveButton").hide();
+        var addmodule ='<div class="row common addfloderlist" data-selectId ='+j+' style = "margin-top: 44px;">';
+            addmodule +='<div class="col-xs-7"><input type="checkbox"></div>';
+            addmodule +='<div class="col-xs-55" style="position:relative;"><img src="<%=resource%>/image/folder.png" alt="" class="img-left"/><span class="addinput" contenteditable=true>新建文件夹</span>';
+            addmodule +='<div class="button-all innerButton" style="position:absolute; left:210px; top:1px;"><button class="addok">确认</button>&nbsp;<button class="addcancel">取消</button></div>';
+            addmodule +='</div><div class="col-xs-18"></div>';
+            addmodule +='<div class="col-xs-10"></div>';
+            addmodule +='<div class="col-xs-10"></div>';
+            addmodule +='</div>';
+        $(".fileList_head-sec").after(addmodule);
+        $(".fileList_head-sec").next().next().css("margin-top", "0px");
+        var inDefaultVlue =$(".addfloderlist:first").find("span").text();
+        $(".addok").click(function(){
+			newFlg = false;
+			$(".make-new-file").removeAttr("disabled");
+        	createNewFolder($(".addinput").text());           
+        });
+        $(".addcancel").click(function(){
+			newFlg = false;
+			$(".make-new-file").removeAttr("disabled");
+            $(this).parents("div.common").remove();
+            $(".fileList_head-sec").next().css("margin-top", "44px");
+        });
+        folderFun = $(".addfloderlist > div:nth-child(2) .addinput");
+        //触发
+        checkedSelect();
+    });
+    //删除
+    $("#delete").click(function(){
+		if (alertNewFolder())
+			return;
+		
+		doDeleteFiles();      
+    });
+    //重命名
+    $("#newNme").click(function(){
+		if (alertNewFolder())
+			return;
+        $(".innerButton").hide();
+        $(".fileList > div.common:visible").find("span").removeAttr("contenteditable").css({"border":"0","padding":"0px"});
+        $(".fileList > div.common:visible").find("input").each(function(index,ele){
+            if(this.checked)
+            {
+                var filetype, imgtype;
+                var _defaultValue = $(this).parent().next().find("span").text();
+				oldHtml = $(this).parent().next().html();   
+				  				
+				var data_option = JSON.parse($(this).parent().parent().attr("data-option"));
+                filetype = data_option.type;
+                imgtype = filetype;
+                if (filetype.indexOf("other") != -1)
+                	 imgtype = "file";
+                   
+                defaultValue = _defaultValue.replace(/\'/g, "&#39;"); 
+                $(this).parent().next().replaceWith("<div class='col-xs-55'><img src=\"<%=resource%>/image/"+imgtype+".png\" alt=\"\" class=\"img-left\"/><input id='needToModify' value='"+defaultValue+"' /><input type='button' style='margin-left:1px' onclick='modifyName(\""+defaultValue+"\", \"" + filetype +"\"); return false;' value='确认' /><input type='button' style='margin-left:1px' onclick='cancelModify();' value='取消' /></div>");
+            }
+        });
+    });
+    
+    //返回
+    $(".gobackHead").click(function(){
+		if (alertNewFolder())
+			return;
+		
+		openfile(path, true);
+    });
+    
+    //复制移动
+    //新建文件夹
+	$("#diagnew").click(function(){
+		if (alertNewDiagFolder())
+			return;
+		
+		newDiagFlg = true;
+		$("#comment").remove();
+		$(".file-tree-container").prepend("<div class='row1'><div class=\"col-xs-7\"><input class='diag-check' type='checkbox'/></div><div class=\"col-xs-55\"><input name='folderdiag' id='folderdiag' value='' placeholder='新建文件夹' /><input type='button' class='newOK' value='确认' /><input type='button' class='newCancel' value='取消' /></div></div>");
+		
+		$(".newOK").click(function(){
+			newDiagFlg = false;
+			if (!isValidFileName($("#folderdiag").val()))
+			{
+				alert("文件夹名字不能包含特殊字符，请重新修改！");
+				return false;
+			}
+			
+			for (var i = 0; i < diagfolders.folderNum; i++){
+				eval("diagfolder = diagfolders.folder" + (i + 1));
+				if (diagfolder == $("#folderdiag").val())
+				{
+					alert("文件夹已存在，请重新命名！")
+					return false;
+				}
+			}		
+
+			clearTimeout(activeTimeout);
+			activeTimeout = setTimeout("Timeout()", 300000);		
+			(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/newFolder')%>',{path:diagpath + "/" + $("#folderdiag").val(), diag:'1'},
+				function(x, json){
+					if (x.responseText.substr(2, 7) == "DOCTYPE")
+						parent.location = "/cgi-bin/luci";
+					else
+					{				
+						$("#comment").remove();
+						$(".file-tree-container").children().each(function(){
+							$(this).remove();
+						});		
+						diagfolders = json;							
+						for (var i = 0; i < json.folderNum; i++){
+							eval("diagfolder = json.folder" + (i + 1));
+							addFileDialog(diagfolder);
+						}
+					}
+				});	           
+		});
+		
+		$(".newCancel").click(function(){
+			newDiagFlg = false;
+		    $(this).parent().parent().remove();
+		});			
+	});
+  
+	$("#fallback").click(function(){
+		if (alertNewDiagFolder())
+			return;
+		
+		openDialogFile(diagpath, true);
+	});	
+	
+	$(".diag-check").live("click", function(){
+		if (this.checked)
+		{
+			$(".diag-check").attr("disabled", true);
+			$(this).attr("disabled", false);
+		}
+		else
+			$(".diag-check").attr("disabled", false);
+		});
+		
+	$("#cancelCopyMove").click(function(){
+		newDiagFlg = false;
+ 	    hidePopup();
+	});
+	
+	$(".title_right").click(function(){
+		newDiagFlg = false;
+		hidePopup();
+	});	
+  
+	$("#copymove").click(function(){
+		if (alertNewDiagFolder())
+			return;
+		
+		var subFolder = 0;
+		var dstpath = diagpath;
+		console.log(dstpath);
+		$(".diag-check").each(function(){
+			if (this.checked)
+			{
+				dstpath += ("/" + $(this).parent().next().text());
+				return false;
+			}
+		});        
+		
+		var srcpath = path;
+		console.log("dest path: " + dstpath);
+		console.log("src path: " + srcpath);
+		if(srcpath == dstpath + "/")
+		{
+			alert("目标文件夹和源文件夹不能相同，请重新选择 ");
+			return false;
+		}
+		
+		var data = "";
+		var dataFolder = "";
+		var maxfile = "";
+		var maxsize = 0;
+	    $(".fileList > div.common:visible").find("input").each(function(index,ele){
+	        if(this.checked)
+	        {
+				data += $(this).parent().next().text() + '/';
+				
+		    	var data_option = JSON.parse($(this).parent().parent().attr("data-option"));
+				console.log("type: " + data_option.type);
+				if (data_option.type == "folder")
+				{
+					srcpath += "/" + $(this).parent().next().text();
+					console.log("src folder: " + srcpath);
+					if (dstpath == srcpath)
+					{
+						subFolder = 1;
+						return false
+					}
+					else if ((dstpath.indexOf(srcpath) == 0) && (dstpath.substring(srcpath.length).indexOf("/") != -1))
+					{
+						subFolder = 2;
+						return false;
+					}
+					dataFolder += data_option.name + '/';
+				}
+				else if (copymove == "copy")
+				{
+					if (data_option.length > maxsize)
+					{
+						maxsize = data_option.length;
+						maxfile = data_option.name;
+					}
+				}
+	        }				
+	    });		
+      
+		if (subFolder == 1)
+		{
+			alert("目标文件夹和源文件夹不能相同，请重新选择 ");
+			return false;
+		}
+		        
+		if (subFolder == 2)
+		{
+			alert("目标文件夹是源文件夹的子文件夹，请重新选择 ");
+			return false;
+		}
+		
+		if (copymove == "copy")
+			displayProgressBar();
+		else
+		{
+			clearTimeout(activeTimeout);
+			activeTimeout = setTimeout("Timeout()", 300000);			
+		}
+        
+		(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/copyMove')%>',{opstr:copymove + "|" + path + "|" + dstpath + "|" + maxfile, fileLists:data},
+			function(x, json){
+				if (x.responseText.substr(2, 7) == "DOCTYPE")
+					parent.location = "/cgi-bin/luci";
+				else
+				{			
+					if (json.setRes)
+					{
+						removeCheckedFlag();
+						if (copymove != "copy")
+						{
+							removeAllFiles();
+							jdata = json;
+							for (var i = 0; i < json.fileNum; i++){
+								eval("fileList = json.file" + (i + 1));
+								addFileList(fileList.name, fileList.size, fileList.isFolder, fileList.time);	
+							}
+							sortFiles();
+							showType();
+							$(".fileList_head").show();	
+						}
+						else
+						{
+							if (parseInt(json.percent) < 100)
+							{
+								$("#progressBarItem").css("width", parseInt(json.percent)+"%");
+								transId = parseInt(json.transId);
+								progressInterval = setInterval("getCopyMoveProgress()", 2000);
+							}
+							else
+							{
+ 								$("#progressBarItem").css("width", "100%");
+ 								setTimeout("hideProgressBar()", 300);
+							}
+						}						
+					}
+					else
+					{
+						if (copymove == "copy")
+						{
+							clearInterval(progressInterval);
+							hideProgressBar();							
+						}
+					}
+				}
+			});
+		
+		hidePopup();
+		$(".fileList_head-sec").hide();  
+		$(".fileList_head").show();		
+	});	
+});
+
+</script>
+<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+<div class="main " style="display:none;">
+    <div class="row head">
+        <div class="col-sm-12 storage_type">
+            <div class="row">
+                <div class="col-sm-2" style="height:40px;">
+                    <div class="current_storage float-left">移动存储</div>
+                    <input type="hidden" name="instno" id="instno" value="" />
+                    <div class="float-left" id="backShowOr" style="display:none;">
+                        <div class="float-left backup gobackHead">返回上一级</div>
+                        <span class="vertical">|</span>
+                    </div>
+                    <div class="float-left directory"> <span id="curpath"></span><span id="classification"></span></div>
+                    <div class="float-left backup make-new-file">+新建文件夹</div>
+                </div>
+                <div class="col-sm-2 storage_type_list" id="usblistscroll" style="display:none;">
+                </div>                
+                <!-- <div class="col-sm-2 mobile_storage"></div> -->
+            </div>
+        </div>
+    </div>
+    <div class="row container_body">
+        <div class="col-sm-2 left">
+            <div class="file_manager left_current" data-option='{"type":1}'>文件管理</div>
+            <div class="s_fomat" data-option='{"type":2}'>格式化</div>
+        </div>
+        <div class="col-sm-10 fileManager">
+            <div class="main_container_title">
+                <div class="filetype">
+                    <span id="all_type" class="active" data-option='{"type":"all"}'>全部文件</span>
+                    <span id="image_type" data-option='{"type":"image"}'>图片</span>
+                    <span id="video_type" data-option='{"type":"video"}'>视频</span>
+                    <span id="audio_type" data-option='{"type":"audio"}'>音频</span>
+                </div>
+								<div class="dropdown-select storage_select" hidefocus="true">
+									<label class="select-value select-value_storage">按文件类型</label>
+									<input type="hidden" id="sort_value" value="6" name="sort_value" />
+									<div class="select-arrow"></div>
+									<ul id="sort" class="dropdown-menu-select">
+										<li livalue="0">按时间升序</li>
+										<li livalue="1">按时间降序</li>
+										<li livalue="2">按文件大小升序</li>
+										<li livalue="3">按文件大小降序</li>
+										<li livalue="4">按文件名称升序</li>
+										<li livalue="5">按文件名称降序</li>
+										<li livalue="6">按文件类型</li>
+									</ul>
+								</div>
+            </div>
+
+            <div class="fileList container" id="containerScroll" style="height:360px; position:relative;zoom:1;margin-top: 15px;">
+                <div class="row fileList_head">
+                    <div class="col-xs-7"><input type="checkbox"></div>
+                    <div class="col-xs-55">文件名</div>
+                    <div class="col-xs-18">修改日期</div>
+                    <div class="col-xs-10">格式</div>
+                    <div class="col-xs-10">大小</div>
+                </div>
+                <div class="row fileList_head-sec" style="display:none;" >
+                    <div class="col-xs-10"><input type="checkbox"></div>
+                    <div class="col-xs-50">已选中<span id="checkNum">1</span>个文件/文件夹</div>
+                    <div class="col-xs-40">
+                        <div class="button-all" style="float:right;">
+                            <button id="delete" disabled='disabled'>删除</button>
+                            <button id="newNme" disabled='disabled'>重命名</button>
+                            <button id="copy" name="copy" onclick="copyORmoveto(this)" disabled='disabled'>复制到</button>
+                            <button id="move" name="move" onclick="copyORmoveto(this)" disabled='disabled'>移动到</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!--  按钮 -->
+                <div class="button-all" id="moveButton" style="position:absolute; z-index:999999; display:none;">
+                    <button id="ok">确认</button>
+                    <button id="cancel">取消</button>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="col-sm-10 fomat" hidden>
+            <div class="row">
+				<div class="main_header">
+					<p class="main_header_title">格式化磁盘</p>
+					<p class="main_header_hint"></p>
+				</div>
+				<p class="fomat_content">
+					格式化磁盘将会让你的本地磁盘恢复到出厂状态，但不会影响网关的相关设置。
+					<br>执行操作前请您及时备份重要的数据！
+				</p>
+				<div>
+					<input type="button" class="input_button button_stroage J_fomat" value="格式化磁盘"/>
+				</div>
+            </div>
+
+        </div>
+    
+        </div>        
+    </div>
+</div>
+
+<div id="container" style="display:none;">
+	<div class="col-sm-10 fomat device">
+    <div class="row">
+			<div class="main_header">
+				<p class="main_header_title">提示</p>
+				<p class="fomat_content">
+					请插入USB存储设备作为网关的本地存储设备，插入后请等待网关存储指示灯亮起并刷新本页面。
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 移动复制dialog -->
+<div id="copymoveDiv"> 
+	<div id="popTitle">
+		<h3><span class="title_left">复制到</span> </h3><span class="title_right"><a 
+		href="#" style="color:#39BA93;">关闭</a> </span> 
+	</div> 
+  <div style="margin: 5px 11px;">
+     <span><input type="button" name="fallback" id="fallback" value="返回上一级" /></span>
+  </div>	
+	<div id="popForm"> 
+	  <div class="file-tree-container fileList" id="cmDidlog">
+	
+	  </div>
+	</div>
+	
+	<div id="copymoveop">
+	     <input class="action_button action_white" type="button" id="diagnew" value="新建文件夹" />
+		 <input class="action_button action_green" type="submit" id="copymove" value="确定" />
+	     <input class="action_button action_white" type="button" value="取消" id="cancelCopyMove" />       
+	</div>
+</div>
+
+<div id="copyProgress"> 
+	<div id="progressBar"> 
+		<div id="progressBarItem"></div> 
+	</div> 
+	<div id="statusInfo"></div> 
+</div> 
+
+</body>
+</html>

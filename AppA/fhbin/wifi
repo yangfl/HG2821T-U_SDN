@@ -1,0 +1,58 @@
+#!/bin/sh
+# Loads WiFi drivers and configures access point
+
+COMMON_CONF=/etc/fh_common.conf
+APCFG=/var/wlan/apcfg
+WLAN_SHELL=`grep "APP_SHELL_PATH_WLAN" $COMMON_CONF | cut -d = -f 2`
+WLAN_CONF=`grep "APP_CONF_PATH_WLAN" $COMMON_CONF | cut -d = -f 2`
+AP=${WLAN_SHELL}/ap
+
+if [ ! -f ${APCFG} ]; then
+	echo "${APCFG} is missing, rebuild it ..."
+	rm -rf /var/wlan
+	mkdir -p /var/wlan
+	cp -rf ${WLAN_CONF}/apcfg /var/wlan
+fi
+
+#Use Mac in factory.conf, by xliao
+setcfgx ${APCFG} MacAddress `getcfgx /flash/cfg/agentconf/factory.conf APMAC`
+
+if [ "${1}" = "up" ]; then
+	echo "Starting Wireless 2G Access Point ..."
+	${AP} up
+elif [ "${1}" = "down" ]; then
+	echo "Shutting down Wireless 2G Access Point ..."
+	${AP} down
+elif [ "${1}" = "uninstall" ]; then
+        echo "Shutting down Wireless 2G and Remove Modules ..."
+        ${AP} down modules
+elif [ "${1}" = "restart" ]; then
+###	sleep 3
+	echo "Shutting down Wireless 2G Access Point ..."
+###	sleep 2
+	${AP} down
+	echo "Starting Wireless 2G Access Point ..."
+	${AP} up
+elif [ "${1}" = "reset" ]; then
+    echo "Reseting Wireless 2G Access Point ..."
+    ${AP} down modules
+	sleep 2
+    ${AP} up
+#elif [ "${1}" = "show" ]; then
+#        ${AP} show
+elif [ "${1}" = "open" ]; then
+	echo "set to open none"
+#		setcfgx ${APCFG} AUTHMODE_0 open
+#		setcfgx ${APCFG} ENCRYPTYPE_0 none
+	${WLAN_SHELL}/set_authmode.sh "open" "1" 
+	${AP} down
+	${AP} up
+elif [ "${1}" = "auth" ]; then
+	echo "set to auth mode"
+	${WLAN_SHELL}/set_authmode.sh $2 $3 $4 $5
+	${AP} down
+	${AP} up		
+else
+#		echo "Usage: wifi up|down|restart|uninstall|reset|show|open|auth"
+	echo "Usage: wifi up|down|restart|uninstall|reset|open|auth"
+fi

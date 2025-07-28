@@ -1,0 +1,8 @@
+Package: luci-lib-ip
+Version: R71
+Depends: libc, liblua, libnl-tiny
+Source: feeds/luci/libs/luci-lib-ip
+Section: luci
+Architecture: mt7526
+Installed-Size: 9462
+Description:  Lua library for IP calculation and routing information

@@ -1,0 +1,124 @@
+preconfigure=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Product/preconfigure/branches/mtk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Product/preconfigure/branches/mtk||
+basefile=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Rootfs/base_filesystem/branches/MTK7526_ubi
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Rootfs/base_filesystem/branches/MTK7526_ubi||
+usbmount=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Rootfs/usbmount/usbmount_zhongshi/branches/usbmount_7526_dbus
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Rootfs/usbmount/usbmount_zhongshi/branches/usbmount_7526_dbus||
+udev=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Rootfs/udev/udev_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Rootfs/udev/udev_zhongshi/trunk||
+fw_uboot_tool=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/fw_env_tool/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/fw_env_tool/trunk||
+manager_inc=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Product/manager_inc/branches/ITMS4.0_guangdong
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Product/manager_inc/branches/ITMS4.0_guangdong||
+lib_msgintf=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_msgintf/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_msgintf/trunk||
+lib_hgdriver=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_hgdriver/lib_hgdriver_zhongshi/branches/lib_hgdriver_mtk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_hgdriver/lib_hgdriver_zhongshi/branches/lib_hgdriver_mtk||
+lib_cfgrw=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_cfgrw/branches/ITMS4.0_memory
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_cfgrw/branches/ITMS4.0_memory||
+lib_fhnetapi=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_fhnetapi/branches/mtk_7526
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_fhnetapi/branches/mtk_7526||
+openssl=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/openssl/openssl-zhongshi/branches/openssl_memory
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/openssl/openssl-zhongshi/branches/openssl_memory||
+hgcdrive=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/voip_adp/branches/ITMS4.0_7526
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/voip_adp/branches/ITMS4.0_7526||
+framework=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/framework
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/framework||
+lib_fhstatistic=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_fhstatistic/mtk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/lib_fhstatistic/mtk||
+cfmsg=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/cfmsg
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Common/Lib/cfmsg||
+arp=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/arp/arp_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/arp/arp_zhongshi/trunk||
+arping=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/arping/arping_zhongshi/branches/ITMS4.0_Memory
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/arping/arping_zhongshi/branches/ITMS4.0_Memory||
+firewall=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/firewall/firewall_zhongshi/branches/ITMS4.0_memory
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/firewall/firewall_zhongshi/branches/ITMS4.0_memory||
+ntp=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/ntp/ntp_zhongshi/branches/NTP_memory
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/ntp/ntp_zhongshi/branches/NTP_memory||
+ping=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/ping/ping_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/ping/ping_zhongshi/trunk||
+pppoe=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/pppoe/pppoe_zhongshi/branches/ITMS4.0_guangdong
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/pppoe/pppoe_zhongshi/branches/ITMS4.0_guangdong||
+udhcpd=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/udhcpd/udhcpd_zhongshi/branches/ITMS4.0
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/udhcpd/udhcpd_zhongshi/branches/ITMS4.0||
+upgrade=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/upgrade/upgrade_zhongshi/branches/ITMS4.0_memory_mtk_ubi
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/upgrade/upgrade_zhongshi/branches/ITMS4.0_memory_mtk_ubi||
+udhcpc=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/udhcpc/udhcpc_zhongshi/branches/UDHCPC_Memory_SeperateFromBusybox
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/udhcpc/udhcpc_zhongshi/branches/UDHCPC_Memory_SeperateFromBusybox||
+sip=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/sip/hgcsip_zhongshi/branch/ITMS4.0_mem
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/sip/hgcsip_zhongshi/branch/ITMS4.0_mem||
+dropbear=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/dropbear
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/dropbear||
+misc=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/misc/branches/ITMS4.0_memory
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/misc/branches/ITMS4.0_memory||
+omci=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/omci/fhomci_zhongshi/branches/bl_omci_5116
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/omci/fhomci_zhongshi/branches/bl_omci_5116||
+oam=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/oam/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/oam/trunk||
+wlancfg=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/wlancfg
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/wlancfg||
+manufacture=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Product/manufacture_mtk/dist
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Product/manufacture_mtk/dist||
+loop=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/loop/branches/loop_7526
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/loop/branches/loop_7526||
+hwdiag=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/hwdiag/branches/hwdiag_memory_mtk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/hwdiag/branches/hwdiag_memory_mtk||
+voice_itf=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/voice_itf/voice_itf_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/voice_itf/voice_itf_zhongshi/trunk||
+autoppp=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/autoppp/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/autoppp/trunk||
+voip_test=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/voip_test_7526/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/voip_test_7526/trunk||
+xl2tp=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/xl2tp/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/xl2tp/trunk||
+Busybox=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Busybox/busybox_zhongshi/branches/busybox_itms4.0_update
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Busybox/busybox_zhongshi/branches/busybox_itms4.0_update||
+iproute=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/iproute/iproute_zhongshi/branches/iproute2_4.4.0
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/iproute/iproute_zhongshi/branches/iproute2_4.4.0||
+led_and_redirectd_ctrl=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/led_and_redirectd_ctrl/led_and_redirectd_ctrl_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/led_and_redirectd_ctrl/led_and_redirectd_ctrl_zhongshi/trunk||
+cfgx=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/cfgx/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/cfgx/trunk||
+vsftpd=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/vsftpd/vsftpd_zhongshi/branches/vsftpd_memory
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/vsftpd/vsftpd_zhongshi/branches/vsftpd_memory||
+wget=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/wget/wget_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/wget/wget_zhongshi/trunk||
+notify=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/notify/notify_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/notify/notify_zhongshi/trunk||
+fhtool=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/fhtool/fhtool_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/fhtool/fhtool_zhongshi/trunk||
+send=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/send/send_zhongshi/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/send/send_zhongshi/trunk||
+peripheral_tool=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/peripheral_tool/peripheral_zhongshi/branches/mtk_7526
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/peripheral_tool/peripheral_zhongshi/branches/mtk_7526||
+md5=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/md5/trunk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/md5/trunk||
+secret=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/secret
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Fiberbox/secret||
+peripheral=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Driver/peripheral/peripheral_zhongshi/branches/mtk_7526
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Driver/peripheral/peripheral_zhongshi/branches/mtk_7526||
+fh_version_info=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Driver/fh_version_info_7526
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/Driver/fh_version_info_7526||
+kernel=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/linux-3.18.21_ubi
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/linux-3.18.21_ubi||
+bootrom=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/bootrom_ubi
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/bootrom_ubi||
+modules=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/modules_ubi
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/modules_ubi||
+Env_mtk=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/Env_mtk_ubi
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/Env_mtk_ubi||
+mtk_inc=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/mtk/include
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/mtk/include||
+mtk_lib=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/mtk/lib
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/mtk/lib||
+mtk_bin=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/mtk/bin
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/mtk/bin||
+global_inc=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/global_inc
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/thd_SDK_Joyme_7526/global_inc||
+iptables=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/iptables/trunk/iptables/iptables-1.4.12.2
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/iptables/trunk/iptables/iptables-1.4.12.2||
+alg_rtsp=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/alg/trunk/alg
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/platform/App/alg/trunk/alg||
+BinMake=|URL: svn://fhbbssvn2.fiberhome.com:3700/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Utilities/BinMake/branches/ITMS4.0_memory_mtk
+正确的相对 URL: ^/project/ART2016012SDNNFV/src/SDN/branches/Openwrt_MTK/MTKCode_SDN/Utilities/BinMake/branches/ITMS4.0_memory_mtk||

@@ -1,0 +1,608 @@
+.main_home_body
+{
+	background: transparent url("../image/home/line.png") no-repeat scroll center 50px;
+	font-size:12px;
+	width:100%;
+}
+
+.pointer_cursor
+{
+	cursor: pointer;
+}
+#home_topo_pic_uplink
+{
+    left: 140px;
+    position: relative;
+    top: 50px;
+	float:left;
+}
+#home_topo_pic_router
+{
+	float: left;
+    left: 350px;
+    position: relative;
+    top: 10px;
+}
+#home_topo_pic_wifi
+{
+	float:left;
+    position: relative;
+    top: 167px;
+}
+#uplink_router_div
+{
+    margin: auto;
+    width: 1200px;
+	height:160px;
+	color: #535353;
+    line-height: 20px;
+}
+#uplink_info_div
+{
+	float:left;
+	width:290px;
+	height:100%;
+}
+#router_info_div
+{
+	height:100%;
+	float:left;
+	width:300px;
+}
+
+#uplink_info
+{
+	margin:33px 0 0 75px;
+	padding:10px 20px 10px 10px;
+	background-image: url("../image/home/uplink_info_bg.png");
+    background-repeat: no-repeat;
+		word-wrap:break-word;
+		background-size:100% 100%;
+		-ms-behavior: url("/luci-static/resources/css/backgroundsize.min.htc");
+}
+#router_info
+{
+	margin-left: 5px;
+	padding:10px 10px 10px 30px;
+	background-image: url("../image/home/router_info_bg.png");
+    background-repeat: no-repeat;
+	background-size:100% 100%;
+	-ms-behavior: url("/luci-static/resources/css/backgroundsize.min.htc");
+	word-wrap:break-word;
+}
+.uplink_logo
+{
+	background-image: url("../image/home/earth.png");
+    background-repeat: no-repeat;
+    cursor: pointer;
+    float: left;
+    min-height: 72px;
+		min-width: 71px;
+    margin-top: 42px;
+		background-size:100% 100%;
+		-ms-behavior: url("/luci-static/resources/css/backgroundsize.min.htc");
+}
+.uplink_rate
+{
+    color: #fff;
+    float: left;
+    height: 100%;
+    line-height: 116px;
+    text-align: center;
+    width: 210px;
+}
+.router_logo
+{
+	float:left;
+	width:128px;
+	background-image: url("../image/home/router.png");
+	background-repeat: no-repeat;
+	background-position: center 0;
+	height:100%;
+	margin-left:-35px;
+	cursor:pointer;
+}
+.uplink_logo_on
+{
+	background-image: url("../image/home/earth_on.png");
+}
+.router_logo_on
+{
+	background-image: url("../image/home/router.png");
+}
+#wifi_phone_div
+{
+	width:100%;
+    margin: auto;
+    width: 1200px;
+	height:95px;
+}
+#wifi_info_div
+{
+	float:left;
+	width:24%;
+	height:100%;
+	overflow:hidden;
+}
+#wifi_logo_div
+{
+	float:left;
+	width:30px;
+	background-repeat: no-repeat;
+	background-position: center 0;
+	height:30px;
+	cursor: pointer;
+}
+#phone_unlink_div
+{
+    background-position: center;
+    background-repeat: no-repeat;
+    float: left;
+    height: 30px;
+    margin-left: 171px;
+    margin-top: 50px;
+    width: 30px;
+}
+#itv_unlink_div
+{
+    background-position: center;
+    background-repeat: no-repeat;
+    float: left;
+    height: 30px;
+    margin-left: 266px;
+    margin-top: 50px;
+    width: 30px;
+    visibility:show;
+
+}
+.unlink_logo
+{
+	background-image: url("../image/home/unlink.png");
+}
+#device_list_div
+{
+	width:100%;
+	height:155px;
+    background-image: url("../image/home/list_bg.png");
+    background-repeat: repeat-x;
+	margin-top: 5px;
+	color:#FFFFFF;
+}
+.device_list_div_wifi
+{
+    background-position:-775px center;
+}
+.device_list_div_pc
+{
+    background-position:-570px center;
+}
+.device_list_div_itv
+{
+    background-position:-375px center;
+}
+.device_list_div_phone
+{
+    background-position:-170px center;
+}
+.device_list_div_storage
+{
+    background-position:30px center;
+}
+
+#device_list_left_div
+{
+	width:260px;
+	height:100%;
+    float: left;
+}
+#device_list_left_arrow_div
+{
+	width:40px;
+	height:100%;
+	float:right;
+}
+#device_list_right_arrow_div
+{
+	width:40px;
+	height:100%;
+    float: left;
+}
+.device_list_left_arrow
+{
+    background-image: url("../image/home/list_arrow_left.png");
+    background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+.device_list_right_arrow
+{
+    background-image: url("../image/home/list_arrow_right.png");
+    background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+.device_list_left_arrow_on
+{
+    background-image: url("../image/home/list_arrow_left_on.png");
+}
+.device_list_right_arrow_on
+{
+    background-image: url("../image/home/list_arrow_right_on.png");
+}
+#device_list_center_div
+{
+	width:870px;
+	height:100%;
+    float: left;
+	text-align: center;
+}
+
+#device_logo_div
+{
+	width:100%;
+    margin: auto;
+    width: 1200px;
+	height:85px;
+}
+.device_logo_div
+{
+	height:100%;
+	width:100px;
+    float: left;
+    background-position: center;
+    background-repeat: no-repeat;
+	cursor: pointer;
+	margin: 0 50px;
+}
+.device_wifi_logo_div
+{
+    background-image: url("../image/home/mobile.png");
+	margin: 0 50px 0 150px;
+}
+.device_wifi_logo_div_mouseover
+{
+    background-image: url("../image/home/mobile_on.png");
+}
+.device_wifi_logo_div_shadow
+{
+    background-image: url("../image/home/mobile_on_shadow.png");
+	background-position: center 10px;
+}
+.device_pc_logo_div
+{
+    background-image: url("../image/home/pc.png");
+}
+.device_pc_logo_div_mouseover
+{
+    background-image: url("../image/home/pc_on.png");
+}
+.device_pc_logo_div_shadow
+{
+    background-image: url("../image/home/pc_on_shadow.png");
+	background-position: center 8px;
+}
+.device_itv_logo_div
+{
+    background-image: url("../image/home/itv.png");
+}
+.device_itv_logo_div_mouseover
+{
+    background-image: url("../image/home/itv_on.png");
+}
+.device_itv_logo_div_shadow
+{
+    background-image: url("../image/home/itv_on_shadow.png");
+	background-position: center 8px;
+}
+.device_phone_logo_div
+{
+    background-image: url("../image/home/phone.png");
+}
+.device_phone_logo_div_mouseover
+{
+    background-image: url("../image/home/phone_on.png");
+}
+.device_phone_logo_div_shadow
+{
+    background-image: url("../image/home/phone_on_shadow.png");
+	background-position: center 7px;
+}
+.device_storage_logo_div
+{
+    background-image: url("../image/home/storage.png");
+}
+.device_storage_logo_div_mouseover
+{
+    background-image: url("../image/home/storage_on.png");
+}
+.device_storage_logo_div_shadow
+{
+    background-image: url("../image/home/storage_on_shadow.png");
+	background-position: center 4px;
+}
+
+#device_info_div
+{
+	width:100%;
+    margin: auto;
+    width: 1200px;
+	height:40px;
+	color: #FFFFFF;
+	text-align:center;
+}
+#device_wifi_info_div
+{
+	margin-left:100px;
+}
+.device_info
+{
+	height:100%;
+	width:200px;
+    float: left;
+}
+
+.device_title
+{
+	height:20px;
+	width:inherit;
+	font-size: 14px;
+}
+.device_state
+{
+	height:24px;
+	width:inherit;
+	line-height: 19px;
+}
+.state_link
+{
+    background-image: url("../image/home/state_bg.png");
+    background-position: center;
+    background-repeat: no-repeat;
+		background-size:cover;
+		padding: 2px 10px;
+		min-width: 120px;
+		display: inline-block;
+		-ms-behavior: url("/luci-static/resources/css/backgroundsize.min.htc");
+}
+.state_unlink
+{
+    background-image: url("../image/home/state_unlink_bg.png");
+    background-position: center;
+    background-repeat: no-repeat;
+		background-size:cover;
+		padding: 2px 5px;
+		min-width: 120px;
+		display: inline-block;
+		-ms-behavior: url("/luci-static/resources/css/backgroundsize.min.htc");
+}
+
+#device_detail_div
+{
+	width:100%;
+    margin: auto;
+    width: 1200px;
+	height:100px;
+	margin-top: 10px;
+}
+#device_wifi_detail_div
+{
+	margin-left:100px;
+}
+.device_detail
+{
+	background-color: #ffffff;
+    border-radius: 4px;
+    color: #666666;
+    float: left;
+    height: 95px;
+    padding: 15px 25px 0;
+    width: 150px;
+	line-height: 20px;
+}
+
+.device_detail_wl
+{
+	background-color: #ffffff;
+    border-radius: 4px;
+    color: #666666;
+    float: left;
+    height: 95px;
+    padding: 0px 25px 0;
+    width: 150px;
+	line-height: 18px;
+}
+.device_detail_wifi
+{
+	height: 95px;
+}
+.device_detail_pc
+{
+	height: 80px;
+}
+.device_detail_itv
+{
+	height: 70px;
+}
+.device_detail_phone
+{
+	height: 70px;
+}
+.device_detail_storage
+{
+	height: 80px;
+}
+.visibility_hidden
+{
+	visibility:hidden;
+}
+
+.device_number
+{
+    background-image: url("../image/home/num.png");
+    background-position: center;
+    background-repeat: no-repeat;
+	width:26px;
+	height:25px;
+	line-height: 23px;
+    text-align: center;
+	color:#FFFFFF;
+    margin-left: 70px;
+    margin-top: -7px;
+	cursor: pointer;
+}
+
+.device_list
+{
+	width:145px;
+	height:100%;
+	float:left;
+	line-height: 230px;
+	background-position: center 40px;
+    background-repeat: no-repeat;
+	cursor:pointer;
+}
+.device_list_content_div
+{
+	width:145px;
+	height:100%;
+	float:left;
+}
+.device_list_icon
+{
+	width: 100%;
+	height:100px;
+	background-position: center 40px;
+    background-repeat: no-repeat;
+	cursor:pointer;
+}
+.device_list_title
+{
+	line-height: 20px;
+	overflow: hidden; 
+	text-overflow: ellipsis; 
+	white-space: nowrap;
+}
+
+.device_list_content_div_storage
+{
+	width:174px;
+	height:100%;
+	float:left;
+	margin-right:43px;
+}
+.device_list_icon_storage
+{
+	width: 66px;
+	height:100%;
+	background-position: center;
+    background-repeat: no-repeat;
+	background-image: url("../image/home/storage.png");
+	float:left;
+}
+.device_list_storage_info
+{
+	float:left;
+	height:100%;
+	width:100px;
+	margin-left:8px;
+	text-align:left;
+}
+.device_list_storage_info_title
+{
+	width:100%;
+	height:75px;
+	line-height:120px;
+}
+.device_list_storage_info_bar
+{
+	width:100px;
+	height:13px;
+	/*background-image: url("../image/home/storage_bar.png");*/
+	background-color:#F0EFEF;
+	border:1px solid #cccccc;
+}
+.device_list_storage_info_bar div
+{
+	background-color:#39ba93;
+	height:100%;
+}
+.device_list_storage_info_size
+{
+	height: 30px;
+    line-height: 30px;
+    width: 100%;
+}
+
+.list_phone
+{
+    background-image: url("../image/home/list_phone.png");
+	margin: auto 40px;
+    width: 65px;
+}
+.list_phone_on
+{
+    background-image: url("../image/home/list_phone_on.png");
+	margin: auto 40px;
+    width: 65px;
+}
+.list_notebook
+{
+    background-image: url("../image/home/list_notebook.png");
+	margin: auto 30px;
+    width: 80px;
+}
+.list_notebook_on
+{
+    background-image: url("../image/home/list_notebook_on.png");
+	margin: auto 30px;
+    width: 80px;
+}
+.list_pad
+{
+    background-image: url("../image/home/list_pad.png");
+	margin: auto 35px;
+    width: 70px;
+}
+.list_pad_on
+{
+    background-image: url("../image/home/list_pad_on.png");
+	margin: auto 35px;
+    width: 70px;
+}
+.list_pc
+{
+    background-image: url("../image/home/list_pc.png");
+}
+.list_pc_on
+{
+    background-image: url("../image/home/list_pc_on.png");
+}
+.list_itv
+{
+    background-image: url("../image/home/list_tv.png");
+}
+.list_itv_on
+{
+    background-image: url("../image/home/list_tv_on.png");
+}
+#device_list_float_div
+{
+	width: 212px;
+	height: 128px;
+	z-index:10;
+	position: relative;
+	top: 20px;
+}
+#device_list_float_info_div
+{
+	width: 212px;
+	height: 140px;
+    background-image: url("../image/home/list_info_bg.png");
+	background-repeat:no-repeat;
+	z-index:8;
+	position: absolute;
+	top:0px;
+	line-height:20px;
+	color:#535353;
+	padding:5px 0 0 30px;
+}

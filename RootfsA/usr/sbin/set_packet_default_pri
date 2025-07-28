@@ -1,0 +1,28 @@
+#!/bin/sh
+#creat by hubo 2013-01-24
+#set packet deafault pri,as these packets must set at the high pri queue
+
+#pppoe discovery
+cli home/cli/hal/flow/ifc_set -v ethtype_en 1 ethtype 0x8863 markpri_en 1 markpri 7 label 0
+#arp
+cli home/cli/hal/flow/ifc_set -v ethtype_en 1 ethtype 0x0806 markpri_en 1 markpri 7 label 0
+#dhcp
+cli home/cli/hal/flow/ifc_set -v  dport_en 1 dport 67  markpri_en 1 markpri 7 label 0
+cli home/cli/hal/flow/ifc_set -v  dport_en 1 dport 68  markpri_en 1 markpri 7 label 0
+#icmp,测试用例的原因，不做高优先级
+#hi_cli home/cli/hal/flow/ifc_set -v  proto_en 1 proto 0x1  markpri_en 1 markpri 7 label 0
+#igmp
+cli home/cli/hal/flow/ifc_set -v  proto_en 1 proto 0x2  markpri_en 1 markpri 7 label 0
+#rarp
+cli home/cli/hal/flow/ifc_set -v ethtype_en 1 ethtype 0x08035  markpri_en 1 markpri 7 label 0
+#pppoe
+cli home/cli/hal/flow/ifc_set -v   ptype_en 1 ptype 32  markpri_en 1 markpri 7 label 0
+
+#设置49152的丢弃
+cli home/cli/hal/flow/ifc_set -v  igr 0x200 dport_en 1 dport 49152 fwd_act_en 1 fwd_act 1 label 0
+
+#来自LAN侧的dhcp的分配丢弃
+cli /home/cli/hal/flow/ifc_set -v  igr 0xf dport_en 1 dport 68 label 5 fwd_act_en 1 fwd_act 1
+
+#SSDP can be only send out to LAN and cpu ports
+cli /home/cli/hal/flow/ifc_set -v  label 5 dip_en 1 dip 239.255.255.250 egress 0x100f fwd_act_en 1 fwd_act 4

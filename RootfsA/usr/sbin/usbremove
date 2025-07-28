@@ -1,0 +1,37 @@
+#!/bin/sh
+usb_led_off()
+{
+	if [ -z "`ls /dev/ | grep -E \"sd|hidraw|ttyACM|ttyUSB\"`" ]
+	then
+		/usr/bin/led_ctrl set usb off
+	fi
+}
+
+usbinfo="`ls /dev/ | grep sd`"
+
+if [ -z "${usbinfo}" ]
+then
+	tempmountpoint="`/bin/mount |grep /dev/sd |awk -F " " '{print $3}'`"
+	for tpp in $tempmountpoint;do
+		umount -l "$tpp"
+		rm -rf "$tpp"
+	done
+	usb_led_off
+	#/usr/bin/led_ctrl set usb off
+else
+
+	echo ${usbinfo}
+	tempusbdev="`/bin/mount |grep /dev/sd |awk -F " " '{print $1}'`"
+	for tud in $tempusbdev;do
+		echo ${tud}
+		if [ ! -b "${tud}" ]
+		then
+			tempmountpoint="`/bin/mount |grep "${tud} " |awk -F " " '{print $3}'`"
+			if [ ! -z "${tempmountpoint}" ]
+			then				
+				umount -l "${tempmountpoint}"
+				rm -rf "${tempmountpoint}"
+			fi
+		fi
+	done
+fi

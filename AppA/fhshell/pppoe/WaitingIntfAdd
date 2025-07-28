@@ -1,0 +1,24 @@
+#!/bin/sh
+#create: lqu
+#date:20120523
+
+
+
+if [ $# == 1 ]
+then
+	INTF_NAME=$1
+else
+	echo " Please input devicename"
+	exit
+fi	
+
+INTF_EXIST=`ifconfig $INTF_NAME|grep "UP"`
+
+
+	
+while [ "$INTF_EXIST" = "" ]
+ do
+   sleep 1
+
+   INTF_EXIST=`ifconfig $INTF_NAME|grep "UP"`
+ done

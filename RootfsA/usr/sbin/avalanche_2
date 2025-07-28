@@ -1,0 +1,24 @@
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/lib/hisilicon/so
+
+# /rom/fhshell/misc_shell/fastpath.sh 2 
+
+# hi_cli /home/cli/adapter/flow/add_service -v mask 0x80000 label 1 sport 0x50 flag 0x40000 markpri 4 
+# hi_cli /home/cli/adapter/flow/add_service -v mask 0x40000 label 1 dport 0x50 flag 0x40000 markpri 4 
+# hi_cli /home/cli/adapter/flow/add_service -v mask 0x40000 label 1 dport 0x13c4 flag 0x40000 markpri 6
+# hi_cli /home/cli/adapter/flow/add_service -v mask 0x80000 label 1 sport 0x13c4 flag 0x40000 markpri 6
+
+# iptables -t mangle -A FORWARD -p tcp --dport 80 -j MARK --set-mark 0xc0 
+# iptables -t mangle -A FORWARD -p tcp --sport 80 -j MARK --set-mark 0xc0
+# iptables -t mangle -A FORWARD -p tcp --sport 5060 -j MARK --set-mark 0xe0 
+# iptables -t mangle -A FORWARD -p tcp --dport 5060 -j MARK --set-mark 0xe0
+
+# hi_cli /home/cli/kveth/setportvlan -v ifname eth0 defvlan 0x6ffe vlanflag 1
+# hi_cli /home/cli/kveth/setportvlan -v ifname eth1 defvlan 0x6ffe vlanflag 1
+# hi_cli /home/cli/kveth/setportvlan -v ifname eth2 defvlan 0x6ffe vlanflag 1
+# hi_cli /home/cli/kveth/setportvlan -v ifname eth3 defvlan 0x6ffe vlanflag 1
+
+# iptables -t mangle -A FORWARD -d 225.0.0.0/255.0.0.0 -j MARK --set-mark 0x80 
+# iptables -t mangle -A FORWARD -d 224.0.0.0/255.0.0.0 -j MARK --set-mark 0x80
+
+# echo 1 > /proc/net/fhroute/fhroute_enable
+echo 1 > /proc/tc3162/avalanche_test

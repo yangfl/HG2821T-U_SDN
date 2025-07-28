@@ -1,0 +1,10 @@
+#!/bin/sh
+# Sample udhcpc dispatch script
+
+#-----lqu modify 20120806
+COMMON_CONF=/etc/fh_common.conf
+UDHCPD_SCRIPTS=`grep "APP_SHELL_PATH_UDHCPC=" $COMMON_CONF | cut -d = -f 2 `
+#--------
+
+#/bin/sh /etc/dhcp.$1
+/bin/sh $UDHCPD_SCRIPTS/dhcp.$1

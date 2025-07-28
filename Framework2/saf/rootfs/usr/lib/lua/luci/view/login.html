@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta HTTP-EQUIV="pragma" CONTENT="no-cache">
+	<meta HTTP-EQUIV="Cache-Control" CONTENT="no-store, must-revalidate">
+	<meta HTTP-EQUIV="expires" CONTENT="0">   
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中国电信智能网关</title>
+  <link rel="shortcut icon" href="<%=resource%>/image/favicon.ico">
+  <link rel="bookmark" href="<%=resource%>/image/favicon.ico">   
+  <link href="<%=resource%>/css/login.css?version=<%=version%>" rel="stylesheet">
+  <script src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+  <script src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+  <script src="<%=resource%>/js/login.js?version=<%=version%>"></script>
+  <script>
+  	<%- if (failtimes ~= 0) and (failtimes % 3 == 0) then %>
+  		setTimeout("hideHint()", parseInt("<%=rsttime%>") * 1000);
+  	<% end -%>
+  	
+  	function hideHint()
+  	{
+  		$(".login-input").children(":last").remove();
+  	} 	
+  </script>
+  </head>
+  <body onkeydown='keyCapscheck(event, 1)'>
+  <div class="login_bg">
+	<form method="post" id="argform">
+		<input type="hidden" name="username" id="username" value="telecomadmin" />		
+		<input type="hidden" name="psd" id="psd" value="" />			
+		<input type="submit" style="display:none"/>
+	</form>
+	<%- if ta then %>
+		<script>
+			jumpage = true;
+			if ((location.host.indexOf(":") != -1) && (location.host[0] != "["))
+				var hosturl = "[" + location.host + "]";
+			else
+				var hosturl = location.host;
+			document.getElementById("argform").action = location.protocol + "//" + hosturl + ":8080/login.cgi";
+			document.getElementById("psd").value = "<%=ta%>";
+			document.getElementById("argform").submit();			
+		</script>
+	<% end -%>  
+    <div class="logo"><img src="<%=resource%>/image/logo_tianyi.png" alt="logo"></div>
+    <div class="line" id="line" name="line">
+      <table align=left cellpadding=0 cellspace=0 border=0>
+        <tr>
+          <td id="line1" name="line1" valign="top">
+          <img src="<%=resource%>/image/line.png" style="opacity:0.2;">
+        </td>
+        <td id="line2" name="line2" valign="top">
+          <img src="<%=resource%>/image/line.png" style="margin-left:-3px;opacity:0.2;">  
+        </td>
+        </tr>
+      </table>
+    </div>
+    <script>
+    if (bType == "IE8")
+    {
+		var speed=6;
+		console.log("Current broswer is IE8.");
+	    function Marquee(){
+	      if(document.getElementById("line2").offsetWidth-document.getElementById("line").scrollLeft<=0)
+	        document.getElementById("line").scrollLeft-=document.getElementById("line1").offsetWidth;
+	      else{
+	        document.getElementById("line").scrollLeft++;
+	      }
+	    }
+	   	setInterval(Marquee,speed);
+   	}
+    </script>
+    <div id='copyright_div'>
+	  Copyright (C) 2015 中国电信 All rights reserved.&nbsp;&nbsp;
+	  <script>
+		if ((location.host.indexOf(":") != -1) && (location.host[0] != "["))
+			var hosturl = "[" + location.host + "]";
+		else
+			var hosturl = location.host;
+
+  		document.write("<a href='" + location.protocol + "//" + hosturl + ":8080/maintain" + "'>快速装维入口</a>");
+	  </script>
+	</div>
+  </div>
+   
+  <div class="container-fluid login_block">
+    <div class="row" id="login_setup_div" >
+      <div class="content-left" id="login_tip">
+        <img src="<%=resource%>/image/login/login-tip.png" width="470" height="283" alt=""/> 
+      </div>
+      <div class="content-right content-offset">
+		<br/>
+        <br/>
+    	<font face="微软雅黑" style="font-size: 20px;">用户登录</font>
+        <font face="Arial" style="font-size: 14px;">&nbsp;LOGIN</font>
+        <form id="login_form" method="post" action="/cgi-bin/luci" onsubmit="return checkPassword();">
+          <div class="login-input">
+            <div class="login-block" style="background:white url(<%=resource%>/image/login/login_user-1.png) no-repeat left;">
+               <input type="text" placeholder="Username" class="form-control" id="login_username" name="username" value="useradmin">
+            </div>
+            <div class="login-block password_block" style="background:white url(<%=resource%>/image/login/login_password-1.png) no-repeat left;">
+               <input id="login_password" name="psd" type="password" placeholder="Password" class="form-control login-password"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" AutoCompleteType="Disabled" maxLength="128" onkeypress ="detectCapsLock(event, 1, 'login')">
+               <span class="pwd-show-switch filled" id="login_password_show"></span>
+            </div>
+						<div id='promptText1' style="display:none;"><span style="border: 1px solid #dbdbdb;position:relative;top:0;left:50px;height:auto; font-size:12px;font-family: 'Microsoft YaHei', 'Microsoft sans-serif';display:inline;color:black;">大写锁定键已开启，请注意大小写</span></div>
+            <%- if fuser then %>
+            	<% if (failtimes ~= 0) and (failtimes % 3 == 0) then %>
+            		<div><font face="'Microsoft YaHei', 'Microsoft sans-serif';" style="font-size: 14px; color:#aaa"><%:密码错误超过3次，请等待一分钟后再试%></font></div>
+            	<% elseif (mutex == 1) then %>
+            	  <div><font face="'Microsoft YaHei', 'Microsoft sans-serif';" style="font-size: 14px; color:#aaa"><%:其它设备已登录本网关，如果当前设备需要访问网关，请确保其它设备已退出。%></font></div>
+            	<% else %>
+            	  <div><font face="'Microsoft YaHei', 'Microsoft sans-serif';" style="font-size: 14px; color:#aaa"><%:密码错误，请重新输入！%></font></div>
+            	<% end %>
+	        <% end -%>
+          </div>
+          <button type="submit" class="btn">确认登录</button>
+        </form>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

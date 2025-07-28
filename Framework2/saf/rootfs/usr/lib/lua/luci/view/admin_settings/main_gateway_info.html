@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language='javascript'>
+			var activeTimeout = setTimeout("Timeout()", 300000);    
+			  
+			function Timeout() {
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+					parent.location = "/cgi-bin/luci";
+					});	
+			}
+		
+			function frmLoad()
+			{
+				(new XHR()).get('<%=luci.dispatcher.build_url('admin/settings/gwinfo')%>',{get:"part"},
+					function(x, json){
+						$("#devType").html(json.DevType);
+						$("#ProductCls").html(json.ProductCls);
+						$("#ProductSN").html(json.ProductSN);
+						$("#SWVer").html(json.SWVer);
+						$("#MAC").html(string2MACFormat(json.MAC).toUpperCase());
+						$("#LANIP").html(json.LANIP);
+						$("#WANIP").html(json.WANIP);
+					});				
+			}
+		</script>
+	</head>
+	<body onLoad='frmLoad()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+		<form>
+			<div id="firstdiv">
+			<div class="main_header">
+				<p class="main_header_title">网关信息</p>
+				<p class="main_header_hint">您可以查看当前网关的状态信息</p>
+			</div>
+			<div class="main_content">
+				<div class="main_item">
+					<div class="main_item_name">设备类型</div>
+					<div class="main_item_content long_text"><span class="theme_color" id="devType"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">产品型号</div>
+					<div class="main_item_content long_text"><span class="theme_color" id="ProductCls"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">产品序列号</div>
+					<div class="main_item_content long_text"><span class="theme_color" id="ProductSN"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">软件版本号</div>
+					<div class="main_item_content"><span class="theme_color" id="SWVer"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">MAC</div>
+					<div class="main_item_content"><span class="theme_color" id="MAC"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">LAN IP</div>
+					<div class="main_item_content"><span class="theme_color" id="LANIP"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">WAN IP</div>
+					<div class="main_item_content"><span class="theme_color" id="WANIP"></span></div>
+				</div>
+			</div>
+			</div>
+		</form>
+	</body>
+</html>

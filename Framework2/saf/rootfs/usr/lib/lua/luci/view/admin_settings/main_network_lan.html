@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"></script>
+	</head>
+		<script language="javascript">
+			var inputVal;
+			var lanaddr;
+			var activeTimeout = setTimeout("Timeout()", 300000);    
+			  
+			function Timeout() {
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+					parent.location = "/cgi-bin/luci";
+					});	
+			}
+		
+			function initVal()
+			{
+					$("#lan_ip").val(inputVal.lanIp);
+					
+					if (inputVal.dhcpEnbl != ($("#dhcp_switch_value").val()))
+					{
+						if (inputVal.dhcpEnbl)
+						{
+							$("#dhcp_switch").removeClass("switch_content_off");
+							$("#dhcp_switch").addClass("switch_content_on");
+							$("#dhcp_switch").children("span").html("&nbsp;ON");
+							$(".range_div").css("display", "");
+						}
+						else
+						{
+							$("#dhcp_switch").removeClass("switch_content_on");
+							$("#dhcp_switch").addClass("switch_content_off");
+							$("#dhcp_switch").children("span").html("OFF&nbsp;");
+							$(".range_div").css("display", "none");
+						}
+					}
+					$("#dhcp_switch_value").val(inputVal.dhcpEnbl);
+					if (isValidIpAddress(inputVal.poolStart))
+					{
+						var start = inputVal.poolStart.split(".");
+						$("#ip_min").val(start[3]);
+					}
+					if (isValidIpAddress(inputVal.poolEnd))
+					{
+						var end = inputVal.poolEnd.split(".");
+						$("#ip_max").val(end[3]);
+					}
+					$("#subnetMask").val(inputVal.subnetMask);
+
+					changeIpHead();
+			}
+			
+			function frmLoad()
+			{
+				(new XHR()).get('<%=luci.dispatcher.build_url('admin/settings/lanInfo')%>',null,
+					function(x, json){
+							inputVal = json;
+							initVal();
+							$(".main_content").show();	
+							$(".main_save").show();   							
+					});					  
+			}	
+			
+			function doChangeLan()
+			{
+				cleanPopWindowContentFromIframe();
+				
+				//填充内容
+				$("#pop_window_title", window.parent.document).html("修改确认");
+				$("#pop_window_icon", window.parent.document).html('<div class="pop_window_icon_alert"></div>');
+				$("#pop_window_message", window.parent.document).html("是否确认修改局域网设置？");
+				
+				//更改确认操作函数
+				var eid = parent.document.getElementById("confirm");
+				if ( isIE7 )
+				{
+					eid.onclick = function() { realChangeLan() };
+				}
+				else
+				{
+					eid.setAttribute("onclick","document.getElementById('setting_iframe').contentWindow.realChangeLan()");
+				}
+				showOrHidePopWindowFromIframe("show");
+			}	
+			
+			function realChangeLan()
+			{
+				showOrHidePopWindowFromIframe("hide");
+				
+				lanaddr = $("#lan_ip").val();	
+				if (inputVal.lanIp != lanaddr)
+					var reLogin = setTimeout("doReLogin()", 10000);
+
+				$("#lanBtn").attr("disabled","disabled");
+				$("#lanBtn").removeClass("input_button");
+				$("#lanBtn").addClass("grey_button");				
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/settings/lanSettings')%>',	  
+					{ token: '<%=token%>', oldLanIp : inputVal.lanIp, lanIp : lanaddr, dhcpEnbl : $("#dhcp_switch_value").val(),
+					  poolStart : $("#network_segment").text() + $("#ip_min").val(), poolEnd : $("#network_segment").text() + $("#ip_max").val(),
+					  subnetMask : $("#subnetMask").val() },		
+					function(x)
+					{	
+						if (x.responseText.substr(2, 7) == "DOCTYPE")
+	      					parent.location = "/cgi-bin/luci";
+	      				else
+	      				{					
+							var retVal = eval("("+x.responseText+")");			
+							if (retVal.message == 0)
+							{
+								$("#error_hint").show();
+								$(".save_error").text("修改局域网设置成功");
+								if (lanaddr == inputVal.lanIp)
+									setTimeout("hideHint()", 1000);
+							}
+							else if (retVal.message == 1)
+							{
+								if (inputVal.lanIp != lanaddr)
+									clearTimeout(reLogin);
+								$("#error_hint").show();
+								$(".save_error").text("修改局域网设置失败");
+								initVal();						
+							}
+							
+							$("#lanBtn").removeClass("grey_button");
+							$("#lanBtn").addClass("input_button");
+							$("#lanBtn").removeAttr("disabled");
+	      				}
+					});					
+			}					
+			
+		$(document).ready(function() {
+			$("#dhcp_switch").bind("click", function(){
+				if($(this).hasClass("switch_content_on"))
+				{
+					$(this).removeClass("switch_content_on");
+					$(this).addClass("switch_content_off");
+					$(this).children("span").html("OFF&nbsp;");
+					$("#" + $(this).attr("id") + "_value").val(0);
+					$(".range_div").css("display", "none");
+				}
+				else
+				{
+					$(this).addClass("switch_content_on");
+					$(this).removeClass("switch_content_off");
+					$(this).children("span").html("&nbsp;ON");
+					$("#" + $(this).attr("id") + "_value").val(1);					
+					$(".range_div").css("display", "");
+					
+				}
+				
+				setTimeout("alertInfo()", 200);
+
+			});
+			
+			$('#lan_ip').bind('input', function() {
+				changeIpHead();
+			});
+			$('#lan_ip').bind('propertychange', function() {				
+				changeIpHead();
+			});
+
+			$(".input_button").click(function(){
+				if (!checkLanSettings())
+					return;
+				
+				  doChangeLan();
+				});		
+		}); 
+		
+		function alertInfo()
+		{
+				if ($("#dhcp_switch").hasClass("switch_content_on"))
+					alert("您将打开DHCP自动分配IP地址服务");
+				else
+					alert("您将关闭DHCP自动分配IP地址服务，如果您的设备需要连入网关，请手动设置静态地址");			
+		}
+		
+		function doReLogin()
+		{
+			top.location.href = location.protocol + "//" + lanaddr;
+		}
+		
+		function changeIpHead()
+		{
+			var lanip = $("#lan_ip").val();
+			if ( isValidIpAddress(lanip) )
+			{
+				var ipArray = lanip.split('.');
+				$("#network_segment").text(ipArray[0] + '.' + ipArray[1] + '.' + ipArray[2] + '.');
+			}
+		}
+		
+		function checkLanSettings()
+		{
+			var lanip = $("#lan_ip").val();
+			var ip_min = parseInt($("#ip_min").val());
+			var ip_max = parseInt($("#ip_max").val());
+			
+			if (!isValidSubnetMask($("#subnetMask").val()))
+			{
+				alert("局域网子网掩码无效");
+				return false;					
+			}
+
+			if (!isValidIpAddress(lanip) || isBroadcastIp(lanip, $("#subnetMask").val()))
+			{
+				alert("局域网IP无效");
+				return false;
+			}				
+				
+			if ($("#dhcp_switch_value").val() == 1)
+			{
+				if (isNaN(ip_min) || (ip_min < 0) || (ip_min > 255) || isBroadcastIp($("#network_segment").text() + $("#ip_min").val(), $("#subnetMask").val()))
+				{
+					alert("IP地址分配范围最小值无效");
+					return false;
+				}
+				if (!isSameSubNet($("#network_segment").text() + $("#ip_min").val(), $("#subnetMask").val(), $("#lan_ip").val(), $("#subnetMask").val()))
+				{
+					alert("IP地址分配范围最小值和局域网IP不在同一子网");
+					return false;				
+				}				
+				if (isNaN(ip_max) || (ip_max < 0) || (ip_max > 255) || isBroadcastIp($("#network_segment").text() + $("#ip_max").val(), $("#subnetMask").val()))
+				{
+					alert("IP地址分配范围最大值无效");
+					return false;
+				}
+				if (!isSameSubNet($("#network_segment").text() + $("#ip_max").val(), $("#subnetMask").val(), $("#lan_ip").val(), $("#subnetMask").val()))
+				{
+					alert("IP地址分配范围最大值和局域网IP不在同一子网");
+					return false;				
+				}
+				if ( ip_max < ip_min )
+				{
+					alert("IP地址分配范围最大值应大于等于最小值");
+					return false;
+				}
+			}
+
+			return true;
+		}	
+		
+		function hideHint()
+		{
+			$("#error_hint").hide();
+		}	
+	</script>
+	<body onLoad='frmLoad()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>	
+		<div class="main_header">
+			<p class="main_header_title">局域网设置</p>
+			<p class="main_header_hint">局域网IP修改后，连接到网关的设备将会重新分配IP，可有效避免两个同网段的网关组网时产生IP冲突的现象。</p>
+		</div>
+		<div class="main_content" style="display:none">
+			<div class="main_item">
+				<div class="main_item_name">局域网IP</div>
+				<div class="main_item_content">
+					<input type="text" value="" id="lan_ip" name="lanIp" class="input_text" autocomplete="off"/>
+				</div>
+			</div>
+			<div class="main_item">
+				<div class="main_item_name">局域网子网掩码</div>
+				<div class="main_item_content">
+					<input type="text" value="" id="subnetMask" name="subnetMask" class="input_text" autocomplete="off"/>
+				</div>
+			</div>			
+			<div class="main_item">
+				<div class="main_item_name">DHCP服务器</div>
+				<div class="main_item_content">
+					<div class="switch_content switch_content_on" id="dhcp_switch" style="margin-top: 15px;">
+						<input type="hidden" id="dhcp_switch_value" name="dhcpEnbl" value="1" />
+						<span>&nbsp;ON</span>
+					</div>
+				</div>
+			</div>
+			<div class="main_item range_div">
+				<div class="main_item_name">IP地址分配范围</div>
+				<div class="main_item_content" style="width:250px;">
+					<div id="network_segment">192.168.1.</div>
+					<div><input type="text" value="200" class="input_text short_input" id="ip_min" autocomplete="off"/></div>
+					<div class="blank_between_input"></div>
+					<div>-</div>
+					<div class="blank_between_input"></div>
+					<div><input type="text" value="222" class="input_text short_input" id="ip_max" autocomplete="off"/></div>
+				</div>
+			</div>			
+
+			<div id="error_hint" style="margin-left: 130px;">
+				<div class="save_error" style="color: #535353;">
+				</div>
+			</div>				
+		</div>
+		<div class="main_save" style="display:none">
+			<button type="submit" id="lanBtn" class="input_button">保存设置</button>
+		</div>
+	</body>
+</html>

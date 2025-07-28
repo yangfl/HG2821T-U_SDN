@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link rel="shortcut icon" href="<%=resource%>/image/favicon.ico">
+		<link rel="bookmark" href="<%=resource%>/image/favicon.ico">
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"></script>
+		<script language='javascript'>
+			var kFlg = false;	
+			function keycheck(e)
+			{
+				console.log("Capture key down event.");
+				var e = window.event ? window.event : e;
+				if ((e.keyCode == 116)  //F5
+					|| (e.ctrlKey && e.keyCode == 82) //ctrl + r
+					|| (e.ctrlKey && e.keyCode == 116)) //ctrl + F5
+				{
+					console.log("Refresh page can't logout.");
+					kFlg = true;
+				}
+			}
+
+			window.onbeforeunload = function()
+			{	
+				if (!kFlg)
+					$.ajax({type: 'POST', url : '<%=luci.dispatcher.build_url('admin/logout')%>', data: { token: '<%=token%>' } ,async: false}); 
+				else
+					kFlg = false;
+			}
+		
+			function realRestart()
+			{
+				showOrHidePopWindowFromIframe("hide");
+				//执行重启
+								
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/reboot')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+				    parent.location = "/cgi-bin/luci";	
+					});					
+			}
+			
+			function doRestart()
+			{
+				cleanPopWindowContent();
+				
+				//填充内容
+				$("#pop_window_title").html("重启确认");
+				$("#pop_window_icon").html('<div class="pop_window_icon_help"></div>');
+				$("#pop_window_message").html("您真的要重启您的网关吗？");
+				
+				//更改确认操作函数
+				var eid = document.getElementById("confirm");
+				eid.onclick = function() { realRestart() };
+				
+				showOrHidePopWindow("show");
+			}
+			
+			function doLogout()
+			{
+				cleanPopWindowContent();
+				
+				//填充内容
+				$("#pop_window_title").html("退出确认");
+				$("#pop_window_icon").html('<div class="pop_window_icon_help"></div>');
+				$("#pop_window_message").html("您将退出网关管理，返回登录页面。");
+				
+				//更改确认操作函数
+				var eid = document.getElementById("confirm");
+				eid.onclick = function() { realLogout() };
+				
+				showOrHidePopWindow("show");
+			}
+			
+			function realLogout()
+			{
+				kFlg = true;
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+				    parent.location = "/cgi-bin/luci";					
+					});					
+			}
+			
+			function bodyLoad()
+			{
+					if(BrowserType() == "IE7") 
+					{
+						isIE7 = true;
+					}
+										
+				(new XHR()).get('<%=luci.dispatcher.build_url('admin/getAppConfig')%>',null,
+					function(x, json){
+						mainMenuJsonObject.appconfig = {"mainDivId":"appconfig_main_div", "hasChildMenu":true, "title":"更多应用", "selectClass": "first_menu_more_select"};
+						var configStr = '{"childMenuPosition": "left","secondmenus":[{"name": "app_hot", "title":"应用商城", "src": "/cgi-bin/luci/admin/appconfig/mall"}';				
+						if (parseInt(json.appCnt) > 0)
+						{
+							configStr += ',{"name": "appconfig", "title":"应用配置", "thirdmenus": [';
+							var appinfo;
+							for (var i = 0; i < parseInt(json.appCnt); i++)
+							{
+								eval("appinfo = json.app" + (i + 1));
+								configStr += '{"name": "'+ appinfo.name + '", "title":"' + appinfo.title +'", "src": "/cgi-bin/luci/admin/appconfig/' + appinfo.src + '"}';
+								if (i + 1 != parseInt(json.appCnt))
+									configStr += ',';
+							}
+							configStr += ']}';
+						}
+						configStr += ']}';
+						subMenuJsonObject.appconfig = JSON.parse(configStr);							
+												
+						changeMainMenu(document.getElementById("first_menu_home"));
+						constructSubMenuHTML("device");
+						constructSubMenuHTML("wifi");
+						constructSubMenuHTML("storage");
+						constructSubMenuHTML("setting");
+						constructSubMenuHTML("appconfig");	
+															
+						window.onresize = function()
+						{
+							console.log("onresize");
+							change_first_menu_arrow(lastMainMenuName);
+						};
+					});	
+			}						
+		</script>		
+	</head>
+	<body onload='bodyLoad()' onkeydown='keycheck(event)'>
+		<div id="first_div">
+			<div id="header_div">
+				<div id="tianyi_logo_div"></div>
+				<div id="first_menu_primary_div" class="">
+					<div id="first_menu_home" class="first_menu_primary text_shadow_black float_left" onclick="changeMainMenu(this)">首页</div>
+					<div id="first_menu_device" class="first_menu_primary text_shadow_black float_left" onclick="changeMainMenu(this)">终端设备</div>
+					<div id="first_menu_wifi" class="first_menu_primary text_shadow_black float_left" onclick="changeMainMenu(this)">WiFi设置</div>
+					<div id="first_menu_storage" class="first_menu_primary text_shadow_black float_left" onclick="changeMainMenu(this)">存储管理</div>
+					<div id="first_menu_setting" class="first_menu_primary text_shadow_black float_left" onclick="changeMainMenu(this)">高级设置</div>
+				</div>
+				<div id="first_menu_more_div" class="">
+					<div id="first_menu_help" class="first_menu_more text_shadow_white float_left" onclick="changeMainMenu(this)">帮助中心</div>
+					<div id="first_menu_appdownload" class="first_menu_more text_shadow_white float_left" onclick="changeMainMenu(this)">APP下载</div>
+					<div id="first_menu_appconfig" class="first_menu_more text_shadow_white float_left" onclick="changeMainMenu(this)">更多应用</div>
+				</div>
+				<div id="menu_action_div" class="">
+					<div id="menu_action_restart" onclick="doRestart()" class="menu_action float_left">
+						<div id="menu_action_restart_logo"></div>
+						<div id="menu_action_restart_hint">重启</div>
+						
+					</div>
+					<div id="menu_action_logout" onclick="doLogout()" class="menu_action float_left">
+						<div id="menu_action_logout_logo"></div>
+						<div id="menu_action_logout_hint">退出</div>
+					</div>
+				</div>
+				<div id="first_menu_select_arrow_div" class="first_menu_select_arrow"></div>
+			</div>
+			<!--首页-->
+			<div id='home_main_div' class="home_div">
+				<iframe id='home_iframe' name='home_iframe' align='middle' frameborder='0' scrolling="no" class="home_iframe" allowTransparency="true" src=''></iframe>
+			</div>
+			<div id="main_body_div">
+				<!--终端设备-->
+				<div id='device_main_div' style="display:none" class="main_div">
+					<div id="device_sub_second_menu_div_top" class="sub_second_menu_top">
+					</div>
+					<div class="sub_second_iframe_top">
+						<iframe id='device_iframe' name='device_iframe' align='middle' frameborder='0' scrolling="auto" class="main_iframe" src=''></iframe>
+					</div>
+				</div>
+				
+				<!--WiFi设置-->
+				<div id='wifi_main_div' style="display:none" class="main_div">
+					<div id="wifi_sub_second_menu_div_top" class="sub_second_menu_top">
+					</div>
+					<div class="sub_second_iframe_top">
+						<iframe id='wifi_iframe' name='wifi_iframe' align='middle' frameborder='0' scrolling="auto" class="main_iframe" src=''></iframe>
+					</div>
+				</div>
+				
+				<!--存储管理-->
+				<div id='storage_main_div' style="display:none" class="main_div">
+					<div id="storage_sub_second_menu_div_top" class="sub_second_menu_top" ></div>
+					<div class="sub_second_iframe_top">
+						<iframe id='storage_iframe' name='storage_iframe' align='middle' frameborder='0' scrolling="auto" class="main_iframe" src=''></iframe>
+					</div>
+				</div>
+				
+				<!--高级设置-->
+				<div id='setting_main_div' style="display:none" class="main_div">
+					<div id="setting_sub_second_menu_div_left" class="sub_second_menu_left">
+					</div>
+					<div class="sub_second_iframe_left">
+						<iframe id='setting_iframe' name='setting_iframe' align='middle' frameborder='0' scrolling="auto" class="main_iframe" src=''></iframe>
+					</div>
+				</div>
+				
+				<!--帮助中心-->
+				<div id='help_main_div' style="display:none" class="main_div">
+					<iframe id='help_iframe' name='storage_iframe' align='middle' frameborder='0' scrolling="auto" class="main_iframe" src=''></iframe>
+				</div>
+				
+				<!--APP下载-->
+				<div id='appdownload_main_div' style="display:none" class="main_div">
+					<iframe id='appdownload_iframe' name='appdownload_iframe' align='middle' frameborder='0' scrolling="auto" class="main_iframe" src=''></iframe>
+				</div>
+				
+				<!--更多应用-->
+				<div id='appconfig_main_div' style="display:none" class="main_div">
+					<div id="appconfig_sub_second_menu_div_left" class="sub_second_menu_left">
+					</div>
+					<div class="sub_second_iframe_left">
+						<iframe id='appconfig_iframe' name='appmore_iframe' align='middle' frameborder='0' scrolling="auto" class="main_iframe" src=''></iframe>
+					</div>
+				</div>
+								
+			</div>
+			<div id='copyright_div'>
+				Copyright (C) 2015 中国电信 All rights reserved.
+			</div>
+		</div>
+		<div id='pop_window_div' style='display:none'></div>
+			<div id="pop_window_content_div">
+				<div id="pop_window_title"></div>
+				<div id="pop_window_body">
+					<div id="pop_window_icon"></div>
+					<div id="pop_window_show_div">
+						<div id="pop_window_message"></div>
+						<div id="pop_window_option">
+							<div onclick="doConfirm()" id="confirm" class="pop_window_action bg_color_main">确认</div>
+							<div onclick="doCancel()" id="cancel" class="pop_window_action bg_color_red">取消</div>
+						</div>
+					</div>
+					
+				</div>
+				
+			</div>
+	</body>
+</html>

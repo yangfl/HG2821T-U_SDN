@@ -1,0 +1,241 @@
+body,div,ul,li,h2,h3,h4,h1,h5,h6,dl,dd,dt{
+	margin:0px;
+	padding:0px;
+}
+
+li{
+	list-style: none;
+}
+
+#container{
+	width:90%;
+	height:450px;
+	margin:30px auto;
+}
+
+#container .head{
+	width:100%;
+	height:65px;
+	border-bottom: 1px solid #DEDEDE;
+}
+
+#container .head h3{
+	color:#525252;
+}
+
+#container .head h5{
+	color:#A2A2A2;
+	padding-top: 7px;
+}
+
+#container .tabs{
+	width:100%;
+	height:45px;
+	border: 2px solid #EAEAEA;
+	margin-top: 20px;
+	margin-bottom: 10px;
+	border-radius:5px;
+}
+
+#container .tabs ul{
+	width:100%;
+	height:35px;
+	color: #9E9E9E;
+}
+
+#container .tabs ul li{
+	width:49%;
+	height:37px;
+	float: left;
+	margin: 4px 4px;
+	text-align:center;
+	line-height: 35px;
+}
+
+#container .tabsContent{
+	width:100%;
+	height:300px;
+	border: 1px solid #DFDFDF;
+	border-radius:5px;
+}
+
+#container .tabsContent #productDiv dl{
+	width:26%;
+	height:80px;
+	border-radius:5px;
+	float: left;
+	margin:30px 25px;
+	cursor: pointer;
+}
+
+#container .tabsContent #problemDiv dl{
+	width:26%;
+	height:80px;
+	margin-left:20px;
+}
+
+#solvingDiv .solving_produce{
+	width:95%;
+	height:80px;
+	margin-left:20px;
+}
+
+#solvingDiv .solving_produce_img{
+	width:52px;
+	padding:15px 23px 15px 25px;
+	float: left;
+}
+
+#solvingDiv .solving_produce_type{
+	width:80%;
+	float: left;
+	color: #515151;
+	font-weight: bold;
+	margin-top: 30px;
+}
+
+#solvingDiv .solving_produce_desc{
+	width:80%;
+	float: left;
+	color: #5DC8A6;
+	font-size: 12px;
+	margin-top: 5px;
+	margin-left: -8px;
+}
+
+#solvingDiv .solving_content{
+	width:93%;
+	height:170px;
+	margin:20px 30px;
+	overflow-y:auto;
+	font-size: 12px;
+}
+
+#solvingDiv .solving_content div{
+	width:99%;
+	text-indent:19.0000pt;
+	word-wrap: break-word;
+	line-height:20px;
+	color:#535353;
+}
+
+
+
+#container .tabsContent dd{
+	width:52px;
+	padding:15px 23px 15px 30px;
+	float: left;
+}
+
+#container .tabsContent dt{
+	width:100px;
+	float: left;
+	color: #515151;
+	font-weight: bold;
+	line-height: 80px;
+}
+
+#container .tabsContent .problemOption{
+	width:90%;
+	height:35px;
+	clear:both;
+	margin:3px 5%;
+}
+
+#container .tabsContent .problemOption ul{
+	width:295px;
+	height:30px;
+	border-radius:3px;
+	border:1px #E9E9E9 solid;
+	color: #A6A6A6;
+}
+
+#container .tabsContent .problemOption ul li{
+	width:147px;
+	height:30px;
+	float: left;
+	text-align: center;
+	line-height: 30px;
+	cursor: pointer;
+}
+
+.problemContent{
+	width:90%;
+	height:100px;
+	clear:both;
+	margin:7px 5% 0;
+}
+
+
+#problemDesc{
+	width:100%;
+	height:100px;
+    border:1px #E9E9E9 solid;
+}
+
+#morehelptext{
+    margin-left:20px;
+    float:left;
+}
+
+.problemNext{
+	width:185px;
+	height:30px;
+	margin:7px 5% 0;
+	border-radius:3px;
+	border:1px #39B990 solid;
+	color:#53C19E;
+	text-align: center;
+	line-height: 30px;
+	float: right;
+	cursor: pointer;
+}
+
+.tabs_bg{
+	border-radius:5px;
+	background-color: #38BB93;
+	color: #FFF;
+}
+
+.menu_bg{
+	border-radius:3px;
+	background-color: #38BB93;
+	color: #FFF;
+}
+
+.border_rigrt{
+	border-right:1px #E9E9E9 solid;
+}
+
+.border_bottom{
+	border-bottom:1px #E9E9E9 solid;
+}
+
+.triangle-up {    
+	width:0;    
+	height:0;   
+	border:22px solid transparent;    
+	border-top-color:#38BB93;
+	position: relative;
+	top:5px;
+	left:182px;
+}
+
+.cor_pointer{
+	cursor: pointer;
+}
+.help_select
+{
+	width:730px;
+}
+.help_drop
+{
+	height: 100px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.help_drop li
+{
+	width: 718px;
+}

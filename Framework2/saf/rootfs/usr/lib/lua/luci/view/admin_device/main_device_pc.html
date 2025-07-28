@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/device.css?version=<%=version%>' rel="stylesheet" type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.nicescroll.min.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/device.js?version=<%=version%>"/></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"/></script>
+		<script language="javascript">
+		var devcount;
+		var jid;
+		var dev;
+		var lanip;
+		var activeTimeout = setTimeout("Timeout()", 300000);    
+		  
+		function Timeout() {
+			XHR.halt();
+			(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+				{ token: '<%=token%>' }, 
+				function(x){
+				parent.location = "/cgi-bin/luci";
+				});	
+		} 
+
+		XHR.poll(WEB_POLL_INTERVAL, '<%=luci.dispatcher.build_url('admin/device/devInfo')%>',{type:'0'},
+			function(x, json){
+				$("tbody").children().each(function(){
+					$(this).remove();
+				});
+
+				$("#devNone").css("display", "none");
+				$("#pc_lists").css("display", "none");	
+				if (json.count == 0)
+				{
+					$("#devNone").css("display", "");
+				}
+				else
+				{
+					devcount = json.count;
+					$("#pc_lists").css("display", "");					
+					$("#devCnt").html("（"+json.count+"台）");
+					bgFlag = 0;
+					for (var i = 0; i < json.count; i++){
+						eval("dev = json.dev" + (i + 1));
+						generateDeviceSetting(dev, i);
+					}
+
+					lanip = json.curip;
+			    }
+			});				
+		
+		function set_host_black()
+		{
+		    showOrHidePopWindowFromIframe("hide");
+			clearTimeout(activeTimeout);
+			activeTimeout = setTimeout("Timeout()", 300000);			
+			var strMac = $("#" + jid).parent().parent().children(":first").children(":last").children(":last").text();
+			if (strMac.length == 17)
+				var setMac = strMac.substr(0,2) + strMac.substr(3,2) + strMac.substr(6,2) + strMac.substr(9,2) + strMac.substr(12,2) + strMac.substr(15,2);
+			else
+				var setMac = strMac;
+
+			(new XHR()).post('<%=url('admin/device/hostSettings')%>',
+				{ token: '<%=token%>', type : "black", mac : setMac }, 
+				function(x){
+					if (x.responseText.substr(2, 7) == "DOCTYPE")
+      					parent.location = "/cgi-bin/luci";
+      				else
+      				{				
+					    var retVal = eval("("+x.responseText+")");
+						if (retVal.setRes != 0)
+							$("#" + jid).find("img").attr("src", "<%=resource%>/image/switch_off.png");
+						else
+						{
+							$("#" + jid).parent().parent().remove();
+							devcount--;
+
+							if (devcount == 0)
+							{
+								$("#devNone").css("display", "");
+								$(".device-mngt-table").css("display", "none");
+							}
+						}
+      				}
+				});				
+		}	
+
+		function set_network_restrict(jid, enbl)
+		{
+			clearTimeout(activeTimeout);
+			activeTimeout = setTimeout("Timeout()", 300000);		
+			var strMac = $("#" + jid).parent().parent().children(":first").children(":last").children(":last").text();
+			if (strMac.length == 17)
+				var setMac = strMac.substr(0,2) + strMac.substr(3,2) + strMac.substr(6,2) + strMac.substr(9,2) + strMac.substr(12,2) + strMac.substr(15,2);
+			else
+				var setMac = strMac;			
+			(new XHR()).post('<%=url('admin/device/hostSettings')%>',
+				{ token: '<%=token%>', type : "restrict", onOff : enbl, 
+					mac : setMac}, 
+				function(x)
+				{
+					if (x.responseText.substr(2, 7) == "DOCTYPE")
+      					parent.location = "/cgi-bin/luci";
+      				else
+      				{				
+						var retVal = eval("("+x.responseText+")");
+						if (retVal.setRes != 0)
+						{
+							if (enbl == 1)  //from close to open, but failed
+							{
+								$("#" + jid).removeClass("switch_content_on");
+								$("#" + jid).addClass("switch_content_off");
+								$("#" + jid).children("span").html("OFF&nbsp;");
+								$("#" + jid + "_value").val(0);								
+							}
+							else
+							{
+								$("#" + jid).addClass("switch_content_on");
+								$("#" + jid).removeClass("switch_content_off");
+								$("#" + jid).children("span").html("&nbsp;ON");
+								$("#" + jid + "_value").val(1);	
+							}			
+						}
+      				}
+				});				
+		}
+			
+		$(document).ready(function(){
+			getSpecifiedIp();
+			//bind switch event
+            customScrollBar("#pc_scrolldiv");
+		
+			var mac;
+			$(".rate_limit").live("click",function(){
+				jid = $(this).attr("id");
+				if (jid.indexOf("black") != -1)
+					confirmPC_Blacklist($("#" + jid).parent().parent().children(":first").children(":last").children().eq(3).text());
+				else
+				{
+					if($(this).hasClass("switch_content_off"))
+					{
+						$(this).addClass("switch_content_on");
+						$(this).removeClass("switch_content_off");
+						$(this).children("span").html("&nbsp;ON");
+						$("#" + $(this).attr("id") + "_value").val(1);						
+						set_network_restrict(jid, "1");
+					}	
+					else
+					{
+						$(this).removeClass("switch_content_on");
+						$(this).addClass("switch_content_off");
+						$(this).children("span").html("OFF&nbsp;");
+						$("#" + $(this).attr("id") + "_value").val(0);
+						set_network_restrict(jid, "0");
+					}
+					
+				}
+			});	
+		});		
+		</script>
+	</head>
+
+	<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body' style="padding-top: 0px; padding-bottom: 0px;">
+		<div id="pc_lists" style="display: none;">
+			<form id="wired_form">
+				<table class="device-mngt-table">
+					<thead>
+				      	<tr>
+					         <th style="width:220px;">当前通过网线连接的设备<span id="devCnt"></span></th>
+					         <th style="width:130px;">实时网速</th>
+					         <th class="restriction-td" style="width:190px;">网络限制</th>
+					         <th>拉黑</th>
+				      	</tr>
+				   </thead>
+				</table>
+
+				<div id="pc_scrolldiv" style="height:375px">				
+					<table class="device-mngt-table" style="margin: -20px 0 10px 0;">	
+						<tbody>			   				   
+						</tbody>				  
+					</table>			
+				</div>			
+			</form>
+		</div>
+		
+		<div style="text-align: center; margin-top: 15%; display: none" id="devNone">
+			<span>您当前没有连接有线设备</span>
+		</div>
+				
+	</body>
+</html>

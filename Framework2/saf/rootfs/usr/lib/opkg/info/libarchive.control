@@ -1,0 +1,10 @@
+Package: libarchive
+Version: 3.1.2-1
+Depends: libc, libopenssl, zlib
+Source: feeds/packages/libs/libarchive
+License: BSD-2-Clause
+Section: libs
+Maintainer: Johannes Morgenroth <morgenroth@ibr.cs.tu-bs.de>
+Architecture: mt7526
+Installed-Size: 243854
+Description:  Multi-format archive and compression library

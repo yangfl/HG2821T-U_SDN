@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <title>中国电信智能网关</title>
+	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">    
+    <meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+    <link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+    <link href='<%=resource%>/css/storage.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+    <link href='<%=resource%>/css/storage_settings.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+    <script src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+    <script src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+    <script src="<%=resource%>/js/main_home.js?version=<%=version%>"></script>
+    <script src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+    <script src="<%=resource%>/js/jquery.nicescroll.min.js?version=<%=version%>"></script>   
+</head>
+
+<script language='javascript'>
+
+function addUsbDeviceObj(usbdev)
+{
+	var htmlObj = "";
+
+	var totalSize = getNetworkRate(parseInt(usbdev.maxSize), 1);
+	var usedSize;
+	if (totalSize[totalSize.length - 1] == "K")
+		usedSize = (parseInt(usbdev.usedSize) / 1024).toFixed(1);
+	else if (totalSize[totalSize.length - 1] == "M")
+		usedSize = (parseInt(usbdev.usedSize) / (1024 * 1024)).toFixed(1);
+	else if (totalSize[totalSize.length - 1] == "G")
+		usedSize = (parseInt(usbdev.usedSize) / (1024 * 1024 * 1024)).toFixed(1);
+	else if (totalSize[totalSize.length - 1] == "T")
+		usedSize = (parseInt(usbdev.usedSize) / (1024 * 1024 * 1024 * 1024)).toFixed(1);  
+
+	htmlObj += "<div class=\"status_top\">";
+	htmlObj += "  <div class=\"localstorage\">";
+	htmlObj += "    <span class=\"Icon\" onclick=\"jumpToPage('storage', 'settings', '', 'usbdev=" + usbdev.instno + "')\"></span>";
+	htmlObj += "    <span class=\"localstorage_info\">";
+	htmlObj += "    <div class=\"storage_info_title\">移动USB存储设备</div>";
+	htmlObj += "    <div class=\"storage_info_detail\">";
+	htmlObj += "      <li>";
+	htmlObj += "        <span class=\"sid_item\">容量状态</span>";
+	htmlObj += "        <span>";
+	htmlObj += "          <div class=\"sid_progress\">";
+	htmlObj += "            <div class=\"progress_bar\"></div>";
+	htmlObj += "          </div>";
+	htmlObj += "          <span>" + usedSize + "/" + totalSize + "B</span>";
+	htmlObj += "        </span>";
+	htmlObj += "      </li>";
+	htmlObj += "      <li>";
+	htmlObj += "        <span class=\"sid_item\">接口方式</span>";
+	htmlObj += "        <span>USB</span>";
+	htmlObj += "      </li>";
+	htmlObj += "      <li id=\"usbdev" + usbdev.instno + "\">";
+	htmlObj += "        <span class=\"sid_item\">设备卷标</span>";
+	htmlObj += "        <span>" + usbdev.label + "</span>";
+	htmlObj += "      </li>";
+	htmlObj += "    </div>";
+	htmlObj += "    </span>";
+	htmlObj += "  </div>";
+	htmlObj += "</div>";
+
+	$("#storage_scrolldiv").append(htmlObj);
+}
+
+$(document).ready(function () {
+     customScrollBar("#storage_scrolldiv");
+    
+	(new XHR()).get('<%=luci.dispatcher.build_url('admin/storage/getUsbDevs')%>',null,
+		function(x, json){
+			if (json.usbCount > 0)
+			{
+			    $("#storage_scrolldiv").show();
+				var usbdev;
+				for (var i = 0; i < json.usbCount; i++){
+					eval("usbdev = json.storage" + (i + 1));
+					addUsbDeviceObj(usbdev);
+				}
+				
+		    $(".sid_progress").each(function(){
+		        var textStr = $(this).next().text();
+		        var widthFormula = textStr.substring(0, textStr.length -2);
+		        var widthStr = eval(widthFormula).toFixed(2);
+		        $(this).find(".progress_bar").css("width", widthStr*100+"%");
+		    });				
+	    	}
+	    	else
+	    	{
+				$("#container").show();	    		
+	    	}
+		}); 
+});      
+</script>
+<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+<div id="storage_scrolldiv" style="width:700px;height:449px;display:none;" >
+ 
+</div>        
+
+<div id="container" style="display:none;">
+	<div class="col-sm-10 fomat device">
+    <div class="row">
+			<div class="main_header">
+				<p class="main_header_title">提示</p>
+				<p class="fomat_content">
+					请插入USB存储设备作为网关的本地存储设备，插入后请等待网关存储指示灯亮起并刷新本页面。
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+				
+</body>
+</html>

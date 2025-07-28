@@ -1,0 +1,125 @@
+#!/bin/sh
+# This script mounts USB mass storage devices when they are plugged in
+# and unmounts them when they are removed.
+# Copyright (C) 2004, 2005 Martin Dickopp
+#
+# This file is free software; the copyright holder gives unlimited
+# permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This file is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+#
+set -e
+#exec > /dev/null 2>&1
+
+if [ ! -f /var/usbhidmounttest ]
+then
+touch /var/usbhidmounttest
+fi
+echo "***********************" >> /var/usbhidmounttest
+echo "opt=$1" >> /var/usbhidmounttest
+echo "DEVNAME=$DEVNAME" >> /var/usbhidmounttest
+echo "DEVPATH=$DEVPATH" >> /var/usbhidmounttest
+echo " " >> /var/usbhidmounttest
+echo "start==" >> /var/usbhidmounttest
+echo start date=`date` >> /var/usbhidmounttest
+echo start opt=$1 >> /var/usbhidmounttest
+echo start idVendor=$2 >> /var/usbhidmounttest
+echo start idProduct=$3 >> /var/usbhidmounttest
+echo start serial=$4 >> /var/usbhidmounttest
+echo start M=$5 >> /var/usbhidmounttest
+echo start vendor=$6 >> /var/usbhidmounttest
+echo start product=$7>> /var/usbhidmounttest
+
+
+. /etc/profile
+# Log a string via the syslog facility.
+log()
+{
+    if test $1 != debug || expr "$VERBOSE" : "[yY]" > /dev/null; then
+	logger -p user.$1 -t "usbmount[$$]" -- "$2"
+    fi
+}
+
+
+if test -e "/var/usbhidmounttest"; then
+	 filesize=`ls -l /var/usbhidmounttest |  awk -F " " '{print $5}'`		
+	if [ $filesize -gt 256000 ]
+	then 
+		rm -rf  /var/usbhidmounttest 
+	fi						
+fi
+
+usb_led_off()
+{
+	if [ -z "`ls /dev/ | grep \"sd|hidraw|ttyACM|ttyUSB\"`" ]
+	then
+		/usr/bin/led_ctrl set usb off
+	fi
+}
+
+# Test if /lib/udev/vol_id is executable.
+#test -x /lib/udev/vol_id || { log err "cannnot execute /lib/udev/vol_id"; exit 1; }
+if [  "$DEVNAME" == "" ]
+then
+	exit 1
+fi
+
+# Default values for configuration variables.
+
+
+umask 000
+
+if test "$1" = add; then
+	/usr/bin/led_ctrl set usb on
+	tmp_mainNum=1
+	echo "tmp_mainNum=$tmp_mainNum" >> /var/usbhidmounttest 
+	tmp_followNum=`echo ${DEVNAME:11}`   
+	INST_NUM=` expr ${tmp_followNum} + 1 `		
+	echo "tmp_followNum=$tmp_followNum" >> /var/usbhidmounttest
+	mountpoint=$DEVNAME 
+	DevId=30${tmp_mainNum}${tmp_followNum}	
+	
+	VARRESULTFILE=/var/usbmounttest_hid${tmp_mainNum}_${tmp_followNum} 
+	rm -rf $VARRESULTFILE
+	touch $VARRESULTFILE
+	echo "MOUNTPOINT=$mountpoint" >> $VARRESULTFILE
+	echo "DeviceId=$DevId" >> $VARRESULTFILE
+	#echo "MODEL=$6" >> $VARRESULTFILE
+	#echo "VENDOR=$7" >> $VARRESULTFILE
+	echo "DEVPATH=$DEVPATH" >> $VARRESULTFILE
+	echo "DEVNAME=$DEVNAME" >> $VARRESULTFILE
+	#echo "SERIALNUM=$4" >> $VARRESULTFILE
+	#echo "idvendor=$2" >> $VARRESULTFILE
+	#echo "idproduct=$3" >> $VARRESULTFILE
+	#echo "bcddevice=$5" >> $VARRESULTFILE							
+			
+	RESULT="{\"Event\":\"USB_DEV_ACTION\",\"ActionType\":\"USB_DEV_INSERT\",\"DevType\":\"USB_HID\",\"DevName\":\"$DEVNAME\",\"MountPath\":\"$mountpoint\",\"DevId\":\"$DevId\",\"Inst_num\":\"$INST_NUM\"}"
+	echo "RESULT=$RESULT" >> /var/usbhidmounttest
+	#notify "$RESULT" 18302	    
+              
+elif test "$1" = remove; then
+	usb_led_off
+	tmp_mainNum=1
+	echo "tmp_mainNum=$tmp_mainNum" >> /var/usbhidmounttest 
+	tmp_followNum=`echo ${DEVNAME:11}`	
+	INST_NUM=` expr ${tmp_followNum} + 1 `	
+	DevId=30${tmp_mainNum}${tmp_followNum}				
+	mountpoint=$DEVNAME
+	VARRESULTFILE=/var/usbmounttest_hid${tmp_mainNum}_${tmp_followNum} 
+	echo "DEVNAME=$DEVNAME" >> /var/usbhidmounttest
+	echo "DEVPATH=$DEVPATH" >> /var/usbhidmounttest
+	echo "DevId=$DevId" >> /var/usbhidmounttest
+	echo "MOUNTPOINT=$mountpoint" >> /var/usbhidmounttest
+	rm -rf $VARRESULTFILE			
+	RESULT="{\"Event\":\"USB_DEV_ACTION\",\"ActionType\":\"USB_DEV_PULL\",\"DevType\":\"USB_HID\",\"DevName\":\"$DEVNAME\",\"MountPath\":\"$mountpoint\",\"DevId\":\"$DevId\",\"Inst_num\":\"$INST_NUM\"}"
+	echo "RESULT=$RESULT" >> /var/usbhidmounttest
+	#notify "$RESULT" 18302
+fi
+
+echo end date=`date` >> /var/usbhidmounttest
+	    
+exit 0

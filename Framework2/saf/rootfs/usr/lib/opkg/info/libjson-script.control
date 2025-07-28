@@ -1,0 +1,10 @@
+Package: libjson-script
+Version: 2016-11-20-7f671b1e68a6664b5baf3e3cffc1bb0880984267
+Depends: libc, libubox
+Source: package/libs/libubox
+License: ISC
+Section: utils
+Maintainer: Felix Fietkau <nbd@openwrt.org>
+Architecture: mt7526
+Installed-Size: 5199
+Description:  Minimalistic JSON based scripting engine

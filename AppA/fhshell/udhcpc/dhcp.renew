@@ -1,0 +1,381 @@
+#!/bin/sh
+# Sample udhcpc renew script
+#-----lqu modify 20120806
+COMMON_CONF=/etc/fh_common.conf
+FHBOX_BIN=`grep "FHBOX_BIN_PATH=" $COMMON_CONF | cut -d = -f 2 `
+GETCFG=`grep "MISC_SHELL_PATH_GETCFG=" $COMMON_CONF | cut -d = -f 2 `
+SETCFG=`grep "MISC_SHELL_PATH_SETCFG=" $COMMON_CONF | cut -d = -f 2 `
+UDHCPD_START_SCRIPT=`grep "APP_SHELL_PATH_UDHCPD_SHELL=" $COMMON_CONF | cut -d = -f 2 `
+DNSMASQ_START_SCRIPT=`grep "APP_SHELL_PATH_DNS_DNSMASQ=" $COMMON_CONF | cut -d = -f 2 `
+ARPING_BIN=`grep "APP_PATH_ARPING=" $COMMON_CONF | cut -d = -f 2 `
+UDHCPC_CONF=`grep "APP_CONF_PATH_UDHCPC_DHCPCLIENT=" $COMMON_CONF | cut -d = -f 2 `
+FILE_HGCXML_CONF=`grep "APP_CONF_PATH_TR069_HGCXML=" $COMMON_CONF | cut -d = -f 2 `
+ROUTE_PATH=/var/internet_route.info
+#--------
+
+IPOE_EMULATOR_INFO=/var/ipoeemuinfo
+if [ -f $IPOE_EMULATOR_INFO ]
+then
+	ifconfig $interface $ip $BROADCAST $NETMASK
+	setcfgx ${IPOE_EMULATOR_INFO} DefaultGateway ${router}
+	setcfgx ${IPOE_EMULATOR_INFO} LocalAddress ${ip}
+	setcfgx ${IPOE_EMULATOR_INFO} Result Success
+	exit
+fi
+RESOLV_CONF="/etc/resolv.conf"
+RESOLV_TR069_CONF="/etc/resolv_tr069.conf"
+RESOLV_VOIP_CONF="/etc/resolv_voip.conf"
+[ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
+[ -n "$subnet" ] && NETMASK="netmask $subnet"
+ifconfig $interface $ip $BROADCAST $NETMASK
+
+#if interface for internet
+if [ -f /var/info/dhcp.$interface.internet ] || [ -f /var/info/dhcp.$interface.special_service_1 ] || [ -f /var/info/dhcp.$interface.special_service_2 ] || [ -f /var/info/dhcp.$interface.special_service_3 ] || [ -f /var/info/dhcp.$interface.special_service_4 ] || [ -f /var/info/dhcp.$interface.other ]
+then
+if [ -f $RESOLV_CONF ]
+then
+	cat /var/resolv.conf > /var/resolv.conf.bak1
+	> $RESOLV_CONF
+	for i in $dns
+	do
+		if grep $i /var/resolv.conf.bak1
+		then
+			echo "The dns info is existed!!!"
+		else
+			echo adding dns $i
+			echo nameserver $i >> $RESOLV_CONF
+		fi
+	done
+	cat /var/resolv.conf.bak1 >> /var/resolv.conf
+else
+	> $RESOLV_CONF
+	for i in $dns
+	do
+		if grep $i /etc/resolv.conf
+		then
+			echo "The dns info is existed!!!"
+		else
+			if [ "x$i" != "x" ]
+			then
+				echo adding dns $i
+				echo nameserver $i >> $RESOLV_CONF
+			fi
+		fi
+	done
+fi
+	cat /var/resolv.conf |grep :>/var/resolv.conf.v6
+	cat /var/resolv.conf |grep -v :>/var/resolv.conf.v4
+	> $RESOLV_CONF
+	cat /var/resolv.conf.v6 >>/var/resolv.conf
+	cat /var/resolv.conf.v4 >>/var/resolv.conf
+#	> $RESOLV_CONF
+	#rm -f $RESOLV_CONF
+	#touch $RESOLV_CONF
+	#[ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
+#	for i in $dns
+#	do
+#		echo adding dns $i
+#		echo nameserver $i >> $RESOLV_CONF
+#	done
+	#killall udhcpd
+	$UDHCPD_START_SCRIPT &
+#	killall dnsmasq.sh
+#	killall dnsmasq
+#	touch /var/dns_finished
+#	$DNSMASQ_START_SCRIPT &
+  # touch file for NTP by lw ,20120112	
+	FILE="/var/run/dhcp.${interface}.internet"
+	if [ ! -e $FILE ];then
+	  rm /var/run/dhcp.*.internet
+		touch $FILE
+	fi	
+	#addded for internet
+	xunhuanlist="1 2 3 4"
+	for xunhuan in ${xunhuanlist}
+	do
+		INTERNETCONN="WANINTERNETCONN${xunhuan}"
+		CONNVALUE="`$GETCFG /var/middleware.conf ${INTERNETCONN}`"
+		if [ "${CONNVALUE}" == "${tty_device}" ]
+		then
+			INTERNETIPADDR="CTUserIPAddress${xunhuan}"
+			internet_ipup ipup ${INTERNETIPADDR} "${local_IP_address}" 
+			$SETCFG /var/middleware.conf ${INTERNETIPADDR} "${local_IP_address}"
+		fi
+	done	
+#	/etc/dns_relay.sh &
+fi
+
+
+
+
+
+
+
+#added by zyzhou,date:2009-02-26
+/usr/bin/sbrdevctrl wanintf IPADDR ${interface} ${ip}
+
+
+#added by zyzhou,date:2008-09-11
+FPATH=/var/udhcpc
+FILENAME=${FPATH}/udhcpc_${interface}_eth.info
+if [ ! -d ${FPATH} ]
+then
+	mkdir -p ${FPATH}
+fi
+if [ -f ${FILENAME} ]
+then
+	echo "interface=${interface}" > ${FILENAME}
+	echo "ipaddress=${ip}" >> ${FILENAME}
+	echo "broadcast=${broadcast}" >> ${FILENAME}
+	echo "subnet=${subnet}" >> ${FILENAME}
+	echo "router=${router}" >> ${FILENAME}
+	echo "domain=${domain}" >> ${FILENAME}
+	j=1
+	for i in $dns
+	do
+		if [ -f $ROUTE_PATH ]
+		then
+			#echo "route path $ROUTE_PATH">>/var/bb
+			`cat ${ROUTE_PATH} |grep ${interface}`
+			IF_INTERNET=`cat ${ROUTE_PATH} |grep ${interface}`
+			# echo "222 cat ${ROUTE_PATH} |grep ${interface} ">>/var/bb 
+			# echo "1 1111 INTTERNET ${IF_INTERNET}">>/var/bb 
+			if [ ! -z "${IF_INTERNET}" ]
+			then
+				$SETCFG $ROUTE_PATH ${interface}_dns$j ${i}
+			fi
+		fi
+		echo "dns$j=${i}" >> ${FILENAME}
+		j=$((j+1))
+	done
+else
+	touch ${FILENAME}
+	echo "interface=${interface}" > ${FILENAME}
+	echo "ipaddress=${ip}" >> ${FILENAME}
+	echo "broadcast=${broadcast}" >> ${FILENAME}
+	echo "subnet=${subnet}" >> ${FILENAME}
+	echo "router=${router}" >> ${FILENAME}
+	echo "domain=${domain}" >> ${FILENAME}
+	j=1
+	for i in $dns
+	do
+		if [ -f $ROUTE_PATH ]
+		then
+		#echo "route path $ROUTE_PATH">>/var/bb
+			IF_INTERNET=`cat $ROUTE_PATH |grep ${interface}`
+			#echo "3333 cat ${ROUTE_PATH} |grep ${interface} ">>/var/bb 
+			`cat ${ROUTE_PATH} |grep ${interface}`
+			#echo "1 1111 INTTERNET $IF_INTERNET">>/var/bb  
+			if [ ! -z "${IF_INTERNET}" ]
+			then
+				$SETCFG $ROUTE_PATH ${interface}_dns$j ${i}
+			fi
+		fi
+		echo "dns$j=${i}" >> ${FILENAME}
+
+		j=$((j+1))
+	done
+fi 
+
+#if interface for voip
+if [ -f /var/info/dhcp.$interface.voip ]
+then
+	> $RESOLV_VOIP_CONF
+	#rm -f $RESOLV_VOIP_CONF
+	#touch $RESOLV_VOIP_CONF
+	#[ -n "$domain" ] && echo domain $domain >> $RESOLV_VOIP_CONF
+	for i in $dns
+	do
+		echo adding dns $i
+		echo nameserver $i >> $RESOLV_VOIP_CONF
+	done
+	touch /var/udhcpc/file_accessible
+fi
+
+
+# touch file for NTP by lw ,20120112	
+	FILE="/var/run/dhcp.${interface}.voip"
+	if [ ! -e $FILE ];then
+	  rm /var/run/dhcp.*.voip
+		touch $FILE
+	fi
+
+wandns1=`$GETCFG ${FILENAME} dns1`
+wandns2=`$GETCFG ${FILENAME} dns2`
+
+#add by liuguo for sdnhg voip 20170312
+if [ -n "${interface}" ]
+then
+	voip_tmp="/var/udhcpc/${interface}"
+	touch ${voip_tmp}
+
+	echo "interfaceName=${interface}" > ${voip_tmp}
+	echo "tempLocalIp=${ip}" >> ${voip_tmp}
+	echo "tempRemoteIp=${router}" >> ${voip_tmp}
+	echo "DNS1=${wandns1}" >> ${voip_tmp}
+	echo "DNS2=${wandns2}" >> ${voip_tmp}
+	echo "netMask=${subnet}" >> ${voip_tmp}	
+
+	notify2 "DHCPC_${interface}" UP
+	
+	#prepare for MNG(pon0.46), by xliao
+	netns="MNG"
+	mkdir -p "/etc/netns/"$netns
+	RESOLV_CONF="/etc/netns/"$netns"/resolv.conf"
+	echo nameserver ${wandns1} > $RESOLV_CONF
+	echo nameserver ${wandns1} >> $RESOLV_CONF
+fi
+
+#add by mjqiao for double route 20130116
+if [ -f $ROUTE_PATH ]
+then
+	IF_INTERNET=`cat $ROUTE_PATH |grep ${interface}`
+	if [ ! -z "$IF_INTERNET" ]
+	then
+portmap=""
+for i in 1 2 3 4 5 6 7 8 9 10 11 12
+do
+	interface_conf=`$GETCFG $ROUTE_PATH LAN$i`
+	if [ ${interface_conf} = ${interface} ]
+	then
+		portmap="1"${portmap}
+	else
+		portmap="0"${portmap}
+	fi
+done
+PR_enable=`$GETCFG $ROUTE_PATH ${interface}_flag`
+if [ "x$PR_enable" != "x1" ]
+then
+	$SETCFG $ROUTE_PATH ${interface}_flag 1
+	/rom/fhshell/misc_shell/policy_route.sh add ${interface} ${ip} ${subnet} ${router} ${wandns1} ${wandns2} ${portmap}
+		fi
+fi
+fi
+#end by mjqiao 20130116
+#added by zyzhou,date:2009-03-06
+ARPING_ENABLE=`$GETCFG $UDHCPC_CONF arping_enable`
+if [ -z ${wandns2} ]
+then 
+	$FHBOX_BIN/notify [${interface}#${interface}#${ip}#${router}#${wandns1}#0#${subnet}#] &
+	#add by xushili for udhcpc down
+	FILENAME="/var/udhcpc_neterror"
+	if [ -e $ FILENAME ]; then
+	rm $FILENAME 
+	fi
+	echo "########################## starting arping  #############################"
+
+         if [ "x$ARPING_ENABLE" == "x1" ]; then
+
+                   kill `ps | grep arping | grep ${interface} | awk '{print $1}'`
+
+                   if [ -f /flash/arping ]; then
+
+                            /flash/arping ${interface} ${router} 240 \
+                            dhcp "[${interface}#${interface}#${ip}#${router}#${wandns1}#0#${subnet}#]" &
+
+                   else
+
+                            $ARPING_BIN ${interface} ${router} 240 \
+                            dhcp "[${interface}#${interface}#${ip}#${router}#${wandns1}#0#${subnet}#]" &
+                   fi
+
+         fi
+else
+	$FHBOX_BIN/notify [${interface}#${interface}#${ip}#${router}#${wandns1}#${wandns2}#${subnet}#] &
+	#add by xushili for udhcpc down
+	FILENAME="/var/udhcpc_neterror"
+	if [-e $ FILENAME];then
+	rm $FILENAME 
+	fi
+	echo "########################## starting arping  #############################"
+
+         if [ "x$ARPING_ENABLE" == "x1" ]; then
+
+                   kill `ps | grep arping | grep ${interface} | awk '{print $1}'`
+
+                   if [ -f /flash/arping ]; then
+
+                            /flash/arping ${interface} ${router} 240 \
+                            dhcp "[${interface}#${interface}#${ip}#${router}#${wandns1}#${wandns2}#${subnet}#]" &
+
+                   else
+
+                             $ARPING_BIN ${interface} ${router} 240 \
+                            dhcp "[${interface}#${interface}#${ip}#${router}#${wandns1}#${wandns2}#${subnet}#]" &
+                   fi
+
+         fi
+fi
+#added end
+
+
+
+#if interface for tr069
+if [ -f /var/info/dhcp.$interface.tr069 ]
+then
+	> $RESOLV_TR069_CONF
+	#rm -f $RESOLV_TR069_CONF
+	#touch $RESOLV_TR069_CONF
+	#[ -n "$domain" ] && echo domain $domain >> $RESOLV_TR069_CONF
+	for i in $dns
+	do
+		echo adding dns $i
+		echo nameserver $i >> $RESOLV_TR069_CONF
+	done
+	
+# touch file for NTP by lw ,20120112	
+	FILE="/var/run/dhcp.${interface}.tr069"
+	if [ ! -e $FILE ];then
+	  rm /var/run/dhcp.*.tr069
+		touch $FILE
+	fi
+	#added by zyzhou for ctadmin
+	if [ ! -z ${wandns2} ]
+	then
+		if [ "${wandns1}" == "${wandns2}" ]
+		then
+			internet_ipup mgtdns MgtDNS "${wandns1}" 
+			$SETCFG /var/info/middleware.conf MgtDNS "${wandns1}"
+		else
+			ALLDNSES="${wandns1},${wandns2}"
+			internet_ipup mgtdns MgtDNS "${ALLDNSES}" 
+			$SETCFG /var/info/middleware.conf MgtDNS "${ALLDNSES}"
+		fi
+	else
+		internet_ipup mgtdns MgtDNS "${wandns1}"
+		$SETCFG /var/info/middleware.conf MgtDNS "${wandns1}"
+	fi
+	internet_ipup ipup CTMgtIPAddress "${ip}"
+	$SETCFG /var/info/middleware.conf CTMgtIPAddress "${ip}"
+fi
+if [ -f /var/info/dhcp.$interface.internet ] || [ -f /var/info/dhcp.$interface.special_service_1 ] || [ -f /var/info/dhcp.$interface.special_service_2 ] || [ -f /var/info/dhcp.$interface.special_service_3 ] || [ -f /var/info/dhcp.$interface.special_service_4 ] || [ -f /var/info/dhcp.$interface.other ]
+then
+	if [ -f "/rom/fhshell/misc_shell/l3_forward.sh" ] 
+	then
+		/rom/fhshell/misc_shell/l3_forward.sh &
+	fi
+fi
+
+if [ -n "$router" ]
+then
+	echo "deleting && adding routers"
+	while route del default gw 0.0.0.0 dev $interface
+	do :
+	done
+#	if [ -f /var/info/dhcp.$interface.internet ]   #this file is build in wancc, so it's not used in sdnhgw # modified by liuguo 20170312
+#	then
+		for i in $router
+		do
+			route add default gw $i dev $interface
+		done
+#	fi
+fi
+
+#use for MNG(pon0.46), by xliao
+NTPSERVER=`cat /var/ntpservers.conf`
+ip netns exec MNG ntpdate -0 -z +08:00 "$NTPSERVER" 0> /dev/zero 1>&0 2>&0 &
+
+/rom/fhshell/misc_shell/ipforward.sh del ${interface}
+echo " dhcprenew /rom/fhshell/misc_shell/ipforward.sh del ${interface} " 
+/rom/fhshell/misc_shell/ipforward.sh add ${interface} ${router}
+echo " dhcprenew /rom/fhshell/misc_shell/ipforward.sh add ${interface} ${router}" 

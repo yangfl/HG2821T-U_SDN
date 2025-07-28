@@ -1,0 +1,365 @@
+#!/bin/sh
+
+COMMON_CONF=/etc/fh_common.conf
+APP_LIB_PATH_PPPOE_RP_PPPOE=`grep "APP_LIB_PATH_PPPOE_RP_PPPOE=" $COMMON_CONF | cut -d = -f 2 `
+APP_FILE_LED_PORT_STATUS=/tmp/led_port_status #/rom/fhbin/port_status运行的生成文件，保存lan侧接口状态，格式：portX=0或1,X为1-4，0表示无设备连接
+APP_FILE_WLAN_STATUS_INFO="/proc/wlan0/sta_info /proc/wlan0_va0/sta_info /proc/wlan0_va1/sta_info /proc/wlan0_va2/sta_info" #记录wlan设备连接状态，实时更新
+FILE_HGCXML_CONF=`grep "APP_CONF_PATH_TR069_HGCXML=" $COMMON_CONF | cut -d = -f 2 `
+device_file=/var/WEB-GUI/webgui.conf
+file_wan_ppp="/var/run/wan4_ppp.conf"
+lan_num=`getcfgx $device_file Port_number`
+wire_enable=`getcfgx $device_file wireless_enable`
+wan_index=`getcfgx /var/waninfo.conf`
+WLAN_CFG=/var/wlan/apcfg
+log_file=/var/ppp_demand
+>$log_file
+wlan_status=0
+lan_port=0
+
+
+#echo  1 $1 2  $2 3  $3 4  $4 5 $5 6 $6 7 $7 8 $8 >$log_file
+kill_proccess_by_name()
+{
+    # echo "Proccess name is $1 ,interface name is $2"
+	if [ $# != 2 ]
+	then
+		echo "usage: kill_proccess_by_name PORCESS_NAME INTF_NAME"
+		exit 1
+	fi
+	process_name=$1
+	interface_name=$2
+    PROC_ID=`ps |grep $process_name |grep -v grep |grep $interface_name |head -n 1 | awk '{print $1}'` 
+    if [ -z $PROC_ID ]
+    then    
+        echo "No proccess to kill"     
+        return 0    
+    else
+	i=0
+          #echo "PID exists"
+          #echo "Kill $PID starting.................."
+		 if [ $process_name = "pppd" ]
+         then 
+			while [ "x$PROC_ID" != "x" -a $i -le 4 ]                                                                         
+			do                                                                                                   
+				#echo "*********$PID pid ***********"                                                         
+				#echo "*********$PROC_ID proc_id ***********"                                                 
+				kill $PROC_ID                                                                                
+				sleep 5                                                                                      
+				#echo "trying to kill..."  
+					i=`expr ${i} + 1`
+				PROC_ID=`ps |grep $process_name |grep -v grep |grep $interface_name |head -n 1 | awk '{print $1}'`
+			done
+			 #echo "*********killall -9 ****bb****"
+			kill -9 $PROC_ID
+			setcfgx /var/curPppStatus.log $intf "ERROR_ISP_DISCONNECT"
+	    else
+        #echo "*********killall -9 **aa******"
+         kill -9 $PROC_ID
+		fi
+    fi
+
+}
+if [ $# -eq 7 ]; then
+	intf=$1
+	user=$2
+	tmpln=$3
+	routflags=$4
+	mtu_value=$5
+	checksecond=$6
+	ipvx=$7
+	
+else
+	intf=$1
+	user=$2
+	tmpln=$3
+	routflags=$4
+	mtu_value=1492
+fi
+if [ $ipvx = "1" ]
+then
+ip_order="+ipv6 noipv6"
+echo ipv4 >>$log_file
+elif [ $ipvx = "2" ]
+then
+ip_order="+ipv6 noip"
+echo ipv6 >>$log_file
+else
+ip_order="+ipv6"
+echo ipv46 >>$log_file
+fi
+setcfgx /var/curPppStatus.log ${intf}_errorcode "NONE"
+setcfgx /var/curPppStatus.log $intf "ERROR_NONE"
+if [ -f /var/curPppStatus.log ] ; then
+  echo "Dial Status File Existed...">>$log_file
+else
+  touch /var/curPppStatus.log
+fi
+
+#echo ssssss=$#  checksecond=$checksecond>>$log_file
+if [ $# -ne 7 ]; then
+
+    while [ 1 ]
+    do
+        pppd plugin ${APP_LIB_PATH_PPPOE_RP_PPPOE} nic-${intf} linkname ${tmpln} ${routflags} noipdefault noauth \
+           default-asyncmap hide-password nodetach usepeerdns mtu ${mtu_value} mru ${mtu_value}  \
+             noaccomp nodeflate nopcomp novj novjccomp user ${user} lcp-echo-interval 20 \
+               lcp-echo-failure 10 nopersist $ip_order
+        sleep 10
+    done
+
+else
+
+	check_brigde()
+	{
+		lan_brigdge_flag=0
+		for i in 1 2 3 4 5 6 7 8
+		do
+			for j in 1 2
+			do 
+				ConnectionType_xml=`grep "IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_ConnectionType=" $FILE_HGCXML_CONF | cut -d = -f 2`
+				LanInterface_xml=`grep "IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_LanInterface=" $FILE_HGCXML_CONF | cut -d = -f 2`
+				ConnectionType=`inter_web get $ConnectionType_xml`
+				if [ ${ConnectionType} = "PPPoE_Bridged&" ]
+				then
+					LanInterface=`inter_web get $LanInterface_xml|grep ${lan_name}`
+					if [ "x${LanInterface}" != "x" ]
+					then
+						lan_brigdge_flag=1
+						return
+					fi
+				fi
+			done
+		done
+	}
+	
+	check_lanport() #检测是否有有线终端接入
+	{
+		lan=0
+		lan_port=0
+		while [ $lan -lt $lan_num ]
+		do
+			let "lan+=1"
+			/rom/fhbin/port_status #路径，底层接口，用于获取lan侧连接状态,在/tmp/led_port_status文件中查看
+			lan_online=`grep "port$lan=" $APP_FILE_LED_PORT_STATUS | cut -d = -f 2`
+			
+			if [ "x${lan_online}" = "x1" ]
+			then
+				lan_name=dev.eth.$lan
+				check_brigde
+				if [ "x$lan_brigdge_flag" != "x1" ]
+				then
+					lan_port=1
+					break
+				fi
+			fi
+
+		done
+	}
+	
+
+check_wlan() #检测是否有无线终端接入
+{
+	wlan=0
+	wlan_status=0
+	wlan_cfg_module_enable==`getcfgx $WLAN_CFG WIFIENABLE`
+	wlan_cfg_ssid_enable_index=0
+	wlan_cfg_ssid_enable=0
+	if [ "${wlan_cfg_module_enable}" = "1" ];then 
+		for wlan_index in  1 2 3 4
+		do
+			wlan_cfg_ssid_enable_index=$wlan
+			wlan_cfg_ssid_enable=`getcfgx $WLAN_CFG ENABLE_${wlan_cfg_ssid_enable_index}`
+			let "wlan+=1"
+			if [ ${wlan_cfg_ssid_enable} = "1" ];then
+				##MTK方案直接去xml中去找WLAN_N下挂设备的个数节点
+				TotalAssociations_xml_seq=`grep "IGD_LAND_1_WLANC_${wlan_index}_TotalAssociations=" $FILE_HGCXML_CONF | cut -d = -f 2`
+				ret=`inter_web get $TotalAssociations_xml_seq`
+				if [ "x$ret" != "x0&" ];then
+					lan_name=dev.wla.$wlan
+					check_brigde
+					if [ "x$lan_brigdge_flag" = "x0" ]
+						then
+							wlan_status=1
+							break
+					fi
+				else
+					wlan_status=0
+				fi
+			fi
+		done
+	fi
+}
+
+	wait_packet()
+	{
+		while [ 1 ]
+		do
+			#echo "welcome to wait_packets">>$log_file
+		   
+			ppp_flag=`ps | grep pppd|grep -c ${intf} |head -n 1`
+			if [ ${ppp_flag} -lt 1 ] &&  [ "x$lan_port" = "x1" ]
+			then
+				echo "ppp is down">>$log_file
+				pppd plugin ${APP_LIB_PATH_PPPOE_RP_PPPOE} nic-${intf} linkname ${tmpln} ${routflags} noipdefault noauth \
+				default-asyncmap hide-password nodetach usepeerdns mtu ${mtu_value} mru ${mtu_value}  \
+				noaccomp nodeflate nopcomp novj novjccomp user ${user} lcp-echo-interval 20 \
+				lcp-echo-failure 10 nopersist $ip_order &
+				sleep 10
+				break
+			fi
+			
+			sleep 5
+			check_lanport
+			if [ $wire_enable = "1" ]
+			then
+				check_wlan
+			fi
+			
+			if [ ${lan_port} -eq 1 -o ${wlan_status} -eq 1 ]
+			then
+				lan_port=1
+			else
+				lan_port=0
+			fi
+			
+			if [ ${lan_port} -eq 1 ]
+			then
+				#echo "###have packets come###">>$log_file
+				pid=`ps | grep pppd|grep ${intf} |head -n 1| awk '{print $1}'`
+				kill_proccess_by_name "pppd" ${intf}
+				if [ $ipvx != "1" ]
+				then
+				kill_proccess_by_name "dhcp6c_start" ${intf}
+				kill_proccess_by_name "dhcp6c" ${intf}
+				killall dhcp6s
+				killall radvd
+				ip -6 addr flush scope global dev br0
+				#echo "clear ipv6">>$log_file
+				fi
+				
+				sleep 5
+				
+				#pppd plugin ${APP_LIB_PATH_PPPOE_RP_PPPOE} nic-${intf} linkname ${tmpln} ${routflags} noipdefault noauth \
+				#default-asyncmap hide-password nodetach usepeerdns mtu ${mtu_value} mru ${mtu_value}  \
+				#noaccomp nodeflate nopcomp novj novjccomp user ${user} lcp-echo-interval 20 \
+				#lcp-echo-failure 10 nopersist noipv6 &
+				
+				sleep 3
+				break
+			else
+				echo "###no packets come###">>$log_file
+				pid=`ps | grep pppd|grep ${intf} |head -n 1| awk '{print $1}'`
+				while [ $pid ]
+				do
+					pid=`ps | grep pppd|grep ${intf} |head -n 1| awk '{print $1}'`
+					if [ -n $pid ]
+					then
+						kill_proccess_by_name "pppd" ${intf}
+						if [ $ipvx != "1" ]
+						then
+						kill_proccess_by_name "dhcp6c_start" ${intf}
+						kill_proccess_by_name "dhcp6c" ${intf}
+						killall dhcp6s
+						killall radvd
+						ip -6 addr flush scope global dev br0
+						#echo "clear ipv6">>$log_file
+						fi
+						echo "###undemand  ppp down ##">>$log_file
+					fi
+				done
+				break
+			fi
+		done  
+	}
+
+
+	while [ 1 ]
+	do
+		ppp_flag=`ps | grep pppd|grep -c ${intf} |head -n 1`
+		#echo "bbbbbbb=$wlan_status ppp_flag=$ppp_flag ">>$log_file
+		if [ ${ppp_flag} -lt 1 ]
+		then
+			pppd plugin ${APP_LIB_PATH_PPPOE_RP_PPPOE} nic-${intf} linkname ${tmpln} ${routflags} noipdefault noauth \
+			default-asyncmap hide-password nodetach usepeerdns mtu ${mtu_value} mru ${mtu_value}  \
+			noaccomp nodeflate nopcomp novj novjccomp user ${user} lcp-echo-interval 20 \
+			lcp-echo-failure 10 nopersist $ip_order &
+		fi
+		
+		sleep 10
+		PPPX=`getcfgx $file_wan_ppp  $intf`
+		ip_up=`ifconfig ${PPPX} | grep "inet addr"`
+		#echo $ip_up>>$log_file
+		if [ -n "${ip_up}" ] && [ -n $PPPX ]
+		then 
+			break
+		fi
+	done
+
+	while [ 1 ]
+	do
+		#echo "welcom to check ppp">>$log_file
+		
+		limit=0
+		while [ 1 ]
+		do
+		   
+			ppp_flag=`ps | grep pppd|grep -c ${intf} |head -n 1`
+			#echo "aaaaawlan_status=$wlan_status ppp_flag=$ppp_flag ">>$log_file
+			if [ ${ppp_flag} -lt 1 ] && [ "x$lan_port" = "x1" ]
+			then 
+				echo "ppp is down">>$log_file
+				pppd plugin ${APP_LIB_PATH_PPPOE_RP_PPPOE} nic-${intf} linkname ${tmpln} ${routflags} noipdefault noauth \
+				default-asyncmap hide-password nodetach usepeerdns mtu ${mtu_value} mru ${mtu_value}  \
+				noaccomp nodeflate nopcomp novj novjccomp user ${user} lcp-echo-interval 20 \
+				lcp-echo-failure 10 nopersist $ip_order &
+				
+				sleep 5 
+				continue
+			fi
+			
+			sleep 10
+			check_lanport
+			if [ $wire_enable = "1" ]
+			then
+				check_wlan
+			fi
+			#echo "wlan_status=$wlan_status lan_port=$lan_port ">>$log_file
+			if [ ${wlan_status} -eq 0 -a ${lan_port} -eq 0 ]
+			then
+				lan_port=0
+			else
+				lan_port=1
+			fi
+			
+			if [ ${lan_port} -eq 0 ]
+			then
+				let "limit+=10"    
+			else
+				limit=0
+			fi
+			
+			#echo "limit = $limit"		
+			if [ ${limit} -ge ${checksecond} ]
+			then
+				break
+			fi 
+		done
+		
+			#echo "****** no pcakets *******">>$log_file
+			#ifconfig ${PPPX} 192.168.2.100 netmask 255.255.255.255 dstaddr 192.168.2.1
+			#route add default gw 192.168.2.1 dev ${PPPX}
+			if [ -d /var/run/ ];then
+				ppp_file=`ls /var/run/*_${intf}_*`
+				if [ "x${ppp_file}" != "x" ]
+				then
+					rm -rf ${ppp_file}
+				fi
+				sleep 3
+			fi
+			wait_packet
+	done
+
+fi
+
+
+

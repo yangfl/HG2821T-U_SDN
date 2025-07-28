@@ -1,0 +1,143 @@
+#!/bin/sh
+COMMON_CONF=/etc/fh_common.conf
+APP_CONF_PATH_PPPOE_RESOLV=`grep "APP_CONF_PATH_PPPOE_RESOLV=" $COMMON_CONF | cut -d = -f 2 `
+GETCFG=`grep "MISC_SHELL_PATH_GETCFG=" $COMMON_CONF | cut -d = -f 2 `
+fpath=/var/run
+ROUTE_PATH=/var/internet_route.info
+interface_name="$1"
+tty_device="$2"
+remote_IP_address="$5"
+local_IP_address="$4"
+RM="rm -f"
+iptables -t nat -D POSTROUTING -o ${interface_name} -j MASQUERADE
+
+TYPE_VPN=`echo "$LINKNAME" | grep "^vpn_"`
+if [ -n "${TYPE_VPN}" ]; then
+	VPN_IFINFO_CONF="/var/vpdn/ifinfo_${LINKNAME}"
+	rm -f $VPN_IFINFO_CONF
+#	killall dnsmasq.sh
+#	killall dnsmasq
+#	$APP_SHELL_PATH_DNS_DNSMASQ &
+	exit 0
+fi
+
+#update wan4_ppp.conf
+emuinfo_file=/var/pppoeemuinfo
+if [ -f $emuinfo_file ];then
+	exit 0
+fi
+if [ ! -f $emuinfo_file ];then
+	sed "/$2=$1/d" $fpath/wan4_ppp.conf >$fpath/wan4_ppp.conf.bak && mv $fpath/wan4_ppp.conf.bak $fpath/wan4_ppp.conf
+	sed "/$2=$1/d" $fpath/wan_ppp.conf >$fpath/wan_ppp.conf.bak && mv $fpath/wan_ppp.conf.bak $fpath/wan_ppp.conf
+fi
+${RM} $fpath/file_accessible
+notify [neterror#$tty_device#$interface_name#$local_IP_address#${remote_IP_address}#${DNS1}#${DNS2}#] &
+if [ "$LINKNAME" == "all" -o "$LINKNAME" == "voip_tr069" ];then
+	FILE="${fpath}/tr069_${tty_device}_${interface_name}.info ${fpath}/voip_${tty_device}_${interface_name}.info"
+	${RM} ${FILE}
+	#mv /etc/resolv.conf.bak /etc/resolv.conf
+fi
+rm /var/wan_info/*${interface_name}*
+if [ "$LINKNAME" == "voip_internet" -o "$LINKNAME" == "voip" ];then
+	FILE="${fpath}/voip_${tty_device}_${interface_name}.info"
+	${RM} ${FILE}
+fi
+
+if [ "$LINKNAME" == "tr069_internet" -o "$LINKNAME" == "tr069" ];then
+	FILE="${fpath}/tr069_${tty_device}_${interface_name}.info"
+	${RM} ${FILE}
+fi
+
+if [ "$LINKNAME" == "internet"   -o "$LINKNAME" == "other"   -o "$LINKNAME" == "special_service_1"  -o "$LINKNAME" == "special_service_2"   -o "$LINKNAME" == "special_service_3" -o "$LINKNAME" == "special_service_4" ];then
+	FILE="${fpath}/{LINKNAME}_${tty_device}_${interface_name}.info"
+#	${RM} ${FILE}
+fi
+
+/rom/fhshell/misc_shell/ipforward.sh del ${tty_device}
+
+if [  "$LINKNAME" == "all" -o "$LINKNAME" == "internet" -o "$LINKNAME" == "voip_internet" -o "$LINKNAME" == "tr069_internet" ];then
+	#mv /etc/resolv.conf.bak /etc/resolv.conf
+	iptables -t nat -D POSTROUTING -o ${interface_name} -j MASQUERADE
+
+	arpctrl remove ${remote_IP_address}
+	# add send signal to wancc, for notify internet link down
+	#echo "bb">>/var/aa
+	send 7
+	
+	rm -fr /var/pppoe_duration_time
+	
+	RESOLV_INTERFACE_INTERNET_CONF="/var/resolv_${tty_device}_internet.conf"
+	wandns1=`cat ${RESOLV_INTERFACE_INTERNET_CONF} | head -1 | awk '{print $2}'`
+	wandns2=`cat ${RESOLV_INTERFACE_INTERNET_CONF} | sed -n '2p' | awk '{print $2}'`
+	count1=`cat /var/resolv_*_internet.conf | grep $wandns1 | wc -l`
+	count2=`cat /var/resolv_*_internet.conf | grep $wandns2 | wc -l`
+	echo "wandns1 $wandns1 wandns2 $wandns2 count1 ${count1}   count2 ${count1}">>/var/aaa
+	rm -fr /var/pppoe_duration_time
+	if [ "x$wandns1" != "x" ]
+	then
+		if [$count1 = 1 ]
+		then
+			cat /var/resolv.conf |grep -v $wandns1 >/var/resolv.bak1.conf
+			cat /var/resolv.bak1.conf >/var/resolv.conf
+		fi
+	fi
+	if [ "x$wandns2" != "x" ]
+	then
+		if [$count2 =1 ]
+		then
+			cat /var/resolv.conf |grep -v $wandns2 >/var/resolv.bak1.conf
+			cat /var/resolv.bak1.conf >/var/resolv.conf
+		fi
+	fi
+	
+	rm $RESOLV_INTERFACE_INTERNET_CONF
+	
+#	killall dnsmasq.sh
+#	killall dnsmasq
+#	$APP_SHELL_PATH_DNS_DNSMASQ &
+	/rom/fhshell/misc_shell/policy_route.sh delete ${interface_name}
+fi
+
+if [  "$LINKNAME" == "other"   -o "$LINKNAME" == "special_service_1"  -o "$LINKNAME" == "special_service_2"   -o "$LINKNAME" == "special_service_3" -o "$LINKNAME" == "special_service_4" ];then
+	#mv /etc/resolv.conf.bak /etc/resolv.conf
+	iptables -t nat -D POSTROUTING -o ${interface_name} -j MASQUERADE
+
+	arpctrl remove ${remote_IP_address}
+	# add send signal to wancc, for notify internet link down
+	#echo "bb">>/var/aa
+	send 7
+	
+	rm -fr /var/pppoe_duration_time
+	
+	RESOLV_INTERFACE_OTHER_SPE_CONF="/var/resolv_${tty_device}_other_spe.conf"
+	wandns1=`cat $(RESOLV_INTERFACE_OTHER_SPE_CONF) | head -1 |awk '{print $2}'`
+	wandns2=`cat $(RESOLV_INTERFACE_OTHER_SPE_CONF) | sed -n \'2p\' |awk \'{print $2}\'`
+	count1=`cat /var/resolv_*_other_spe.conf | grep $wandns1 | wc -l`
+	count2=`cat /var/resolv_*_other_spe.conf | grep $wandns2 | wc -l`
+	echo "wandns1 $wandns1 wandns2 $wandns2 count1 ${count1}   count2 ${count1}">>/var/aaa
+	rm -fr /var/pppoe_duration_time
+	if [ "x$wandns1" != "x" ]
+	then
+		if [$count1 = 1 ]
+		then
+			cat /var/resolv_other_spe.conf |grep -v $wandns1 >/var/resolv_other_spe.conf.bak
+			cat /var/resolv_other_spe.conf.bak >/var/resolv_other_spe.conf
+		fi
+	fi
+	if [ "x$wandns2" != "x" ]
+	then
+		if [$count2 =1 ]
+		then
+			cat /var/resolv_other_spe.conf |grep -v $wandns2 >/var/resolv_other_spe.conf.bak
+		cat /var/resolv_other_spe.conf.bak >/var/resolv_other_spe.conf
+		fi
+	fi
+	
+	rm $RESOLV_INTERFACE_OTHER_SPE_CONF
+	
+	
+#	killall dnsmasq.sh
+#	killall dnsmasq
+#	$APP_SHELL_PATH_DNS_DNSMASQ &
+	/rom/fhshell/misc_shell/policy_route.sh delete ${interface_name}
+fi

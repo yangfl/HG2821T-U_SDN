@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/device.css?version=<%=version%>' rel="stylesheet" type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.nicescroll.min.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/device.js?version=<%=version%>"/></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"/></script>
+		<script language="javascript">
+		var devcount = 0;
+		var macaddr = "";
+		var activeTimeout = setTimeout("Timeout()", 300000);    
+		  
+		function Timeout() {
+			(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+				{ token: '<%=token%>' }, 
+				function(x){
+				parent.location = "/cgi-bin/luci";
+				});	
+		}
+		
+		function initBlackLists()
+		{
+			var dev;
+			(new XHR()).get('<%=luci.dispatcher.build_url('admin/device/blackHosts')%>',null,
+				function(x, json){
+					if (json.count == 0)
+						$("#devNone").css("display", "");
+					else
+					{
+						devcount = json.count;
+						$("#black_lists").css("display", "");					
+						$("#devCnt").html("（"+json.count+"台）");
+						bgFlag = 0;
+						for (var i = 0; i < json.count; i++){
+							eval("dev = json.dev" + (i + 1));
+							displayblackhosts(dev);
+						}
+				    }
+				});		
+		}		
+
+		function removeBlack()
+		{
+		    showOrHidePopWindowFromIframe("hide");
+
+		    if (macaddr == "")
+		    	return;
+		    else if (macaddr.length == 17)
+				var setMac = macaddr.substr(0,2) + macaddr.substr(3,2) + macaddr.substr(6,2) + macaddr.substr(9,2) + macaddr.substr(12,2) + macaddr.substr(15,2);
+			else
+				var setMac = macaddr;
+			clearTimeout(activeTimeout);
+			activeTimeout = setTimeout("Timeout()", 300000);				
+			(new XHR()).post('<%=url('admin/device/rmBlackHost')%>',
+				{ token: '<%=token%>', mac : setMac }, 
+				function(x)
+				{
+					if (x.responseText.substr(2, 7) == "DOCTYPE")
+      					parent.location = "/cgi-bin/luci";
+      				else
+      				{				
+					  	var retVal = eval("("+x.responseText+")");
+						if (retVal.setRes == 0)
+						{
+							$(".blackmac").each(function(){
+								if (macaddr.toUpperCase() == $(this).text())
+								{
+									$(this).parent().parent().parent().remove();
+									devcount--;
+									if (devcount == 0)
+									{
+										$("#black_lists").css("display", "none");
+										$("#devNone").css("display", "");
+									}
+									return false;
+								}
+							});
+						}
+					}
+				});				
+		}
+
+		$(document).ready(function(){
+			customScrollBar("#black_scrolldiv");
+		
+			$(".switch-button").live("click",function(){
+					macaddr = $(this).parent().parent().children(":first").children(":last").children(":last").text();
+					cancelBlacklist();
+			});	
+		});			
+			
+		
+		</script>
+	</head>
+
+	<body onLoad='initBlackLists()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body' style="padding-top: 0px; padding-bottom: 0px;">
+	   <div id="black_lists" style="display: none">
+			<table class="device-mngt-table" id="blacklist-table">
+				<thead>
+			      	<tr>
+				         <th> </th>
+				         <th> </th>
+				         <!--<th>优先开关</th>-->
+				         <th class="restriction-td"> </th>
+				         <th> </th>
+			      	</tr>
+			   </thead>	
+			</table>
+
+			<div id="black_scrolldiv" style="height:395px">				
+				<table class="device-mngt-table" style="margin: -20px 0 10px 0;">	
+					<tbody>			   				   
+					</tbody>				  
+				</table>			
+			</div>
+		</div>
+		
+		<div style="text-align: center; margin-top: 15%; display: none" id="devNone">
+			<span>您当前没有设备被拉黑</span>
+		</div>
+				
+	</body>
+</html>

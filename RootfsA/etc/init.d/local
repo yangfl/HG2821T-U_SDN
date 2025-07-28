@@ -1,0 +1,363 @@
+#!/bin/sh
+
+#-----lqu modify 20120816
+WEB_PATH=`grep "APP_PATH_WEB=" $COMMON_CONF | cut -d = -f 2 `
+WANCC_RUN=`grep "APP_PATH_WANCC=" $COMMON_CONF | cut -d = -f 2 `
+QOSMODE_INIT=`grep "MISC_SHELL_PATH_QOSMODE_INIT=" $COMMON_CONF | cut -d = -f 2 `
+IGMP_INIT=`grep "MISC_SHELL_PATH_IGMP_INIT=" $COMMON_CONF | cut -d = -f 2 `
+IPV6_mode="/rom/fhshell/misc_shell/ipv6_mode_init.sh"
+SET_wan="/usr/local/fh/mf/setwan_enable.sh"
+INIT_VLANBINDING=`grep "MISC_SHELL_PATH_INIT_VLANBINDING=" $COMMON_CONF | cut -d = -f 2 `
+START_PINGCONFIG=`grep "MISC_SHELL_PATH_START_PINGCONFIG=" $COMMON_CONF | cut -d = -f 2 `
+FHBOX_PATH=`grep "FHBOX_BIN_PATH=" $COMMON_CONF | cut -d = -f 2 `
+DPI_PATH=`grep "APP_PATH_DPI_APP" $COMMON_CONF | cut -d = -f 2`
+WLAN_SHELL_PATH=`grep "APP_SHELL_PATH_WLAN" $COMMON_CONF | cut -d = -f 2`
+FHOMCI_RUN=`grep "APP_PATH_OMCI=" $COMMON_CONF | cut -d = -f 2 `
+MPA_RUN=`grep "APP_PATH_MPA=" $COMMON_CONF | cut -d = -f 2 `
+MPA_CONF=/flash/cfg/app_conf/mpa/mpa.conf
+
+#solve RSTP loop problem
+/usr/sbin/ethphxcmd gsww 200c fff10
+/usr/sbin/ethphxcmd gsww 210c fff10
+/usr/sbin/ethphxcmd gsww 220c fff10
+/usr/sbin/ethphxcmd gsww 230c fff10
+/usr/sbin/ethphxcmd gsww 240c fff10
+
+#set console printk log level
+if [ -f /usr/local/fh/log_switch/console_redirect_log_enable ];then 
+	echo 8 > /proc/sys/kernel/printk
+	$FHBOX_PATH/console_redirect &
+else
+	echo 4 > /proc/sys/kernel/printk
+fi
+
+#wifi_dev=`cat /proc/bus/pci/devices | cut -f 2`
+wifi_dev=`cat /proc/bus/pci/devices | cut -f 2 | sed -n '3p'`
+
+if [ ! -z "$wifi_dev" ]
+then
+	/usr/share/usbmount/usbinit.sh &
+fi
+
+#set mount dir mode
+chmod 755 /mnt
+
+#set system time
+#date 111511302010
+#for ntp timezone
+echo "UTC-8:00" > /etc/TZ
+
+> /etc/resolv.conf
+> /etc/resolv_tr069.conf
+> /etc/resolv_voip.conf
+
+mkdir /var/ppp
+
+if [ ! -h /flash/cfg/app_conf/pppoe/resolv.conf ]
+then
+	rm /flash/cfg/app_conf/pppoe/resolv.conf
+	ln -s /var/ppp/resolv.conf /flash/cfg/app_conf/pppoe/resolv.conf
+fi
+> /flash/cfg/app_conf/pppoe/resolv.conf
+touch /var/udhcpd_lan.leases
+#qj mark
+#prepare for webgui env
+#if [ ! -d /var/WEB-GUI ]
+#then
+#	mkdir /var/WEB-GUI
+#	mkdir /var/WEB-GUI/session
+#	ln -s $WEB_PATH/js /var/WEB-GUI/js
+#	ln -s $WEB_PATH/css /var/WEB-GUI/css
+#	ln -s $WEB_PATH/fake /var/WEB-GUI/fake
+#	ln -s $WEB_PATH/html /var/WEB-GUI/html
+#	ln -s $WEB_PATH/image /var/WEB-GUI/image
+#	ln -s $WEB_PATH/branches /var/WEB-GUI/branches
+#	ln -s $WEB_PATH/languages /var/WEB-GUI/languages
+#	ln -s $WEB_PATH/cgi-bin /var/WEB-GUI/cgi-bin
+#	cp $WEB_PATH/lnk/* /var/WEB-GUI/.
+#fi
+
+#setcfgx /var/WEB-GUI/webgui.conf wireless_enable 0
+#setcfgx /var/WEB-GUI/webgui.conf Telinterface_number $TEL_NUM
+#setcfgx /var/WEB-GUI/webgui.conf Port_number 2
+#setcfgx /var/WEB-GUI/webgui.conf usb_number 1
+#qj mark end
+#DeviceType=HG6201T
+ARER_CODE=`getcfgx /data/tr069_control.conf area_code`
+#qj mark
+#if [ "$ponflag" = "EPON" ]
+#then
+#	DeviceType1=HG2
+#	setcfgx /var/WEB-GUI/webgui.conf PONMODE EPON
+#else
+#	DeviceType1=HG6
+#	setcfgx /var/WEB-GUI/webgui.conf PONMODE GPON
+#fi
+#qj mark end
+DeviceType4=T
+
+#echo ZL9641 > /proc/fh_ver_info/slic_id
+if [ "$chip_version" = "MT7526G" ]
+then
+	PCI_ID_5_7612_temp=`cat /proc/bus/pci/devices | cut -f 2 | grep 7612`
+	PCI_ID_5_7662_temp=`cat /proc/bus/pci/devices | cut -f 2 | grep 7662`
+	if [ "${PCI_ID_5_7662_temp}" = "14c37662" -o "${PCI_ID_5_7612_temp}" = "14c37612" ]; then
+		DeviceType2=82
+		DeviceType4=T-U
+#qj mark		setcfgx /var/WEB-GUI/webgui.conf wifi5g 1
+		echo "MT7526" > /var/CPU_TYPE
+	else
+		echo "5g is not exist"
+#qj mark		setcfgx /var/WEB-GUI/webgui.conf wifi5g 0
+		DeviceType2=20
+		echo "MT7526" > /var/CPU_TYPE
+	fi	
+#qj mark	setcfgx /var/WEB-GUI/webgui.conf Port_number 4
+else
+	DeviceType2=10
+#qj mark	setcfgx /var/WEB-GUI/webgui.conf wifi5g 0
+	echo "MT7526" > /var/CPU_TYPE
+fi
+
+if [ $TEL_NUM -ne 0 ]
+then
+	DeviceType3=1
+else
+	DeviceType3=0
+fi
+#qj mark
+#if [ ! -z $wifi_dev ]; then
+#	setcfgx /var/WEB-GUI/webgui.conf wireless_enable 1
+#fi
+#qj mark end
+DeviceType=${DeviceType1}${DeviceType2}${DeviceType3}${DeviceType4}
+#setcfgx /var/WEB-GUI/webgui.conf DeviceType "$DeviceType"
+
+#/usr/sbin/set_packet_default_pri > /dev/null &
+
+#reset factory(longlong reset)
+if [ $Province = "Shanghai" ] || [ $Province = "Hubei" ] || [ $Province = "Trunk" ]; then
+	if [ ! -f /flash/cfg/agentconf/factory_reset.conf ]
+	then
+		touch /flash/cfg/agentconf/factory_reset.conf
+		echo "long_push_reset=0" > /flash/cfg/agentconf/factory_reset.conf
+	fi
+fi
+
+if [ -f /rom/upgrade_dir/flag/upgrade_flag ]
+then
+	/rom/upgrade_dir/preconf/upgrade_before.sh
+fi
+
+#/usr/bin/lancc &
+
+###/rom/fhshell/misc_shell/misc_run.sh &
+
+###while :
+###do
+###	if [ -f /var/manager_finished ]
+###	then
+###		break
+###	fi
+###	if [ -f /var/agent_error_flag ]
+###	then
+###		exit
+###	fi
+###	sleep 1
+###done
+
+# if [ "$ponflag" != "EPON" ]
+# then
+	# $FHOMCI_RUN -M 1 -L 3 &
+# else
+	# fhoam -M 1 -L 3 &
+# fi
+#exit
+#full image upgrade
+if [ -f /data/upgrade_flag ]
+then
+	mount -o remount,rw /data
+	rm -rf /data/upgrade_flag
+	mount -o remount,ro /data
+	
+	if [ ! -f /flash/upgrade_fail ]
+	then
+		touch /flash/upgrade_succ
+	fi
+fi
+
+if [ -f /flash/upgrade_succ ]
+then
+	touch /var/upgrade_succ
+	rm -f /flash/upgrade_succ
+	/usr/local/fh/mf/AllLightOn.sh &
+elif [ -f /flash/upgrade_fail ]
+then
+	touch /var/upgrade_fail
+	rm -f /flash/upgrade_fail
+	/rom/fhshell/misc_shell/led_all_blk.sh &
+fi
+
+#echo 1 > /proc/tc3162/shutdown_powerled_Timer
+if [ ! -f /var/ledstatus.conf ]
+then
+	cp -f /rom/cfg/misc_conf/ledstatus.conf  /var/
+fi
+setcfgx /var/ledstatus.conf power_led "on"
+
+#/etc/gdbus.sh &
+if [ $Province = "Shanghai" ]; then
+	mpa_enable=`getcfgx $MPA_CONF enable`
+	if [ "x$mpa_enable" = "x1" ] 
+	then
+		$MPA_RUN > /dev/null &
+	fi
+fi
+
+touch /var/vpm_finished
+
+###if [ -f /usr/local/fh/log_switch/console_redirect_log_enable ];then 
+###	$WANCC_RUN -B &
+###else
+###	$WANCC_RUN &
+###fi
+
+#$QOSMODE_INIT &
+
+###$IGMP_INIT &
+
+###$IPV6_mode &
+
+#cp /flash/cfg/wlan_conf/apcfg /var/wlan/apcfg
+#cp /flash/cfg/wlan_conf/apcfg_5 /var/wlan/apcfg_5
+
+#Only start wlancfg, by xliao
+if [ ! -z $wifi_dev ]; then
+	#$WLAN_SHELL_PATH/wlan_start &
+	#insmod /lib/fhko/mt7603eap.ko
+	/usr/bin/wlancfg
+fi
+
+if [ $Province = "Anhui" -a "$DPI_PATH" != "" ]; then
+	#insmod /lib/fhko/dpi.ko
+	$DPI_PATH/dpi start &
+fi
+#sleep 10
+/usr/bin/loop &
+#$INIT_VLANBINDING &
+#sleep 2
+if [ "$ponflag" = "EPON" ]
+then
+	PONMac=`grep "PONMac=" $FACTORY_CONF | cut -d = -f 2`
+	# cli /home/cli/mpcp/start -v mac $PONMac
+	# cli /home/cli/hal/nni/nni_pon_map_add -v igr 0xfdff tcont 0
+else
+	GponSN=`grep "GponSN=" $FACTORY_CONF | cut -d = -f 2`
+	GPONPassWord=`grep "GPONPassWord=" $FACTORY_CONF | cut -d = -f 2`
+	# cli /home/cli/ploam/start -v sn ${GponSN}  pwd ${GPONPassWord}
+fi
+
+echo "loid=`getcfgx /flash/cfg/misc_conf/register.config_ok USERNAME`" > /var/loid.txt
+echo "password=`getcfgx /flash/cfg/misc_conf/register.config_ok USERID`" >> /var/loid.txt
+
+if [ "$ponflag" != "EPON" ]
+then
+	$FHOMCI_RUN -M 1 -L 3 &
+else
+	fhoam -M 1 -L 3 &
+fi
+
+###$START_PINGCONFIG &
+
+bobpoll &
+
+###Add for debug
+#/usr/bin/udhcpd /flash/cfg/app_conf/udhcpd/udhcpd_lan.conf &
+echo "root:hg2x0:0:0:root:/root:/bin/sh" > /var/tel_passwd
+echo "root:hg2x0:0:0:root:/root:/bin/sh" > /var/telWan_passwd
+
+
+
+#iptables -I INPUT ! -i br0 -p tcp --dport 23 -j DROP
+#iptables -I INPUT ! -i br0 -p tcp --dport 21 -j DROP
+#iptables -I INPUT ! -i br0 -p tcp --dport 80 -j DROP
+#iptables -I INPUT ! -i br0 -p udp --dport 54321 -j DROP
+
+br0_ip=`cat /flash/cfg/app_conf/udhcpd/udhcpd_lan.conf|grep router|grep option|cut -d "	" -f 3`
+br0_subnet=`cat /flash/cfg/app_conf/udhcpd/udhcpd_lan.conf|grep subnet|grep option|cut -d "	" -f 3`
+#callfhnetapi setbrsubnet $br0_ip $br0_subnet
+
+$SET_wan &
+if [ $Province = "Guangdong" ]; then
+	insmod /rom/fhlib/fhbr_ppp_snooping.ko
+	/usr/bin/autobppp_start &
+fi
+
+if [ $Province = "Sichuan" ]; then
+	/usr/bin/stbcheck &
+fi
+
+if [ -f /rom/felix/jamvm/bin/jamvm ]
+then
+	#start quickinstall
+	 
+	cd /usr/local
+	if [ ! -L classpath ]
+	then
+		ln -sf /rom/felix/classpath classpath
+		ln -sf /rom/felix/felix felix
+		ln -sf /rom/felix/jamvm jamvm
+	fi
+	
+	if [ ! -L sys_cplugin ]
+	then
+		ln -sf /rom/sys_cplugin sys_cplugin
+	fi
+	
+	if [ ! -d /opt/upt/apps/osgi ]
+	then
+		mkdir /opt/upt/apps/osgi
+	fi
+	
+	if [ ! -d /opt/upt/apps/CPlugin ]
+	then
+		mkdir /opt/upt/apps/CPlugin
+	fi
+	
+	mkdir -p /var/lock
+	
+	quickinstall & 
+
+	
+	mkdir /tmp/osgi/bundle -p
+	cd /tmp/osgi/
+	cp /usr/local/felix/bundle/*.jar bundle/
+	#sleep 1 #waiting 1s for copy
+	jamvm -Djavax.net.ssl.trustStore=/etc/keystore -Djavax.net.ssl.trustStorePassword=111111 -Dfile.encoding=utf8 -cp /usr/local/felix/bin/felix.jar:/usr/local/classpath/lib/classpath:/usr/local/classpath/share/classpath:/lib -Xms4M -Xmx10M -Xss256K -Xasyncgc -Xnocompact -Xcompactalways org/apache/felix/main/Main &
+else
+#insmod /rom/fhlib/maxnetdpi.ko
+#	/usr/bin/mem_superviser &
+#	/usr/bin/recvimg &
+#	/etc/saf.sh &
+	echo "App Framework Disabled."
+fi
+
+if [ ! -d /flash/ovsdb ]
+then
+	mkdir -p /flash/ovsdb
+	touch /flash/ovsdb/conf.fact
+fi
+
+
+if [ -f /usr/init_scripts/init_script.sh ] && [ -f /usr/ovs/sbin/ovsdb-server ]
+then
+	#prepare for voip fhtool
+	cp /rom/cfg/app_conf/voice/sip_cm_info /var/voip
+	cp /rom/cfg/app_conf/voice/sip_ip_info /var/voip
+	cd /usr/init_scripts
+	./init_script.sh &
+else
+	ifconfig eth0 192.168.1.1/24
+	telnetd -p 23
+fi
+

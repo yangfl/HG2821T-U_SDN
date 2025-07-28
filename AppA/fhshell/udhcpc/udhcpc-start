@@ -1,0 +1,58 @@
+#!/bin/sh
+
+#-----lqu modify 20120806
+COMMON_CONF=/etc/fh_common.conf
+UDHCPD_SCRIPTS=`grep "APP_SHELL_PATH_UDHCPC=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_PPPOE_WAITINGINTFADD=`grep "APP_SHELL_PATH_PPPOE_WAITINGINTFADD=" $COMMON_CONF | cut -d = -f 2 `
+PONAUTH_PATH=/var/phyauthstates
+
+#--------
+
+if [ $# == 1 ]; then
+	DEVICE=$1
+else
+	echo " Please input devicename"
+	exit
+fi	
+
+while :
+do
+	pon_status=`cat $PONAUTH_PATH`
+
+	if [ $pon_status = "1" ]
+	then
+		sleep 1
+		pon_status=`cat $PONAUTH_PATH`
+		if [ $pon_status = "1" ]
+		then
+			break
+		else
+			sleep 2
+		fi
+	else
+		sleep 2
+	fi 
+done
+
+while :
+do
+	if [ -f  /var/vpm_finished ]
+	then
+		echo " Start udhcpc......."
+		break
+	else
+		sleep 1
+	fi 
+done
+
+#lqu add 2012.5.23
+$APP_SHELL_PATH_PPPOE_WAITINGINTFADD ${DEVICE}
+
+	echo " Configuring via udhcpc"
+	ifconfig ${DEVICE} 0.0.0.0 up
+
+while [ 1 ]
+do	
+	udhcpc -f -n -i ${DEVICE} -s $UDHCPD_SCRIPTS/dhcp.script >/dev/null 2>/dev/null
+	sleep 10
+done

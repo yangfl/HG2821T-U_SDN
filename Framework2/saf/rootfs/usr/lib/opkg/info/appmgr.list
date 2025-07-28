@@ -1,0 +1,8 @@
+/usr/share/lxc/templates/lxc-rootapp
+/sbin/ctc-app.sh
+/usr/share/lxc/templates/lxc-essapp
+/usr/share/lxc/templates/lxc-app
+/etc/init.d/appmgr
+/usr/share/lxc/templates/lxc-rootess
+/etc/config/appmgr
+/sbin/appmgr

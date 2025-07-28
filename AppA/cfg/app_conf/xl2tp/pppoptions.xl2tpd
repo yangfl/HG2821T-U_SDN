@@ -1,0 +1,10 @@
+usepeerdns
+user "123"
+password "123"
+noauth
+proxyarp
+unit 10
+mtu 1400
+mru 1400
+linkname vpn_1
+nodefaultroute

@@ -1,0 +1,13 @@
+#/bin/sh
+
+if [ ! -f "/var/wancc_finished" ]; then
+    echo "loop is waiting for wancc finished ..."
+    sleep 10
+fi
+
+if [ ! -f "/var/wancc_finished" ]; then
+	echo "not found /var/wancc_finished, exit"
+	exit 1
+fi
+
+/usr/bin/loop &

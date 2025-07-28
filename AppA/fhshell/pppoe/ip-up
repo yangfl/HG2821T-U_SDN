@@ -1,0 +1,731 @@
+#!/bin/sh
+#!/bin/sh
+emuinfo_file=/var/pppoeemuinfo
+if [  -f $emuinfo_file ];then
+	setcfgx $emuinfo_file $2 $1
+	exit 0 
+fi
+COMMON_CONF=/etc/fh_common.conf
+APP_CONF_PATH_PPPOE_RESOLV=`grep "APP_CONF_PATH_PPPOE_RESOLV=" $COMMON_CONF | cut -d = -f 2 `
+MISC_SHELL_PATH_SETCFG=`grep "MISC_SHELL_PATH_SETCFG=" $COMMON_CONF | cut -d = -f 2 `
+MISC_SHELL_PATH_GETCFG=`grep "MISC_SHELL_PATH_GETCFG=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_PPPOE_SERVER_OPTIONS=`grep "APP_SHELL_PATH_PPPOE_SERVER_OPTIONS=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_DNS_DNSMASQ=`grep "APP_SHELL_PATH_DNS_DNSMASQ=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_UDHCPD_SHELL=`grep "APP_SHELL_PATH_UDHCPD_SHELL=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_PPPOE=`grep "APP_CONF_PATH_PPPOE=" $COMMON_CONF | cut -d = -f 2 `
+FHBOX_BIN=`grep "FHBOX_BIN_PATH=" $COMMON_CONF | cut -d = -f 2 `
+FILE_HGCXML_CONF=`grep "APP_CONF_PATH_TR069_HGCXML=" $COMMON_CONF | cut -d = -f 2 `
+SEND=$FHBOX_BIN/send
+ROUTE_PATH=/var/internet_route.info
+fpath=/var/run
+. /var/WEB-GUI/hgcxml.conf
+
+
+
+interface_name="$1"
+tty_device="$2"
+speed="$3"
+local_IP_address="$4"
+remote_IP_address="$5"
+ipparam="$6"
+RESOLV_CONF="/var/resolv.conf"
+RESOLV_INTERFACE_INTERNET_CONF="/var/resolv_${tty_device}_internet.conf"
+RESOLV_INTERFACE_OTHER_SPE_CONF="/var/resolv_${tty_device}_other_spe.conf"
+
+RESOLV_OTHER_SPE_CONF="/var/resolv_other_spe.conf"
+RESOLV_VPN_CONF="/var/resolv_vpn.conf"
+
+#added by tzw at 2011.06.01 begin
+STR=`grep $tty_device /var/curPppStatus.log`
+
+TYPE_VPN=`echo "$LINKNAME" | grep "^vpn_"`
+if [ -n "${TYPE_VPN}" ]; then
+	VPN_IFINFO_CONF="/var/vpdn/ifinfo_${LINKNAME}"
+	echo WANIP=${local_IP_address} > $VPN_IFINFO_CONF
+	echo VPNDNS1=${DNS1} >> $VPN_IFINFO_CONF
+	echo VPNDNS2=${DNS2} >> $VPN_IFINFO_CONF
+	
+	if grep ${DNS1} RESOLV_VPN_CONF
+	then
+		echo "The dns info is existed!!!"
+	else
+		echo adding dns ${DNS1}
+		echo nameserver ${DNS1} >> $RESOLV_VPN_CONF
+	fi
+	
+	if grep ${DNS2} RESOLV_VPN_CONF
+	then
+		echo "The dns info is existed!!!"
+	else
+		echo adding dns ${DNS2}
+		echo nameserver ${DNS2} >> $RESOLV_VPN_CONF
+	fi
+	
+#	killall dnsmasq.sh
+#	killall dnsmasq
+#	$APP_SHELL_PATH_DNS_DNSMASQ &
+	exit 0
+fi
+
+if [ "$LINKNAME" == "test" ]; then
+> $RESOLV_CONF
+echo nameserver ${DNS1} >> $RESOLV_CONF
+echo nameserver ${DNS2} >> $RESOLV_CONF
+# killall dnsmasq.sh
+# killall dnsmasq
+# $APP_SHELL_PATH_DNS_DNSMASQ &
+touch /var/ppp_ok
+exit 0
+fi
+
+if [ "x$STR" != "x" ]
+ then 
+   setcfgx /var/curPppStatus.log $tty_device ERROR_NONE
+fi
+
+if [ "x$STR" == "x" ]
+ then
+ echo "$tty_device=ERROR_NONE" >> /var/curPppStatus.log
+fi
+
+
+#added by tzw at 2011.06.01 end
+
+
+#added by xsl
+	for i in 1 2 3 4 5 6 7 8
+	do
+		echo "link vid is:"$i
+		eval vid0="\${IGD_WAND_1_WANCD_${i}_XCTCOMWANELC_VLANIDMark}"
+		vid=`$FHBOX_BIN/inter_web get $vid0` 
+
+		if [ "$vid" != "NULL&" ]                                                        
+			then
+			if [ "x$vid" = "x0&" ]
+			then
+				vid="4093&"
+			fi
+			device=pon0.$vid
+			eval ppp_enable0="\${IGD_WAND_1_WANCD_${i}_WANPPPC_1_Enable}"
+			ppp_enable=`$FHBOX_BIN/inter_web get $ppp_enable0`
+			if [ "x$device" == "x$tty_device&" ] && [ "x$ppp_enable" == "x1&" ]
+				then
+				for j in 1 2
+				do
+					eval ConnectionType_seq="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_ConnectionType}"
+					ConnectionType=`$FHBOX_BIN/inter_web get $ConnectionType_seq`
+					eval mode_seq="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_IPMode}"
+					mode=`$FHBOX_BIN/inter_web get $mode_seq`
+					eval NATEnabled_seq="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_NATEnabled}"
+					natEnable=`$FHBOX_BIN/inter_web get $NATEnabled_seq`
+					echo "tzw natEnable=$natEnable seq=$NATEnabled_seq"  >> /var/xsl
+					if [ $ConnectionType = "IP_Routed&" ] && [ $mode != "2&" ] && [ $natEnable = "1&" ]
+						then
+							iptables -t nat -A POSTROUTING -o ${interface_name} -j MASQUERADE
+							#echo "nat is up" >>/var/xsl
+							if [ "$LINKNAME" == "all" -o "$LINKNAME" == "internet" -o "$LINKNAME" == "voip_internet" -o "$LINKNAME" == "tr069_internet" ];then
+							route add default gw ${remote_IP_address} dev ${interface_name}
+							fi
+						break
+					fi
+				done
+			fi
+		fi
+	done
+#end by xsl
+
+if [ "$LINKNAME" == "all" ];then
+	FILE="${fpath}/tr069_${tty_device}_${interface_name}.info"
+	if [ -e $FILE ];then
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	else
+		touch $FILE
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	fi
+
+	FILE="${fpath}/voip_${tty_device}_${interface_name}.info"
+	if [ -e $FILE ];then
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	else
+		touch $FILE
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	fi
+	#mv /etc/resolv.conf /etc/resolv.conf.bak	
+#	cp $APP_CONF_PATH_PPPOE_RESOLV /var/resolv.conf
+
+
+
+	cp $APP_CONF_PATH_PPPOE_RESOLV  /var/resolv_tr069.conf
+	cp $APP_CONF_PATH_PPPOE_RESOLV  /var/resolv_voip.conf
+
+	if [ ! -z  ${DNS2} ]
+	then
+		if [ "${DNS1}" == "${DNS1}" ]
+		then
+			/usr/bin/internet_ipup mgtdns MgtDNS "${DNS1}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${DNS1}"
+		else
+			ALLDNSES="${DNS1},${DNS2}"
+			/usr/bin/internet_ipup mgtdns MgtDNS "${ALLDNSES}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${ALLDNSES}"
+		fi
+	else
+		/usr/bin/internet_ipup mgtdns MgtDNS "${DNS1}" 
+		$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${DNS1}"
+	fi
+
+	/usr/bin/internet_ipup ipup CTMgtIPAddress "${local_IP_address}" 
+	$MISC_SHELL_PATH_SETCFG /var/middleware.conf CTMgtIPAddress "${local_IP_address}"
+
+	#addded for internet
+	xunhuanlist="1 2 3 4"
+	for xunhuan in ${xunhuanlist}
+	do
+		INTERNETCONN="WANINTERNETCONN${xunhuan}"
+		CONNVALUE="`$MISC_SHELL_PATH_GETCFG /var/middleware.conf ${INTERNETCONN}`"
+		if [ "${CONNVALUE}" == "${tty_device}" ]
+		then
+			INTERNETIPADDR="CTUserIPAddress${xunhuan}"
+			/usr/bin/internet_ipup ipup ${INTERNETIPADDR} "${local_IP_address}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf ${INTERNETIPADDR} "${local_IP_address}"
+		fi
+	done
+
+fi
+
+if [ "$LINKNAME" == "voip_tr069" ];then
+	FILE="${fpath}/tr069_${tty_device}_${interface_name}.info"
+	if [ -e $FILE ];then
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	else
+		touch $FILE
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	fi
+
+	FILE="${fpath}/voip_${tty_device}_${interface_name}.info"
+	if [ -e $FILE ];then
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	else
+		touch $FILE
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	fi
+	cp $APP_CONF_PATH_PPPOE_RESOLV /var/resolv_tr069.conf
+	cp $APP_CONF_PATH_PPPOE_RESOLV /var/resolv_voip.conf
+
+	if [ ! -z  ${DNS2} ]
+	then
+		if [ "${DNS1}" == "${DNS1}" ]
+		then
+			internet_ipup mgtdns MgtDNS "${DNS1}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${DNS1}"
+		else
+			ALLDNSES="${DNS1},${DNS2}"
+			internet_ipup mgtdns MgtDNS "${ALLDNSES}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${ALLDNSES}"
+		fi
+	else
+		internet_ipup mgtdns MgtDNS "${DNS1}" 
+		$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${DNS1}"
+	fi
+
+	/usr/bin/internet_ipup ipup CTMgtIPAddress "${local_IP_address}" 
+	$MISC_SHELL_PATH_SETCFG /var/middleware.conf CTMgtIPAddress "${local_IP_address}"
+
+fi
+
+if [ "$LINKNAME" == "voip_internet" -o "$LINKNAME" == "voip" ];then
+	FILE="${fpath}/voip_${tty_device}_${interface_name}.info"
+	if [ -e $FILE ];then
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	else
+		touch $FILE
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	fi
+	cp $APP_CONF_PATH_PPPOE_RESOLV /var/resolv_voip.conf
+	
+	#addded for internet
+	xunhuanlist="1 2 3 4"
+	for xunhuan in ${xunhuanlist}
+	do
+		INTERNETCONN="WANINTERNETCONN${xunhuan}"
+		CONNVALUE="`$MISC_SHELL_PATH_GETCFG /var/middleware.conf ${INTERNETCONN}`"
+		if [ "${CONNVALUE}" == "${tty_device}" ]
+		then
+			INTERNETIPADDR="CTUserIPAddress${xunhuan}"
+			/usr/bin/internet_ipup ipup ${INTERNETIPADDR} "${local_IP_address}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf ${INTERNETIPADDR} "${local_IP_address}"
+		fi
+	done
+	
+fi
+
+if [ "$LINKNAME" == "tr069_internet" -o "$LINKNAME" == "tr069" ];then
+	FILE="${fpath}/tr069_${tty_device}_${interface_name}.info"
+	if [ -e $FILE ];then
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	else
+		touch $FILE
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	fi
+	cp $APP_CONF_PATH_PPPOE_RESOLV /var/resolv_tr069.conf
+
+	#added for mgt wanconn
+	if [ ! -z  ${DNS2} ]
+	then
+		if [ "${DNS1}" == "${DNS1}" ]
+		then
+			/usr/bin/internet_ipup mgtdns MgtDNS "${DNS1}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${DNS1}"
+		else
+			ALLDNSES="${DNS1},${DNS2}"
+			/usr/bin/internet_ipup mgtdns MgtDNS "${ALLDNSES}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${ALLDNSES}"
+		fi
+	else
+		/usr/bin/internet_ipup mgtdns MgtDNS "${DNS1}" 
+		$MISC_SHELL_PATH_SETCFG /var/middleware.conf MgtDNS "${DNS1}"
+	fi
+
+	/usr/bin/internet_ipup ipup CTMgtIPAddress "${local_IP_address}" 
+	$MISC_SHELL_PATH_SETCFG /var/middleware.conf CTMgtIPAddress "${local_IP_address}"
+
+	#addded for internet
+	xunhuanlist="1 2 3 4"
+	for xunhuan in ${xunhuanlist}
+	do
+		INTERNETCONN="WANINTERNETCONN${xunhuan}"
+		CONNVALUE="`$MISC_SHELL_PATH_GETCFG /var/middleware.conf ${INTERNETCONN}`"
+		if [ "${CONNVALUE}" == "${tty_device}" ]
+		then
+			INTERNETIPADDR="CTUserIPAddress${xunhuan}"
+			/usr/bin/internet_ipup ipup ${INTERNETIPADDR} "${local_IP_address}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf ${INTERNETIPADDR} "${local_IP_address}"
+		fi
+	done
+fi
+
+if [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ];then
+	FILE="${fpath}/${LINKNAME}_${tty_device}_${interface_name}.info"
+	if [ -e $FILE ];then
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	else
+		touch $FILE
+		echo "interface_name=${interface_name}" > $FILE
+		echo "tty_device=${tty_device}" >> $FILE
+		echo "speed=${speed}" >> $FILE
+		echo "local_IP_address=${local_IP_address}" >> $FILE
+		echo "remote_IP_address=${remote_IP_address}" >> $FILE
+		echo "ipparam=${ipparam}" >> $FILE
+		echo "dns1=${DNS1}" >> $FILE
+		echo "dns2=${DNS2}" >> $FILE
+	fi
+	if [ "$LINKNAME" == "internet" ];then
+	#addded for internet
+	xunhuanlist="1 2 3 4"
+	for xunhuan in ${xunhuanlist}
+	do
+		INTERNETCONN="WANINTERNETCONN${xunhuan}"
+		CONNVALUE="`$MISC_SHELL_PATH_GETCFG /var/middleware.conf ${INTERNETCONN}`"
+		if [ "${CONNVALUE}" == "${tty_device}" ]
+		then
+			INTERNETIPADDR="CTUserIPAddress${xunhuan}"
+			/usr/bin/internet_ipup ipup ${INTERNETIPADDR} "${local_IP_address}" 
+			$MISC_SHELL_PATH_SETCFG /var/middleware.conf ${INTERNETIPADDR} "${local_IP_address}"
+		fi
+	done
+	fi
+fi
+
+	
+touch $fpath/file_accessible
+notify [$tty_device#$interface_name#$local_IP_address#${remote_IP_address}#${DNS1}#${DNS2}#]
+	
+#update resolv.conf
+if [ "$LINKNAME" == "all" -o "$LINKNAME" == "internet" -o "$LINKNAME" == "voip_internet" -o "$LINKNAME" == "tr069_internet" ];then
+if [ -f "/rom/fhshell/misc_shell/l3_forward.sh" ] 
+	then
+		/rom/fhshell/misc_shell/l3_forward.sh &
+	fi
+	if [ -f ${ROUTE_PATH} ]
+	then 
+			IF_INTERTNET=`cat $ROUTE_PATH |grep ${tty_device}`
+			if [ ! -z "${IF_INTERTNET}" ]
+			then
+				$MISC_SHELL_PATH_SETCFG $ROUTE_PATH ${tty_device}_dns1 ${DNS1}
+				$MISC_SHELL_PATH_SETCFG $ROUTE_PATH ${tty_device}_dns2 ${DNS2}
+			fi
+	fi
+	
+
+
+
+	#mv /etc/resolv.conf /etc/resolv.conf.bak
+#mjqiao 20120131 write dns to resolv.conf
+#	cp $APP_CONF_PATH_PPPOE_RESOLV /var/resolv.conf
+if [ -f /var/resolv.conf ]
+then
+	cat /var/resolv.conf >/var/resolv.conf.bak
+	> $RESOLV_CONF
+	if [ "x$DNS1" != "x" ]
+	then
+		if grep ${DNS1} /var/resolv.conf.bak
+		then
+			echo "The dns info is existed!!!"
+		else
+			echo adding dns ${DNS1}
+			echo nameserver ${DNS1} >> $RESOLV_CONF
+		fi
+	fi
+
+	if [ "x$DNS2" != "x" ]
+		then
+
+	if grep ${DNS2} /var/resolv.conf.bak
+	then
+		echo "The dns info is existed!!!"
+	else
+		echo adding dns ${DNS2}
+		echo nameserver ${DNS2} >> $RESOLV_CONF
+	fi
+	fi
+	cat /var/resolv.conf.bak >>/var/resolv.conf
+else
+	> $RESOLV_CONF
+	if [ "x$DNS1" != "x" ]
+	then
+		if grep ${DNS1} /var/resolv.conf
+		then
+			echo "The dns info is existed!!!"
+		else
+			echo adding dns ${DNS1}
+			echo nameserver ${DNS1} >> $RESOLV_CONF
+		fi
+	fi
+	if [ "x$DNS2" != "x" ]
+	then
+		if grep ${DNS2} /var/resolv.conf
+		then
+			echo "The dns info is existed!!!"
+		else
+		echo adding dns ${DNS2}
+		echo nameserver ${DNS2} >> $RESOLV_CONF
+		fi
+	fi
+fi
+	cat /var/resolv.conf |grep :>/var/resolv.conf.v6
+	cat /var/resolv.conf |grep -v :>/var/resolv.conf.v4
+	> $RESOLV_CONF
+	cat /var/resolv.conf.v6 >>/var/resolv.conf
+	cat /var/resolv.conf.v4 >>/var/resolv.conf
+# mjqiao end
+
+	echo nameserver ${DNS1} > $RESOLV_INTERFACE_INTERNET_CONF
+	echo nameserver ${DNS2} >> $RESOLV_INTERFACE_INTERNET_CONF
+
+
+#	killall dnsmasq.sh
+#	killall dnsmasq
+#	$APP_SHELL_PATH_DNS_DNSMASQ &
+fi
+
+if [ "$LINKNAME" == "other"   -o "$LINKNAME" == "special_service_1"  -o "$LINKNAME" == "special_service_2"   -o "$LINKNAME" == "special_service_3" -o "$LINKNAME" == "special_service_4" ];then
+if [ -f "/rom/fhshell/misc_shell/l3_forward.sh" ] 
+	then
+		/rom/fhshell/misc_shell/l3_forward.sh &
+	fi
+	if [ -f ${ROUTE_PATH} ]
+	then 
+			IF_INTERTNET=`cat $ROUTE_PATH |grep ${tty_device}`
+			if [ ! -z "${IF_INTERTNET}" ]
+			then
+				$MISC_SHELL_PATH_SETCFG $ROUTE_PATH ${tty_device}_dns1 ${DNS1}
+				$MISC_SHELL_PATH_SETCFG $ROUTE_PATH ${tty_device}_dns2 ${DNS2}
+			fi
+	fi
+
+	if grep ${DNS1} RESOLV_OTHER_SPE_CONF
+	then
+		echo "The dns info is existed!!!"
+	else
+		echo adding dns ${DNS1}
+		echo nameserver ${DNS1} >> $RESOLV_OTHER_SPE_CONF
+	fi
+	
+	if grep ${DNS2} RESOLV_OTHER_SPE_CONF
+	then
+		echo "The dns info is existed!!!"
+	else
+		echo adding dns ${DNS2}
+		echo nameserver ${DNS2} >> $RESOLV_OTHER_SPE_CONF
+	fi
+
+	echo nameserver ${DNS1} > $RESOLV_INTERFACE_OTHER_SPE_CONF
+	echo nameserver ${DNS2} >> $RESOLV_INTERFACE_OTHER_SPE_CONF
+	
+#	killall dnsmasq.sh
+#	killall dnsmasq
+#	$APP_SHELL_PATH_DNS_DNSMASQ &
+fi
+
+echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" >> /var/curPppStatus.log
+setcfgx $APP_SHELL_PATH_PPPOE_SERVER_OPTIONS ms-dns ${DNS1}
+
+#add by caoting
+#生成ipv4的pon0.xx与ppp的对应关系的文件
+#$1=ppp,$2=pon0.xx
+#file likes: pon0.xx=ppp1
+file_wan_ppp="/var/run/wan4_ppp.conf"
+emuinfo_file=/var/pppoeemuinfo
+if [ -f $emuinfo_file ];then
+	setcfgx $emuinfo_file $2 $1
+else
+	if [ -f $file_wan_ppp ]
+	then
+	wan_ppp=`cat $file_wan_ppp | sed "/$2/d"`
+	echo "$wan_ppp">$fpath
+	setcfgx $file_wan_ppp $2 $1
+	else
+	touch $file_wan_ppp
+	setcfgx $file_wan_ppp $2 $1
+	fi
+fi
+#add by caoting end
+
+#add by mjqiao for double route 20130116
+if [ -f $ROUTE_PATH ]
+then
+	IF_INTERTNET=`cat $ROUTE_PATH |grep ${tty_device}`
+	if [ ! -z "${IF_INTERTNET}" ]
+	then
+portmap=""
+for i in 1 2 3 4 5 6 7 8 9 10 11 12
+do
+	interface_conf=`getcfgx ${ROUTE_PATH} LAN$i`
+	#echo "1 $interface_conf 2 ${tty_device} $i">>/var/aa
+	if [ ${interface_conf} = ${tty_device} ]
+	then
+		portmap="1"${portmap}
+	else
+		portmap="0"${portmap}
+	fi
+done
+
+
+#echo " add ${interface_name} ${ip} "255.255.255.255" ${router} ${DNS1} ${DNS2} ${portmap}">>/var/aa
+PR_enable=`getcfgx ${ROUTE_PATH} ${tty_device}_flag`
+if [ "x$PR_enable" != "x1" ]
+then
+
+#	echo "/rom/fhshell/misc_shell/policy_route.sh add ${interface_name} ${local_IP_address} "255.255.255.255" ${remote_IP_address} ${DNS1} ${DNS2} ${portmap}">>/var/aa
+	setcfgx $ROUTE_PATH ${tty_device}_flag 1
+	setcfgx $ROUTE_PATH ${tty_device}_pppoe_name ${interface_name}
+	/rom/fhshell/misc_shell/policy_route.sh add ${interface_name} ${local_IP_address} "255.255.255.255" ${remote_IP_address} ${DNS1} ${DNS2} ${portmap}
+fi
+fi
+fi
+#end by mjqiao 20130116
+# for upnp there is not miniupnp mjqiao
+if [ -f "/var/miniupnpd_run.sh" ];then
+	MINIUPNPD="/usr/bin/miniupnpd"
+	MINIUPNPD_FILE="/etc/miniupnpd.conf"
+	if [ "$LINKNAME" == "all" -o "$LINKNAME" == "internet" ];then
+		if [ -e $MINIUPNPD -a -w $MINIUPNPD_FILE ];then
+			killall 	$MINIUPNPD
+			setcfgx ${MINIUPNPD_FILE} ext_ifname ${interface_name}
+			$MINIUPNPD -f $MINIUPNPD_FILE
+		fi
+	fi
+fi
+
+
+
+/rom/fhshell/misc_shell/ipforward.sh del ${tty_device}
+
+
+/rom/fhshell/misc_shell/ipforward.sh add ${tty_device} ${remote_IP_address}
+
+
+#udhcpd
+if [ "$LINKNAME" == "all" -o "$LINKNAME" == "internet" -o "$LINKNAME" == "voip_internet" -o "$LINKNAME" == "tr069_internet" ];then
+	#killall udhcpd
+	$APP_SHELL_PATH_UDHCPD_SHELL &
+	remotemac=`cat /proc/net/pppoe | grep $tty_device | awk -F " " '{print $2}'`
+	if [ "${remotemac}" == "" ]
+	then
+		echo "no ${tty_device} find"
+	else
+		arpctrl add ${remote_IP_address} ${remotemac}
+	fi
+	#lqu added to zhouhaiping 2013-08-15 
+UPTIME=`cat /proc/uptime | cut -d " " -f 1`
+echo "TIME=$UPTIME" > /var/pppoe_duration_time
+
+
+
+
+## 添加IGMPProxy的判断并启动
+#	IGMPProxyEnable=`$FHBOX_BIN/inter_web get $IGD_S_XCTCOMIPTV_ProxyEnable`
+#	if [ $IGMPProxyEnable = "1&" ]
+#		then
+#			killall igmpproxy_ppp.sh
+#			killall igmpproxy
+#			echo "quickleave" > /var/igmpproxy.conf
+#			echo "phyint $interface_name upstream ratelimit 0" >> /var/igmpproxy.conf
+#			echo "phyint br0 downstream ratelimit 0" >> /var/igmpproxy.conf
+#			echo -e '\n' >> /var/igmpproxy.conf 
+#			igmpproxy -d -c /var/igmpproxy.conf &
+#	fi
+##
+fi
+
+##added by zoug,for igmpproxy
+UPSTREAM_PATH=/var/upstreamwan.conf
+interface_upstream=`getcfgx $UPSTREAM_PATH upstreamwan`
+
+
+if [ ${interface_upstream} = ${tty_device} ]                    
+then                     
+	IGMPProxyEnable=`$FHBOX_BIN/inter_web get $IGD_S_XCTCOMIPTV_ProxyEnable`
+	if [ $IGMPProxyEnable = "1&" ]
+		then
+
+		setcfgx $UPSTREAM_PATH proxyinterface ${interface_name}
+		/var/igmpproxy.sh &
+		
+	fi
+fi     
+
+
+#modify bl23x8 subnet
+vidflag=0
+#echo  $tty_device | grep . || vidflag=0 
+i=0
+while :
+do
+	if [ ${i} -gt 8 ]
+	then
+		break
+	fi
+	nofindflag=0
+	wandevname=wan${i}
+	echo $tty_device | grep $wandevname || nofindflag=1
+	if  [ $nofindflag == 1 ]
+	then
+		i=$((i+1)) 
+		continue
+	else
+		break
+	fi
+
+done
+
+if [ $nofindflag == 0 ]
+then
+	if [ $tty_device == $wandevname ]
+	then
+		vidflag=0
+	else
+		vidflag=1
+	fi
+	subnetid=$i
+	sessionid=`cat /proc/net/pppoe | grep $tty_device | head -n 1 | awk -F " " '{print $1}'`
+	if [ -z $sessionid ]
+	then
+		exit 0
+	fi
+
+	[ -f /var/ipupdebug ] || touch /var/ipupdebug
+	echo "$subnetid ${local_IP_address} $sessionid" >> /var/ipupdebug
+	msubnet $subnetid ${local_IP_address} $sessionid 
+fi

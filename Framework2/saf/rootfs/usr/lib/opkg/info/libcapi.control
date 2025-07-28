@@ -1,0 +1,10 @@
+Package: libcapi
+Version: R1762
+Depends: libc, glib2
+Source: package/upointech/capi
+Section: base
+Essential: yes
+Maintainer: Upointech
+Architecture: mt7526
+Installed-Size: 59792
+Description:  dbus c-api for smart gateway device

@@ -1,0 +1,735 @@
+#!/bin/sh
+#
+# ipv6-up
+#
+# Called by pppd after IPV6CP/up was finished
+#
+# This file should not be modified -- make local changes to
+# /etc/ppp/ipv6-up.local instead
+#
+# Taken from:
+# (P) & (C) 2001-2006 by Peter Bieringer <pb@bieringer.de>
+#
+#  You will find more information on the initscripts-ipv6 homepage at
+#   http://www.deepspace6.net/projects/initscripts-ipv6.html
+#
+# RHL integration assistance by Pekka Savola <pekkas@netcore.fi>
+#
+# Calling parameters:
+#  $1: interface name
+#  $6: logical interface name (set by pppd option ipparam)
+#
+#
+# Version: 2006-08-02
+#
+# Uses following information from "/etc/sysconfig/network":
+#  NETWORKING_IPV6=yes|no: controls IPv6 initialization (global setting)
+#  IPV6_DEFAULTDEV=<device>: controls default route (optional)
+#
+# Uses following information from "/etc/sysconfig/network-scripts/ifcfg-$1":
+#  IPV6INIT=yes|no: controls IPv6 configuration for this interface
+#  IPV6ADDR=<IPv6 address>[/<prefix length>]: specify primary static IPv6 address
+#  IPV6ADDR_SECONDARIES="<IPv6 address>[/<prefix length>] ..." (optional)
+#  IPV6_MTU=<MTU for IPv6>: controls IPv6 MTU for this link (optional)
+#
+echo 0 > /proc/sys/net/ipv6/conf/$1/forwarding
+COMMON_CONF=/etc/fh_common.conf
+APP_CONF_PATH_DHCPV6_STATELESS=`grep "APP_CONF_PATH_DHCPV6_STATELESS=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_DHCPV6_PD=`grep "APP_CONF_PATH_DHCPV6_PD=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_DHCPV6_NA=`grep "APP_CONF_PATH_DHCPV6_NA=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_DHCPV6_NAPD=`grep "APP_CONF_PATH_DHCPV6_NAPD=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_DHCPV6_PDAFTR=`grep "APP_CONF_PATH_DHCPV6_PDAFTR=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_DHCPV6_NAAFTR=`grep "APP_CONF_PATH_DHCPV6_NAAFTR=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_DHCPV6_NAPDAFTR=`grep "APP_CONF_PATH_DHCPV6_NAPDAFTR=" $COMMON_CONF | cut -d = -f 2 `
+APP_PATH_DHCP6=`grep "APP_SHELL_PATH_DHCPV6=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_PPPOE=`grep "APP_CONF_PATH_PPPOE=" $COMMON_CONF | cut -d = -f 2 `
+APP_CONF_PATH_TR069_HGCXML=`grep "APP_CONF_PATH_TR069_HGCXML=" $COMMON_CONF | cut -d = -f 2 `
+FHBOX_BIN=`grep "FHBOX_BIN_PATH" $COMMON_CONF | cut -d = -f 2 `
+MISC_SHELL_PATH_GETCFG=`grep "MISC_SHELL_PATH_GETCFG=" $COMMON_CONF | cut -d = -f 2 `
+emuinfo_file=/var/pppoeemuinfo6
+APP_PATH_DHCP6C=${APP_PATH_DHCP6}/dhcp6c_start
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+export PATH
+. /var/WEB-GUI/hgcxml.conf
+fpath=/var/run/wan_ppp.conf
+interface_name="$1"     #ppp0接口
+tty_device="$2"         #wan0.100这样的接口
+speed="$3"
+local_IP_address="$4"
+remote_IP_address="$5"
+ipparam="$6"
+#wan_ppp=APP_CONF_PATH_PPPOE"/etc/ppp/wan_ppp.conf"              #cf
+#config_File_name="/etc/ipv6_wan.conf"        #wan连接配置文件
+flag=""                                      #获取地址 获取前缀 1表示生效 0表示不生效
+logFile="/var/pppoe_ipv6_up_proc.log"        #此脚本调用日志
+#echo "$2=$1" >>$APP_CONF_PATH_PPPOE/wan_ppp.conf  
+                   #c
+
+if [ -f $emuinfo_file ];then
+	setcfgx $emuinfo_file $2 $1 #mjqiao get ppp0 for pon0.xxx
+	setcfgx $emuinfo_file "WANDefaultIPv6Gateway" $remote_IP_address
+	exit 0
+else
+	if [ -f $fpath ]
+	then
+	wan_ppp=`cat $fpath | sed "/$2/d"`
+	echo "$wan_ppp">$fpath
+	setcfgx $fpath $2 $1 #mjqiao get ppp0 for pon0.xxx
+	else
+	touch $fpath
+	setcfgx $fpath $2 $1 #mjqiao get ppp0 for pon0.xxx
+	fi
+fi
+echo "tty_device is:"$tty_device > $logFile
+echo "link type is:"$LINKNAME >> $logFile
+vid=`echo $tty_device |cut -d . -f 2`
+if [ "$LINKNAME" == "all" ] || [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "voip_internet" ] || [ "$LINKNAME" == "tr069_internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ]
+then
+	echo INTERFACE_NAME=$interface_name > /var/avalanche_info
+	echo INTERFACE_VLAN=$vid >> /var/avalanche_info
+	#lqu added to zhouhaiping 2013-08-15 
+UPTIME=`cat /proc/uptime | cut -d " " -f 1`
+echo "TIME=$UPTIME" > /var/pppoe_duration_time
+fi
+
+for i in 1 2 3 4 5 6 7 8
+do
+echo "link vidmmmmmmmmmmm is:"$i >> $logFile 
+eval vid0="\${IGD_WAND_1_WANCD_${i}_XCTCOMWANELC_VLANIDMark}"
+vid=`$FHBOX_BIN/inter_web get $vid0`
+echo "link vid is:"$vid >> $logFile
+echo "link vidnnn is:"$i >> $logFile
+if [ "$vid" != "NULL&" ]                                                        
+  then
+	echo "link vid2 is:"$vid >> $logFile
+	if [ "x$vid" = "x0&" ]
+	then
+		vid="4093&"
+	fi
+	device=pon0.$vid
+	eval ppp_enable0="\${IGD_WAND_1_WANCD_${i}_WANPPPC_1_Enable}"
+	ppp_enable=`$FHBOX_BIN/inter_web get $ppp_enable0`
+	echo "lqulqulqu:$ppp_enable" >> $logFile
+    if [ "x$device" == "x$tty_device&" ] && [ "x$ppp_enable" == "x1&" ]
+    then
+			tempFlag=route_nok
+			for j in 1 2
+			do
+			eval ConnectionType_seq="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_ConnectionType}"
+			ConnectionType=`inter_web get $ConnectionType_seq`
+			eval mode_seq="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_IPMode}"
+			mode=`inter_web get $mode_seq`
+				if [ $ConnectionType = "IP_Routed&" ] && [ $mode != "1&" ]
+				then
+						tempFlag=route_ok
+							## add support for ds-lite ###
+						eval WAN_DSLITE_ENABLE_FLAG0="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_Dslite_Enable}"
+						 WAN_DSLITE_ENABLE_FLAG=`$FHBOX_BIN/inter_web get $WAN_DSLITE_ENABLE_FLAG0`
+						 echo "WAN_DSLITE_ENABLE_FLAG=$WAN_DSLITE_ENABLE_FLAG" >> $logFile
+						 DSLITE_ENABLE=`echo $WAN_DSLITE_ENABLE_FLAG |cut -c 1`
+						 eval WAN_AFTR_MODE_FLAG0="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_AftrMode}"
+					WAN_AFTR_MODE_FLAG=`$FHBOX_BIN/inter_web get $WAN_AFTR_MODE_FLAG0`
+					#`$FHBOX_BIN/inter_web get $WAN_AFTR_MODE_FLAG0`for jiangxi dslite aftr change  Internet slow 
+					echo "WAN_AFTR_MODE_FLAG=$WAN_AFTR_MODE_FLAG" >> $logFile
+					eval WAN_AFTR_FLAG0="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_Aftr}"
+					WAN_AFTR_FLAG=`$FHBOX_BIN/inter_web get $WAN_AFTR_FLAG0`
+					echo "WAN_AFTR_FLAG=$WAN_AFTR_FLAG" >> $logFile
+					## add support for ds-lite end ####
+					eval ipv6_gain_addr0="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_IPv6IPAddressOrigin}"
+					eval ipv6_PDEnabled0="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_IPv6PrefixDelegationEnabled}"
+
+						ipv6_gain_addr=`$FHBOX_BIN/inter_web get $ipv6_gain_addr0`
+						ipv6_PDEnabled=`$FHBOX_BIN/inter_web get $ipv6_PDEnabled0`
+
+					echo "link ipv6_gain_addr is:"$ipv6_gain_addr >> $logFile
+					echo "link ipv6_PDEnabled is:"$ipv6_PDEnabled >> $logFile
+					eval Mflag="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_FIB_COM_MFlag}"
+					eval WAN_gw_xml="\${IGD_WAND_1_WANCD_${i}_WANPPPC_${j}_X_CT_COM_DefaultIPv6Gateway}"
+					
+					if [ -f $emuinfo_file ];then
+						setcfgx $emuinfo_file "WANDefaultIPv6Gateway" $remote_IP_address
+					else
+						$FHBOX_BIN/inter_web set $WAN_gw_xml $remote_IP_address
+					fi
+					break
+				fi
+			done
+		if [ "$tempFlag" == "route_nok" ]
+		then
+			continue
+		fi
+			if [ "$ipv6_gain_addr" == "DHCPv6&" ]; then
+			while [ 1 ]
+			do
+				if [ -f /var/ra_${interface_name}.msg.flag ]; then
+					#echo "ra.msg.flag_found" >> $logFile
+					break
+				fi 
+				#echo "ra.msg.flag_not_found" >> $logFile
+				sleep 1
+			done
+				Mflag_file=`getcfgx /var/ra_${interface_name}.msg.flag $interface_name `
+
+				echo "Mflag_file=$Mflag_file mflag $mflag" >> $logFile
+				rm /var/*${interface_name}*
+
+				if [ "x$Mflag_file" != "x1" ]
+				then
+					if [ -f $emuinfo_file ];then
+						if [ "x$Mflag_file" = "x" ]; then
+							setcfgx $emuinfo_file  "result" "ParamNegoFail_IPv6"
+						fi
+					else
+						if [ -f /var/curPppStatus6.log ]
+						then
+							setcfgx /var/curPppStatus6.log $tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6"
+							setcfgx /var/curPppStatus6.log dslite_$tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6"
+						else
+							touch /var/curPppStatus6.log 
+							setcfgx /var/curPppStatus6.log $tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6"
+							setcfgx /var/curPppStatus6.log dslite_$tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6"
+						fi
+					fi
+					echo "exit ipv6_up" >> $logFile
+					exit
+				fi
+
+			fi
+if [ "$ipv6_gain_addr" = "DHCPv6&" ] && [ "$ipv6_PDEnabled" = "0&" ]
+then #=================start 获取地址，不获取前缀
+	if [ "$LINKNAME" == "all" ];then
+		# ip -f inet6 route add ::/0 via $5 dev $1
+		# wan connection is tr069_voip_internet type
+		rm -rf /var/dhcp6c_$tty_device.conf
+		cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+		setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+
+	if [ "$LINKNAME" == "voip_internet" ];then
+		rm -rf /var/dhcp6c_$tty_device.conf
+		cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+		setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+
+	if [ "$LINKNAME" == "tr069_internet" ];then
+		 # wan connection is tr069_internet type
+		 rm -rf /var/dhcp6c_$tty_device.conf
+		 cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+		 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+	if [ "$LINKNAME" == "tr069" ] || [ "$LINKNAME" == "voip" ] || [ "$LINKNAME" == "voip_tr069" ];then
+		 # wan connection is tr069type
+		 rm -rf /var/dhcp6c_$tty_device.conf
+		 cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+		 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+	if [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ];then
+		 # wan connection is internet type
+		 rm -rf /var/dhcp6c_$tty_device.conf
+		 #cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+		# add ds-lite support , need more info to choose which templet config file, 2012-6-19  #
+		 if [ "$WAN_DSLITE_ENABLE_FLAG" == "1&" ] && [ "$WAN_AFTR_MODE_FLAG" == "0&" ] ;then
+			cp $APP_CONF_PATH_DHCPV6_NAAFTR /var/dhcp6c_$tty_device.conf
+		 else
+			cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+		 fi
+		# add ds-lite support end
+		 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+	#ip -f inet6 route add ::/0 via $5 dev $1   #添加默认路由
+	#	   /usr/bin/radvd -m logfile                 #不获取前缀 就要启动radvd
+	#===================end 获取地址，不获取前缀
+elif [ "$ipv6_gain_addr" = "DHCPv6&" ] && [ "$ipv6_PDEnabled" = "1&" ]
+then #===================start 获取地址，获取前缀
+	if [ "$LINKNAME" == "all" ];then
+		# wan connection is tr069_voip_internet type
+		rm -rf /var/dhcp6c_$tty_device.conf
+		cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+		sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+		mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+	fi
+
+	if [ "$LINKNAME" == "voip_internet" ];then
+		# wan connection is voip_internet type
+		rm -rf /var/dhcp6c_$tty_device.conf
+		cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+		sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+		mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+	fi
+
+	if [ "$LINKNAME" == "tr069_internet" ];then
+		# wan connection is tr069_internet type
+		rm -rf /var/dhcp6c_$tty_device.conf
+		cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+		sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+		mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+	fi
+	if [ "$LINKNAME" == "tr069" ] || [ "$LINKNAME" == "voip" ] || [ "$LINKNAME" == "voip_tr069" ];then
+	 # wan connection is tr069type
+	 rm -rf /var/dhcp6c_$tty_device.conf
+	 cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+	 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+	if [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ];then
+		# wan connection is internet type
+		rm -rf /var/dhcp6c_$tty_device.conf
+		#cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+		#echo "-- here we are 1 --" >> $logFile
+		# add ds-lite support , need more info to choose which templet config file, 2012-6-19  #
+		if [ "$WAN_DSLITE_ENABLE_FLAG" == "1&" ] && [ "$WAN_AFTR_MODE_FLAG" == "0&" ] ;then
+			cp $APP_CONF_PATH_DHCPV6_NAPDAFTR /var/dhcp6c_$tty_device.conf
+			#echo "-- here we are 2 --" >> $logFile
+		else
+			cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+			#echo "-- here we are 3 --" >> $logFile
+			#echo "ENABLE_FLAG $WAN_DSLITE_ENABLE_FLAG , MODE_FLAG $WAN_AFTR_MODE_FLAG " >> $logFile
+		fi
+		# add ds-lite support end
+		sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+		mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+	fi
+	#ip -f inet6 route add ::/0 via $5 dev $1   #添加默认路由
+		#===================end 获取地址，获取前缀
+#===========================================================================================
+		#==============start AutoConfigured==================================
+elif [ "$ipv6_gain_addr" == "AutoConfigured&" ]; then
+
+while [ 1 ]
+do
+	if [ -f /var/ra_${interface_name}.msg.flag ]; then
+		#echo "ra.msg.flag_found" >> $logFile
+		break
+	fi 
+	#echo "ra.msg.flag_not_found" >> $logFile
+	sleep 1
+done
+	
+	Mflag_file1=`getcfgx /var/ra_${interface_name}.msg.flag $interface_name `
+	prefix=`getcfgx /var/ra_${interface_name}.msg.flag prefix_$interface_name `
+	echo "prefix="$prefix >>$logFile
+	inter_web set $Mflag $Mflag_file1
+	mflag="$Mflag_file1""&"
+	echo "mflag="$mflag >>$logFile
+	echo "Mflag_file=$Mflag_file mflag $mflag" >> $logFile
+	
+	rm /var/*${interface_name}*
+	if [ -f $emuinfo_file ] && [ "x$mflag" = "x0&" ];then
+		setcfgx $emuinfo_file "WANIPv6Prefix" $prefix
+	fi
+	if [ "x$mflag" = "x" ]; then
+		if [ -f $emuinfo_file ];then
+			setcfgx $emuinfo_file "result" "ParamNegoFail_IPv6"
+		else
+			if [ -f /var/curPppStatus6.log ]
+			then
+				setcfgx /var/curPppStatus6.log $tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6" 
+				setcfgx /var/curPppStatus6.log dslite_$tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6"
+			else
+				touch /var/curPppStatus6.log 
+				setcfgx /var/curPppStatus6.log $tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6"
+				setcfgx /var/curPppStatus6.log dslite_$tty_device "ERROR_SERVER_OUT_OF_RESOURCES_IPv6"
+			fi
+		fi
+	fi
+
+	if [ "x$mflag" = "x0&" ] && [ $ipv6_PDEnabled = "0&" ]
+	then
+		if [ "$LINKNAME" == "all" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+            # wan connection is tr069_voip_internet type
+            rm -rf /var/dhcp6c_$tty_device.conf
+            cp $APP_CONF_PATH_DHCPV6_STATELESS /var/dhcp6c_$tty_device.conf
+            setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+
+           if [ "$LINKNAME" == "voip_internet" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+             # wan connection is voip_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_STATELESS /var/dhcp6c_$tty_device.conf
+             setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+
+           if [ "$LINKNAME" == "tr069_internet" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+             # wan connection is tr069_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_STATELESS /var/dhcp6c_$tty_device.conf
+             setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+	if [ "$LINKNAME" == "tr069" ] || [ "$LINKNAME" == "voip" ] || [ "$LINKNAME" == "voip_tr069" ];then
+	 # wan connection is tr069type
+	 rm -rf /var/dhcp6c_$tty_device.conf
+	 cp $APP_CONF_PATH_DHCPV6_STATELESS /var/dhcp6c_$tty_device.conf
+	 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+           if [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+             # wan connection is internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_STATELESS /var/dhcp6c_$tty_device.conf
+             setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+	   #ip -f inet6 route add ::/0 via $5 dev $1  #添加默认路由
+	 #   /usr/bin/radvd -m logfile                 #不获取前缀 就要启动radvd
+	elif [ "x$mflag" = "x0&" ] && [ $ipv6_PDEnabled = "1&" ]
+	then #=====================start 不获取地址 获取前缀
+		if [ "$LINKNAME" == "all" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+            # wan connection is tr069_voip_internet type
+            rm -rf /var/dhcp6c_$tty_device.conf
+            cp $APP_CONF_PATH_DHCPV6_PD /var/dhcp6c_$tty_device.conf
+            sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	    if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+           fi
+
+           if [ "$LINKNAME" == "voip_internet" ];then
+             # ip -f inet6 route add ::/0 via $5 dev $1
+             # wan connection is voip_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_PD /var/dhcp6c_$tty_device.conf
+             sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	     if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+           fi
+
+           if [ "$LINKNAME" == "tr069_internet" ];then
+             # ip -f inet6 route add ::/0 via $5 dev $1
+             # wan connection is tr069_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_PD /var/dhcp6c_$tty_device.conf
+             sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	     if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+           fi
+	if [ "$LINKNAME" == "tr069" ] || [ "$LINKNAME" == "voip" ] || [ "$LINKNAME" == "voip_tr069" ];then
+	 # wan connection is tr069type
+	 rm -rf /var/dhcp6c_$tty_device.conf
+	 cp $APP_CONF_PATH_DHCPV6_PD /var/dhcp6c_$tty_device.conf
+	 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+           if [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ];then
+             # ip -f inet6 route add ::/0 via $5 dev $1
+             # wan connection is internet type
+            rm -rf /var/dhcp6c_$tty_device.conf
+            # cp $APP_CONF_PATH_DHCPV6_PD /var/dhcp6c_$tty_device.conf
+ 		# add ds-lite support , need more info to choose which templet config file, 2012-6-19  #
+			 if [ "$WAN_DSLITE_ENABLE_FLAG" == "1&" ] &&  [ "$WAN_AFTR_MODE_FLAG" == "0&" ] ;then
+				cp $APP_CONF_PATH_DHCPV6_PDAFTR /var/dhcp6c_$tty_device.conf
+			 else	
+				cp $APP_CONF_PATH_DHCPV6_PD /var/dhcp6c_$tty_device.conf
+			 fi	
+		# add ds-lite support end
+             sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+           fi
+	   #ip -f inet6 route add ::/0 via $5 dev $1    #添加默认路由
+	   #=====================end 不获取地址 获取前缀
+	elif [ "x$mflag" = "x1&" ] && [ $ipv6_PDEnabled = "0&" ]
+	then #================start 获取地址 不获取前缀
+           if [ "$LINKNAME" == "all" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+            # wan connection is tr069_voip_internet type
+            rm -rf /var/dhcp6c_$tty_device.conf
+            cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+            setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+
+           if [ "$LINKNAME" == "voip_internet" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+             # wan connection is voip_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+             setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+
+           if [ "$LINKNAME" == "tr069_internet" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+             # wan connection is tr069_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+             setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+	if [ "$LINKNAME" == "tr069" ] || [ "$LINKNAME" == "voip" ] || [ "$LINKNAME" == "voip_tr069" ];then
+	 # wan connection is tr069type
+	 rm -rf /var/dhcp6c_$tty_device.conf
+	 cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+	 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+           if [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ];then
+            # ip -f inet6 route add ::/0 via $5 dev $1
+
+             # wan connection is internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             #cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+	 	# add ds-lite support , need more info to choose which templet config file, 2012-6-19  #
+			 if [ "$WAN_DSLITE_ENABLE_FLAG" == "1&" ] && [ "$WAN_AFTR_MODE_FLAG" == "0&" ] ;then
+				cp $APP_CONF_PATH_DHCPV6_NAAFTR /var/dhcp6c_$tty_device.conf
+			 else	
+				cp $APP_CONF_PATH_DHCPV6_NA /var/dhcp6c_$tty_device.conf
+			 fi	
+		# add ds-lite support end
+             setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+           fi
+	   #ip -f inet6 route add ::/0 via $5 dev $1   #添加默认路由
+#	   /usr/bin/radvd -m logfile                 #不获取前缀 就要启动radvd
+		#================end 获取地址 不获取前缀
+	elif [ "x$mflag" = "x1&" ] && [ $ipv6_PDEnabled = "1&" ]
+	then #==================start 获取地址 获取前缀
+           if [ "$LINKNAME" == "all" ];then
+            # wan connection is tr069_voip_internet type
+            rm -rf /var/dhcp6c_$tty_device.conf
+            cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+            sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+           fi
+
+           if [ "$LINKNAME" == "voip_internet" ];then
+             # wan connection is voip_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+             sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+           fi
+
+           if [ "$LINKNAME" == "tr069_internet" ];then
+             # wan connection is tr069_internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+             sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+           fi
+	if [ "$LINKNAME" == "tr069" ] || [ "$LINKNAME" == "voip" ] || [ "$LINKNAME" == "voip_tr069" ];then
+	 # wan connection is tr069type
+	 rm -rf /var/dhcp6c_$tty_device.conf
+	 cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+	 setcfgx /var/dhcp6c_$tty_device.conf interface $interface_name
+	 $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+	fi
+           if [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "special_service_1" ] || [ "$LINKNAME" == "special_service_2" ] || [ "$LINKNAME" == "special_service_3" ] || [ "$LINKNAME" == "special_service_4" ] || [ "$LINKNAME" == "other" ];then
+             # wan connection is internet type
+             rm -rf /var/dhcp6c_$tty_device.conf
+             #cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+          #echo "-- here we are 1 --" >> $logFile
+			 # add ds-lite support , need more info to choose which templet config file, 2012-6-19  #
+			 if [ "$WAN_DSLITE_ENABLE_FLAG" == "1&" ] && [ "$WAN_AFTR_MODE_FLAG" == "0&" ] ;then
+				cp $APP_CONF_PATH_DHCPV6_NAPDAFTR /var/dhcp6c_$tty_device.conf
+				#echo "-- here we are 2 --" >> $logFile
+			 else
+				cp $APP_CONF_PATH_DHCPV6_NAPD /var/dhcp6c_$tty_device.conf
+				#echo "-- here we are 3 --" >> $logFile
+				#echo "ENABLE_FLAG $WAN_DSLITE_ENABLE_FLAG , MODE_FLAG $WAN_AFTR_MODE_FLAG " >> $logFile
+			 fi
+			  # add ds-lite support end
+             sed "s/wan0[.0-9]*/$interface_name/g" /var/dhcp6c_$tty_device.conf > /var/temp_pppoe
+	     mv /var/temp_pppoe /var/dhcp6c_$tty_device.conf
+             $APP_PATH_DHCP6C ${tty_device} ${interface_name} -c /var/dhcp6c_$tty_device.conf -d $DSLITE_ENABLE $WAN_AFTR_MODE_FLAG0 &
+		if [ ! -f $emuinfo_file ];then
+			/var/set_lan6_xml.sh ${interface_name} ${DSLITE_ENABLE}
+		fi
+           fi
+	     #ip -f inet6 route add ::/0 via $5 dev $1   #添加默认路由
+		  #==================end 获取地址 获取前缀
+		  fi
+		else
+						echo "wan connection is not existed aaaaaaaaaaa "  >> $logFile
+		#==============end AutoConfigured==================================
+		fi
+		echo "123 123 1323"$ipv6_gain_addr >> $logFile
+		break
+	else
+		echo "wan connection is not existed bbb"  >> $logFile
+		continue
+	fi #end if "x$device"=="x$tty_device&"
+	else
+		continue
+fi #end if "$vid" != "NULL&" 
+	echo "wan connection is not existed ccccccccc"  >> $logFile
+done
+if [ ! -f $emuinfo_file ];then
+	exit
+fi
+#get sessionid
+#modify bl23x8 subnet
+vidflag=0
+#echo  $tty_device | grep . || vidflag=0 
+i=0
+while :
+do
+        if [ ${i} -gt 8 ]
+        then
+                break
+        fi
+        nofindflag=0
+        wandevname=wan${i}
+        echo $tty_device | grep $wandevname || nofindflag=1
+        if  [ $nofindflag == 1 ]
+        then
+                i=$((i+1)) 
+                continue
+        else
+                break
+        fi
+
+done
+
+if [ $nofindflag == 0 ]
+then
+        if [ $tty_device == $wandevname ]
+        then
+                vidflag=0
+        else
+                vidflag=1
+        fi
+        subnetid=$i
+        sessionid=`cat /proc/net/pppoe | grep $tty_device | head -n 1 | awk -F " " '{print $1}'`
+        if [ -z $sessionid ]
+        then
+                exit 0
+        fi
+
+        [ -f /var/ipupdebug ] || touch /var/ipupdebug
+        echo "$subnetid ${local_IP_address} $sessionid" >> /var/ipupdebug
+        msubnet $subnetid ${local_IP_address} $sessionid 
+fi
+
+
+[ -f /etc/sysconfig/network ] || exit 0
+. /etc/sysconfig/network
+
+cd /etc/sysconfig/network-scripts
+. ./network-functions
+. ./network-functions-ipv6
+
+CONFIG=$LOGDEVICE
+[ -f "$CONFIG" ] || CONFIG=ifcfg-$CONFIG
+source_config
+
+# Test whether IPv6 configuration is enabled for this interface, else stop
+[ "$IPV6INIT" = "yes" ] || exit 0
+
+# Test whether IPv6 should be configured, else stop
+[ "${NETWORKING_IPV6}" = "yes" ] || exit 0
+
+[ -f /etc/sysconfig/network-scripts/network-functions-ipv6 ] || exit 1
+. /etc/sysconfig/network-scripts/network-functions-ipv6
+
+# IPv6 test, module loaded, exit if system is not IPv6-ready
+ipv6_test || exit 1
+
+# Test device status
+ipv6_test_device_status $REALDEVICE
+if [ $? != 0 -a $? != 11 ]; then
+	# device doesn't exist or other problem occurs
+	exit 1
+fi
+
+# Setup IPv6 address on specified interface
+if [ -n "$IPV6ADDR" ]; then
+	ipv6_add_addr_on_device $REALDEVICE $IPV6ADDR || exit 1
+fi
+
+# Set IPv6 MTU, if given
+if [ -n "$IPV6_MTU" ]; then
+	ipv6_set_mtu $REALDEVICE $IPV6_MTU
+fi
+
+# Setup additional IPv6 addresses from list, if given
+if [ -n "$IPV6ADDR_SECONDARIES" ]; then
+	for ipv6addr in $IPV6ADDR_SECONDARIES; do
+			ipv6_add_addr_on_device $REALDEVICE $ipv6addr
+	done
+fi
+
+# Setup default IPv6 route through device
+if [ "$IPV6_DEFAULTDEV" = "$LOGDEVICE" ]; then
+	ipv6_set_default_route "" "$REALDEVICE" "$REALDEVICE"
+fi
+
+# Setup additional static IPv6 routes on specified interface, if given
+if [ -f /etc/sysconfig/static-routes-ipv6 ]; then
+	LC_ALL=C grep -w "^$LOGDEVICE" /etc/sysconfig/static-routes-ipv6 | while read device args; do
+		ipv6_add_route $args $REALDEVICE
+	done
+fi
+
+# Setup additional static IPv6 routes (newer config style)
+if [ -f "/etc/sysconfig/network-scripts/route6-$DEVICE" ]; then
+	cat "/etc/sysconfig/network-scripts/route6-$DEVICE" | sed 's/#.*//g' | grep -v '^[[:space:]]*$' | while read line; do
+		ipv6_exec_ip -6 route add $line
+	done
+fi
+
+if [ "$IPV6_CONTROL_RADVD" = "yes" ]; then						
+	# Control running radvd								
+	ipv6_trigger_radvd up "$IPV6_RADVD_TRIGGER_ACTION" $IPV6_RADVD_PIDFILE		
+fi											
+
+[ -x $APP_CONF_PATH_PPPOE/ipv6-up.local ] && $APP_CONF_PATH_PPPOE/ipv6-up.local "$@"
+
+exit 0
+ 

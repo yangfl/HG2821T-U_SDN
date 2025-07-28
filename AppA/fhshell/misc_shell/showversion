@@ -1,0 +1,58 @@
+#!/bin/sh
+
+#-----lqu modify 20120816
+COMMON_CONF=/etc/fh_common.conf
+GETCFG=`grep "MISC_SHELL_PATH_GETCFG=" $COMMON_CONF | cut -d = -f 2 `
+DEVFUNC_PATH=`grep "LIB_DEVFUNC_LIB_PATH=" $COMMON_CONF | cut -d = -f 2 `
+FACTORY_CONF=`grep "APP_CONF_PATH_TR069_FACTORY=" $COMMON_CONF | cut -d = -f 2 `
+AREA=`grep "Province=" $COMMON_CONF | cut -d = -f 2 `
+Device_Type=`grep "DeviceType=" $COMMON_CONF | cut -d = -f 2 `
+
+EXIT_NOFILE=65
+SOFTVERSION_FILE="/root/ver_info/record_version_${AREA}_${Device_Type}"
+module_compiletime_rootfs="/Rootfs_compiledate.log"
+module_compiletime_appfs="/rom/Appfs_compiledate.log"
+
+if [ -f ${SOFTVERSION_FILE} ]
+then :
+else
+	exit ${EXIT_NOFILE}
+fi
+
+echo "   ----------------------SYSTEM  VERSION----------------------"
+printf "%-8s%-16s%-24s%-16s\n" Number System_Name System_Version System_Compiletime
+system_var="Linux.bin"
+system_version="`$GETCFG $FACTORY_CONF SoftwareVersion`"
+system_compiletime="`uname -v | awk -F \" \" '{print $5" "$3" "$4" "$7}'`"
+printf "%-8s%-16s%-24s%-16s\n" 1 "${system_var}" "${system_version}" "${system_compiletime}" 
+system_var="Hardware"
+system_version="`$GETCFG $FACTORY_CONF HardwareVersion`"
+system_compiletime=""
+printf "%-8s%-16s%-24s%-16s\n" 2 "${system_var}" "${system_version}" "${system_compiletime}" 
+
+system_var="Rootfs"
+system_version="`$GETCFG $FACTORY_CONF SoftwareVersion`"
+system_compiletime="`cat \"${module_compiletime_rootfs}\" | grep \"${system_var}\" | awk -F \"=\" '{print $2}'`"
+printf "%-8s%-16s%-24s%-16s\n" 3 "${system_var}" "${system_version}" "${system_compiletime}" 
+
+system_var="Appfs"
+system_version="`$GETCFG $FACTORY_CONF SoftwareVersion`"
+system_compiletime="`cat \"${module_compiletime_appfs}\" | grep \"${system_var}\" | awk -F \"=\" '{print $2}'`"
+printf "%-8s%-16s%-24s%-16s\n" 4 "${system_var}" "${system_version}" "${system_compiletime}" 
+
+echo "   ----------------------------END----------------------------"
+
+
+
+echo "   ----------------------SOFTWARE VERSION----------------------"
+i=1
+printf "%-8s%-16s%-24s%-16s\n" Number Module_Name Module_Version
+cat ${SOFTVERSION_FILE} | while read line
+do
+	module_var=`echo $line | awk -F '=' '{print $1}'`
+	module_version=`echo $line | awk -F '=' '{print $2}'| awk -F '|' '{print $1}'`
+	printf "%-8s%-32s%-32s\n" "${i}" "${module_var}" "${module_version}"
+	i=$((i+1))
+done
+echo "   ----------------------------END----------------------------"
+

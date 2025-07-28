@@ -1,0 +1,196 @@
+#!/bin/sh
+#create by hubo 2014-5-26
+COMMON_CONF=/etc/fh_common.conf
+FHBOX_PATH=/usr/bin
+INTER_WEB=$FHBOX_PATH/inter_web
+GETCFG=/rom/fhshell/misc_shell/getcfg
+SETCFG=/rom/fhshell/misc_shell/setcfg
+NTPDATE_PATH=/usr/bin/ntpdate
+Param_File_Path=/var/misc_run_param.conf
+PROGRAM_CONF=/var/program.conf
+
+NTP_Enable_Num=`cat $Param_File_Path |grep "IGD_T_Enable=" |cut -d "=" -f 2`
+NTP_Enable=`$INTER_WEB get $NTP_Enable_Num`
+if [ "$NTP_Enable" == "1&" ]
+then
+	Curr_Ntp_Counts=`$GETCFG $PROGRAM_CONF NTPCounts`
+	#更新NTPCounts
+	tmp_Curr_Ntp_Counts=`expr $Curr_Ntp_Counts + 12 `
+	$SETCFG $PROGRAM_CONF NTPCounts $tmp_Curr_Ntp_Counts
+	
+	#同步成功
+	if [ -f /var/ntp_success ]
+	then
+		NTPInterval_Num=`cat $Param_File_Path |grep "IGD_T_X_CT_COM_NTPInterval=" |cut -d "=" -f 2`
+		NTPInterval=`$INTER_WEB get $NTPInterval_Num | cut -d  "&" -f 1`
+		#按照规范，当该管理量为0，要求不同步
+		if [ "$NTPInterval" == "0" ]
+		then
+			exit 0
+		fi
+		if [ `expr $Curr_Ntp_Counts` -ge `expr $NTPInterval` ] 
+		then
+			NTP_Server_Type_Num=`cat $Param_File_Path |grep "IGD_T_X_CT_COM_NTPServerType=" | cut -d "=" -f 2`
+			LocalTimeZone_Num=`cat $Param_File_Path |grep "IGD_T_LocalTimeZone=" |cut -d "=" -f 2`
+			NTPServer1_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer1=" |cut -d "=" -f 2`
+			NTPServer2_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer2=" |cut -d "=" -f 2`
+			NTPServer3_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer3=" |cut -d "=" -f 2`
+			NTPServer4_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer4=" |cut -d "=" -f 2`
+			NTPServer5_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer5=" |cut -d "=" -f 2`
+			NTP_STR=`$INTER_WEB get $NTP_Server_Type_Num $LocalTimeZone_Num $NTPServer1_Num $NTPServer2_Num $NTPServer3_Num $NTPServer4_Num $NTPServer5_Num`
+			for paramIndex in 1 2 3 4 5 6 7
+			do
+				val=`echo "$NTP_STR" | cut -d '&' -f ${paramIndex}`
+				if [ "$val" == "NULL" ]  && [ $paramIndex -ge 3 ]
+				then
+					val=""
+				fi
+				case $paramIndex
+					in
+					"1")
+						NTP_Server_Type=$val
+					;;
+					"2")
+						LocalTimeZone=$val
+					;;
+					"3")
+						NTPServer1=$val
+					;;
+					"4")
+						NTPServer2=$val
+					;;
+					"5")
+						NTPServer3=$val
+					;;
+					"6")
+						NTPServer4=$val
+					;;
+					"7")
+						NTPServer5=$val
+					;;
+					*)
+					break
+					;;
+				esac
+			done
+			PROC_ID=`pidof ntpdate`
+			if [ -z "$PROC_ID" ]
+			then
+				#echo "$NTPDATE_PATH -$NTP_Server_Type -z $LocalTimeZone $NTPServer1 $NTPServer2 $NTPServer3 $NTPServer4 $NTPServer5"
+				$NTPDATE_PATH -$NTP_Server_Type -z $LocalTimeZone $NTPServer1 $NTPServer2 $NTPServer3 $NTPServer4 $NTPServer5 0> /dev/zero 1>&0 2>&0 &
+			fi
+		fi
+	#同步失败
+	elif [ -f /var/ntp_failed ]
+	then
+		NTPInterval=180
+		if [ `expr $Curr_Ntp_Counts` -ge `expr $NTPInterval` ] 
+		then
+			NTP_Server_Type_Num=`cat $Param_File_Path |grep "IGD_T_X_CT_COM_NTPServerType=" | cut -d "=" -f 2`
+			LocalTimeZone_Num=`cat $Param_File_Path |grep "IGD_T_LocalTimeZone=" |cut -d "=" -f 2`
+			NTPServer1_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer1=" |cut -d "=" -f 2`
+			NTPServer2_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer2=" |cut -d "=" -f 2`
+			NTPServer3_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer3=" |cut -d "=" -f 2`
+			NTPServer4_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer4=" |cut -d "=" -f 2`
+			NTPServer5_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer5=" |cut -d "=" -f 2`
+			NTP_STR=`$INTER_WEB get $NTP_Server_Type_Num $LocalTimeZone_Num $NTPServer1_Num $NTPServer2_Num $NTPServer3_Num $NTPServer4_Num $NTPServer5_Num`
+			for paramIndex in 1 2 3 4 5 6 7
+			do
+				val=`echo "$NTP_STR" | cut -d '&' -f ${paramIndex}`
+				if [ "$val" == "NULL" ]  && [ $paramIndex -ge 3 ]
+				then
+					val=""
+				fi
+				case $paramIndex
+					in
+					"1")
+						NTP_Server_Type=$val
+					;;
+					"2")
+						LocalTimeZone=$val
+					;;
+					"3")
+						NTPServer1=$val
+					;;
+					"4")
+						NTPServer2=$val
+					;;
+					"5")
+						NTPServer3=$val
+					;;
+					"6")
+						NTPServer4=$val
+					;;
+					"7")
+						NTPServer5=$val
+					;;
+					*)
+						break
+					;;
+				esac
+			done
+			PROC_ID=`pidof ntpdate`
+			if [ -z "$PROC_ID" ]
+			then
+				#echo "$NTPDATE_PATH -$NTP_Server_Type -z $LocalTimeZone $NTPServer1 $NTPServer2 $NTPServer3 $NTPServer4 $NTPServer5"
+				$NTPDATE_PATH -$NTP_Server_Type -z $LocalTimeZone $NTPServer1 $NTPServer2 $NTPServer3 $NTPServer4 $NTPServer5 0> /dev/zero 1>&0 2>&0 &
+			fi
+		fi
+	#首次同步
+	else
+		if [ -f /var/default_dns ]
+		then
+			NTP_Server_Type_Num=`cat $Param_File_Path |grep "IGD_T_X_CT_COM_NTPServerType=" | cut -d "=" -f 2`
+			LocalTimeZone_Num=`cat $Param_File_Path |grep "IGD_T_LocalTimeZone=" |cut -d "=" -f 2`
+			NTPServer1_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer1=" |cut -d "=" -f 2`
+			NTPServer2_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer2=" |cut -d "=" -f 2`
+			NTPServer3_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer3=" |cut -d "=" -f 2`
+			NTPServer4_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer4=" |cut -d "=" -f 2`
+			NTPServer5_Num=`cat $Param_File_Path |grep "IGD_T_NTPServer5=" |cut -d "=" -f 2`
+			NTP_STR=`$INTER_WEB get $NTP_Server_Type_Num $LocalTimeZone_Num $NTPServer1_Num $NTPServer2_Num $NTPServer3_Num $NTPServer4_Num $NTPServer5_Num`
+			for paramIndex in 1 2 3 4 5 6 7
+			do
+				val=`echo "$NTP_STR" | cut -d '&' -f ${paramIndex}`
+				if [ "$val" == "NULL" ]  && [ $paramIndex -ge 3 ]
+				then
+					val=""
+				fi
+				case $paramIndex
+					in
+					"1")
+						NTP_Server_Type=$val
+					;;
+					"2")
+						LocalTimeZone=$val
+					;;
+					"3")
+						NTPServer1=$val
+					;;
+					"4")
+						NTPServer2=$val
+					;;
+					"5")
+						NTPServer3=$val
+					;;
+					"6")
+						NTPServer4=$val
+					;;
+					"7")
+						NTPServer5=$val
+					;;
+					*)
+					break
+					;;
+				esac
+			done
+			PROC_ID=`pidof ntpdate`
+			if [ -z "$PROC_ID" ]
+			then
+				#echo "$NTPDATE_PATH -$NTP_Server_Type -z $LocalTimeZone $NTPServer1 $NTPServer2 $NTPServer3 $NTPServer4 $NTPServer5"
+				$NTPDATE_PATH -$NTP_Server_Type -z $LocalTimeZone $NTPServer1 $NTPServer2 $NTPServer3 $NTPServer4 $NTPServer5 0> /dev/zero 1>&0 2>&0 &
+			fi
+		fi
+	fi
+else
+	exit 0
+fi

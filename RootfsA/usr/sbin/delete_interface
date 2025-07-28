@@ -1,0 +1,8 @@
+#!/bin/sh
+sed -i "/$1/d" /var/mac.log
+if [ $1 == 0 ]
+then
+	vconfig rem pon0.4093
+else
+	vconfig rem pon0.$1
+fi

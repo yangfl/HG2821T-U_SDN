@@ -1,0 +1,115 @@
+#!/bin/sh
+
+#param1:	pingconfig instance number (1-8)
+#param2:	sleep timeout for each while
+#param3:	running time: 0 starup;  1 usually
+
+
+#-----lqu modify 20120806
+COMMON_CONF=/etc/fh_common.conf
+FHBOX_BIN=`grep "FHBOX_BIN_PATH=" $COMMON_CONF | cut -d = -f 2 `
+GETCFG=`grep "MISC_SHELL_PATH_GETCFG=" $COMMON_CONF | cut -d = -f 2 `
+SETCFG=`grep "MISC_SHELL_PATH_SETCFG=" $COMMON_CONF | cut -d = -f 2 `
+APP_PATH_PING=`grep "APP_PATH_PING=" $COMMON_CONF | cut -d = -f 2 `
+#--------
+
+
+
+paramfile=/var/ping.config
+
+if [ $# -ne 3  ]; then
+echo "usage: ipconfig <param1:	pingconfig instance number>"
+echo "                <param2:	sleep timeout for each while>"
+echo "                <param3:	running time: 0 starup;  1 usually>"
+exit 1
+fi
+
+while true
+do
+$SETCFG $paramfile Error_${1} Requested
+sleep $2
+if [ -f /var/manager_finished ]; then
+	ENABLE=`$GETCFG $paramfile PingConfigEnable`
+	if [ "x$ENABLE" = "x1" ]; then
+		STATE=`$GETCFG $paramfile State_${1}`
+		if [ "x$STATE" = "xRequested" ]; then
+		
+			INTERFACE=`$GETCFG $paramfile InterfaceDev_${1}`		
+			if [ "x$INTERFACE" != "x" ]; then 
+				ifconfig | grep "${INTERFACE} "
+				if [ "x$?" != "x0" ]; then
+					$SETCFG $paramfile Error_${1} NOInterface
+					$SETCFG $paramfile State_${1} Error_Other
+					break;					
+				fi
+				INTERFACEOPTION="-I $INTERFACE"
+			else
+				INTERFACEOPTION=""
+			fi
+			
+			SEQUENCE=`$GETCFG $paramfile ConnectSeq_${1}`
+			CONNECTSTATE=`$FHBOX_BIN/inter_web get $SEQUENCE`
+			if [ "$CONNECTSTATE" = "Connected&" ]; then
+				NUM=`$GETCFG $paramfile NumberOfRepete_${1}`
+				TIMEOUT=`$GETCFG $paramfile Timeout_${1}`
+				SIZE=`$GETCFG $paramfile DataBlockSize_${1}`
+				DSCP=`$GETCFG $paramfile DSCP_${1}`
+				INTERVAL=`$GETCFG $paramfile Interval_${1}`
+				HOST=`$GETCFG $paramfile Host_${1}`				
+                
+                echo "num = $NUM" >> /var/ping_debug
+                echo "timeout = $TIMEOUT" >> /var/ping_debug
+                echo "size = $SIZE" >> /var/ping_debug
+                echo "dscp = $DSCP" >> /var/ping_debug
+                echo "interval = $INTERVAL" >> /var/ping_debug
+                echo "host = $HOST" >> /var/ping_debug                
+                
+				if [ "x$NUM" != "x0" ]; then
+					NUMOPTION="-c $NUM"
+				else
+					NUMOPTION=""
+				fi
+				
+				if [ "x$HOST" == "x" ]; then
+					$SETCFG $paramfile Error_${1} HostEmpty
+					$SETCFG $paramfile State_${1} Error_CannotResolveHostName
+					break;
+				fi
+
+				PING_STR="$APP_PATH_PING -G ${1} -q $NUMOPTION -s $SIZE -Q $DSCP -i $INTERVAL $INTERFACEOPTION $HOST"
+                echo "ping_string = $PING_STR" >> /var/ping_debug
+                echo "--------------------------------------------------------" >> /var/ping_debug
+                $APP_PATH_PING -G ${1} -q $NUMOPTION -s $SIZE -Q $DSCP -i $INTERVAL $INTERFACEOPTION $HOST
+                
+				if [ "x$?" = "x0" -o "x$?" = "x137" ]; then
+					$SETCFG $paramfile Error_${1} Complete
+					$SETCFG $paramfile State_${1} Complete
+				else
+					$SETCFG $paramfile Error_${1} Error_CannotResolveHostName
+					$SETCFG $paramfile State_${1} Error_CannotResolveHostName
+				fi
+										
+			elif [ "$CONNECTSTATE" = "Connecting&" ]; then
+				if [ "x$3" = "x0" ]; then
+					$SETCFG $paramfile Error_${1} Connecting
+					continue;
+				else
+					$SETCFG $paramfile Error_${1} IPDown
+					$SETCFG $paramfile State_${1} Error_Other
+				fi
+			else
+				$SETCFG $paramfile Error_${1} ErrorInterface
+				$SETCFG $paramfile State_${1} Error_Other
+			fi
+			
+		else
+			$SETCFG $paramfile Error_${1} NoRequested
+		fi
+	else
+		$SETCFG $paramfile Error_${1} PingDisabled
+	fi
+	break;
+fi
+done
+
+exit 0

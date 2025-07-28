@@ -1,0 +1,11 @@
+{"name": "Configure_Manager",
+ "version": "1.1.1",
+ "cksum": "3129420575 182",
+ "tables": {
+   "Configure_Manager": {
+     "columns": {
+       "firsttest":{ "type": "string"}
+      },
+    "isRoot": true}
+  }
+}

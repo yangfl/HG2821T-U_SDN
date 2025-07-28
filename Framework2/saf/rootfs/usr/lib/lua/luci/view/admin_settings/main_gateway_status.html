@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language='javascript'>
+		var activeTimeout = setTimeout("Timeout()", 300000);    
+		  
+		function Timeout() {
+			(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+				{ token: '<%=token%>' }, 
+				function(x){
+				parent.location = "/cgi-bin/luci";
+				});	
+		}		
+
+		function frmLoad()
+		{
+			var tStr; 
+						
+			(new XHR()).get('<%=luci.dispatcher.build_url('admin/settings/gwstatus')%>',null,
+				function(x, json){
+					tStr = formatTime(parseInt(json.upTime));
+					var tUp = tStr.split(":");
+					$("#uptime").text(tUp[0]+"天"+tUp[1]+"小时"+tUp[2]+"分钟");
+											
+					tStr = formatTime(parseInt(json.sysTime));
+					var tSys = tStr.split(":");
+					$("#systime").text(tSys[0]+"天"+tSys[1]+"小时"+tSys[2]+"分钟");
+					
+					$("#wDevs").html("&nbsp;"+json.wcount+"台&nbsp;");
+					$("#wlDevs").html("&nbsp;"+json.wlcount+"台&nbsp;");
+					if (json.itv)
+						$("#itv").html("&nbsp;已开通&nbsp;");
+					else
+						$("#itv").html("&nbsp;未开通&nbsp;");
+						
+					if (json.voip)
+						$("#voip").html("&nbsp;已开通&nbsp;");
+					else
+						$("#voip").html("&nbsp;未开通&nbsp;");
+					
+					if (json.scount > 0)
+					{
+						var ustr = "";
+						for (var i = 0; i < json.scount; i++){
+							eval("udev = json.storage" + (i + 1));
+							if (i == 0)
+								ustr = udev.name + ":&nbsp;" + udev.usedPer + "%";
+							else
+								ustr += "&nbsp; | " + udev.name + ":&nbsp;" + udev.usedPer + "%";
+						}							
+						$("#storage").html(ustr);
+					}
+					else
+						$("#storage").html("&nbsp;未接存储设备");
+						
+					$("#cpuUsed").text(json.cpuUsed+"%");
+				});				  
+		}
+		</script>
+	</head>
+	<body onLoad='frmLoad()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+		<form>
+			<div class="main_header">
+				<p class="main_header_title">当前网关状态</p>
+				<p class="main_header_hint">您可以查看当前网关的状态信息</p>
+			</div>
+			<div class="main_content">
+				<div class="main_item">
+					<div class="main_item_name">上网时间</div>
+					<div class="main_item_content"><span class="theme_color" id="uptime"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">运行时间</div>
+					<div class="main_item_content"><span class="theme_color" id="systime"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">设备接入情况</div>
+					<div class="main_item_content">
+						无线端<span class="theme_color" id="wlDevs"></span>|
+						有线端<span class="theme_color" id="wDevs"></span>|
+						iTV<span class="theme_color" id="itv"></span>|
+						电话<span class="theme_color" id="voip"></span>
+					</div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">CPU使用情况</div>
+					<div class="main_item_content"><span class="theme_color" id="cpuUsed"></span></div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">存储状况</div>
+					<div>
+						<span class="theme_color" id="storage"></span>
+					</div>
+				</div>				
+			</div>
+		</form>
+	</body>
+</html>

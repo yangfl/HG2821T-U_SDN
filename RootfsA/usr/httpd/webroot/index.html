@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>中国电信智能随选网关</title>
+	<link rel="icon" href="/imgs/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="/imgs/favicon.ico" type="image/x-icon" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+  
+
+<div class="container">
+	<div class="row">
+	<div class="col-md-12">
+	<!-- <img src="/imgs/logo_shtel.png"> -->
+	<h2>欢迎使用中国电信SDN网关</h2>
+	</div>
+	</div>
+</div>
+<div class="mainshow">
+
+    <div class="container">
+    <div class="row">
+        <div class="col-md-12">
+        <h3>
+          <span class="glyphicon glyphicon-scale"></span> 设备状态
+          <small><br class=" visible-xs visible-sm">设备逻辑ID: <span id="info_myloid"></span>&nbsp;&nbsp; <br class=" visible-xs visible-sm">网关序列号: <span id="info_serialnum"></span>&nbsp;&nbsp;<br class=" visible-xs visible-sm"><span id="info_factorymode"></span></small>
+          </h3>
+    	</div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 hidden-xs hidden-sm">
+            
+            <h4  style="color:#003366">
+                    &nbsp;&nbsp;启动时长: <span id="info_uptime"></span>
+                <br>&nbsp;&nbsp;厂家名称: <span id="info_manu"></span>
+                <br>&nbsp;&nbsp;网关型号: <span id="info_model"></span>
+                <br>&nbsp;&nbsp;硬件版本: <span id="info_hwversion"></span>
+                <br>&nbsp;&nbsp;软件版本: <span id="info_fwversion"></span>
+                <br>&nbsp;&nbsp;设备温度: <span id="info_temperature"></span>
+            </h4>
+            <h4  style="color:#003366">
+                <hr>
+
+                    &nbsp;&nbsp;PON发帧数: <span id="info_pontx"></span>
+                <br>&nbsp;&nbsp;PON发功率: <span id="info_pontxdbm"></span>
+                <br>&nbsp;&nbsp;PON收帧数: <span id="info_ponrx"></span>
+                <br>&nbsp;&nbsp;PON收功率: <span id="info_ponrxdbm"></span>
+                <hr>
+            
+                
+                &nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle text-danger' id="info_upstatPON"></span> PON光路注册<br>
+                &nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle text-danger' id="info_upstatManager"></span> 管理器连接<br>
+                &nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle text-danger' id="info_upstatDevAuth"></span> 设备认证<br>
+                &nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle text-danger' id="info_upstatController"></span> 控制器连接<br>
+            </h4>
+            
+        </div>
+        <div class="col-md-9">
+        <div class="row">
+            <div class="col-md-2 hidden-xs hidden-sm" align=center>
+            <!-- <div class="col-md-4"  align=right> -->
+            <br>
+                <span class="glyphicon glyphicon-globe" style="font-size:800%"></span>
+            </div>
+            <div class="col-md-10">
+                <h2>启动时长: <span id="infobig_uptime"></span></h2>
+                <h2 id="showresult">....</h2>
+            </div>
+        </div>
+
+        
+        <br><br>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-6" style="font-size:150%" id="infobig_upstatPON" align=center>
+            <span class='glyphicon glyphicon-random' style="font-size:300%"></span><br>PON光路注册<br><br>
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-6" style="font-size:150%" id="infobig_upstatManager" align=center>
+            <span class='glyphicon glyphicon-cog' style="font-size:300%"></span><br>管理器连接<br>
+            <div style="font-size:70%"><span id="info_dhcp"></span><a href="/dhcpmsg.html">(详细信息)</a></div><br><br>
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-6" style="font-size:150%" id="infobig_upstatDevAuth" align=center>
+            <span class='glyphicon glyphicon-check' style="font-size:300%"></span><br>设备认证<br><br>
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-6" style="font-size:150%" id="infobig_upstatController" align=center>
+            <span class='glyphicon glyphicon-cloud-upload' style="font-size:300%"></span><br>控制器连接<br><br>
+            </div>
+        </div>
+
+        <br class=" visible-xs visible-sm">
+        <div class="col-md-3 visible-xs visible-sm">
+            
+            <h4  style="color:#003366">
+                    &nbsp;&nbsp;启动时长: <span id="info_uptime_small"></span>
+                <br>&nbsp;&nbsp;厂家名称: <span id="info_manu_small"></span>
+                <br>&nbsp;&nbsp;网关型号: <span id="info_model_small"></span>
+                <br>&nbsp;&nbsp;硬件版本: <span id="info_hwversion_small"></span>
+                <br>&nbsp;&nbsp;软件版本: <span id="info_fwversion_small"></span>
+                <br>&nbsp;&nbsp;设备温度: <span id="info_temperature_small"></span>
+            </h4>
+            <h4  style="color:#003366">
+                <hr>
+
+                    &nbsp;&nbsp;PON发帧数: <span id="info_pontx_small"></span>
+                <br>&nbsp;&nbsp;PON发功率: <span id="info_pontxdbm_small"></span>
+                <br>&nbsp;&nbsp;PON收帧数: <span id="info_ponrx_small"></span>
+                <br>&nbsp;&nbsp;PON收功率: <span id="info_ponrxdbm_small"></span>
+                <hr>
+            
+                
+            </h4>
+            
+        </div>
+        <br class=" visible-xs visible-sm">
+
+        <h3><span class="label label-primary" id="info_pppaccinfo"></span></h3>
+        <h3><span class="label label-primary" id="info_voipaccinfo"></span>
+        <p class=" visible-xs visible-sm"></p>
+        <p class=" visible-xs visible-sm"></p>
+        <span class="label label-primary" id="info_voipaccinfo2"></span></h3>
+        
+        <h3><span class="label label-primary" id="info_ssid24g"></span> 
+        <p class=" visible-xs visible-sm"></p>
+        <span class="label label-primary" id="info_ssid5g"></span></h3>
+
+        <br><br>
+        </div>
+
+        
+    </div>
+    </div>
+
+</div>
+<br>
+<div class="container">
+	<div class="row">
+	<div class="col-md-8">
+    <!-- <a href="/index.html" class="btn  btn-lg btn-primary"> <span class="glyphicon glyphicon-home"></span> 返回设备主页</a> &nbsp;&nbsp; -->
+	<a href="/login/passwd/000000" class="btn  btn-lg btn-primary"> <span class="glyphicon glyphicon-user"></span> 退出登录</a> &nbsp;&nbsp;
+	<a href="/setloid.html" class="btn btn-lg btn-warning"> <span class="glyphicon glyphicon-download"></span> 重置LOID</a> &nbsp;&nbsp;
+    <p class=" visible-xs visible-sm"></p>
+	<a href="/reset.html" class="btn btn-lg btn-danger"> <span class="glyphicon glyphicon-refresh"></span> 恢复出厂</a>
+	</div>
+    <br class=" visible-xs visible-sm">
+    <br class=" visible-xs visible-sm">
+	<div class="col-md-4">
+	<b>Copyright © 2017 中国电信 - All rights reserved</b>
+	</div>
+	</div>
+</div>
+<br><br><br>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+    function getdevinfo()
+    {
+        var errmsg="";
+        $.getJSON("/appapi/getstat/000000",
+            function(data){
+                $("#info_myloid").text(data["loid"]);
+                var bSuccess=1;
+                if(data["upstatPON"]=="OK") 
+                {
+                    $("#info_upstatPON").removeClass("glyphicon-remove-circle").removeClass("text-danger").addClass("glyphicon-ok-circle").addClass("text-success");
+                    $("#infobig_upstatPON").removeClass("text-warning").addClass("text-success");
+                }
+                else
+                {
+                    $("#info_upstatPON").addClass("glyphicon-remove-circle").addClass("text-danger").removeClass("glyphicon-ok-circle").removeClass("text-success");
+                    $("#infobig_upstatPON").removeClass("text-success").addClass("text-warning");
+                    bSuccess=0;
+                } 
+    			if(data["upstatManager"]=="OK") 
+    			{
+    				$("#info_upstatManager").removeClass("glyphicon-remove-circle").removeClass("text-danger").addClass("glyphicon-ok-circle").addClass("text-success");
+    				$("#infobig_upstatManager").removeClass("text-warning").addClass("text-success");
+    			}
+                else
+                {
+                    $("#info_upstatManager").addClass("glyphicon-remove-circle").addClass("text-danger").removeClass("glyphicon-ok-circle").removeClass("text-success");
+                    $("#infobig_upstatManager").removeClass("text-success").addClass("text-warning");
+                    bSuccess=0;
+                } 
+    			if(data["upstatDevAuth"]=="OK") 
+    			{
+    				$("#info_upstatDevAuth").removeClass("glyphicon-remove-circle").removeClass("text-danger").addClass("glyphicon-ok-circle").addClass("text-success");
+    				$("#infobig_upstatDevAuth").removeClass("text-warning").addClass("text-success");
+     			}
+     			else
+     			{
+     				if(data["upstatDevAuthmsg"].indexOf("uthentication failure. There is no related service.")>0)
+    					errmsg="认证失败:无用户业务信息，请确认用户工单状态";
+    				else if(data["upstatDevAuthmsg"].indexOf("uthentication failure. Device SN number is being used.")>0)
+    					errmsg="认证失败:该设备已绑定在其他用户名下";
+    				else if(data["upstatDevAuthmsg"].indexOf("uthentication failure. Device is not initialized.")>0)
+    					errmsg="认证失败:该设备需要恢复出厂设置操作后，才能进行激活";
+                   	else if(data["upstatDevAuthmsg"].indexOf("uthentication failure. User is not found.")>0)
+                        errmsg="认证失败:无用户业务信息，请确认用户工单状态";
+    				else errmsg=data["upstatDevAuthmsg"];
+
+                    $("#info_upstatDevAuth").addClass("glyphicon-remove-circle").addClass("text-danger").removeClass("glyphicon-ok-circle").removeClass("text-success");
+                    $("#infobig_upstatDevAuth").removeClass("text-success").addClass("text-warning");
+                    bSuccess=0;
+     			} 
+    			if(data["upstatController"]=="OK") 
+    			{
+    				$("#info_upstatController").removeClass("glyphicon-remove-circle").removeClass("text-danger").addClass("glyphicon-ok-circle").addClass("text-success");
+    				$("#infobig_upstatController").removeClass("text-warning").addClass("text-success");
+    			}
+                else
+                {
+                    $("#info_upstatController").addClass("glyphicon-remove-circle").addClass("text-danger").removeClass("glyphicon-ok-circle").removeClass("text-success");
+                    $("#infobig_upstatController").removeClass("text-success").addClass("text-warning");
+                    bSuccess=0;
+                } 
+
+    			if(bSuccess)
+    				$("#showresult").text("已完成网络连接，您可以使用中国电信提供的业务");
+    			else if(errmsg.length)
+    			{
+    				$("#showresult").text(errmsg);
+    			}
+                else if(data["loid"]=="")
+                {
+                    $("#showresult").text("设备还未设置光口号");
+                }
+    			else
+    			{
+    				$("#showresult").text("设备正在准备中，请耐心等待...");
+
+    			}
+
+    			var uptimestr="";
+    			uptimestr+=parseInt(data["passedSystime"]/(24*3600))+"天";
+    			uptimestr+=parseInt(data["passedSystime"]%(24*3600)/3600)+"时";
+                uptimestr+=parseInt(data["passedSystime"]%(3600)/60)+"分";
+    			$("#info_uptime").text(uptimestr);
+                $("#info_uptime_small").text(uptimestr);
+    			uptimestr+=parseInt(data["passedSystime"]%60)+"秒";
+    			$("#infobig_uptime").text(uptimestr);
+                $("#info_manu").text(data["Manufacturer"]);
+                $("#info_manu_small").text(data["Manufacturer"]);
+                $("#info_model").text(data["Model"]);
+                $("#info_model_small").text(data["Model"]);
+                $("#info_hwversion").text(data["CustomerHWVersion"]);
+                $("#info_hwversion_small").text(data["CustomerHWVersion"]);
+                $("#info_fwversion").text(data["CustomerSWVersion"]);
+                $("#info_fwversion_small").text(data["CustomerSWVersion"]);
+                $("#info_serialnum").text(data["SerialNum"]);
+                $("#info_temperature").text(data["Temperature"]);
+                $("#info_temperature_small").text(data["Temperature"]);
+                if(data["DhcpAddr"]=="ipnull")
+                {
+                    $("#info_dhcp").text("未获取IP地址"); 
+                }
+                else
+                {
+                    $("#info_dhcp").text(data["DhcpAddr"]); 
+                }                
+                $("#info_pontx").text(data["TxFrameCnt"]);
+                $("#info_pontx_small").text(data["TxFrameCnt"]);
+                $("#info_ponrx").text(data["RxFrameCnt"]);
+                $("#info_ponrx_small").text(data["RxFrameCnt"]);
+                // if(data["Manufacturer"]=="FiberHome")
+                // {
+                    $("#info_pontxdbm").text(data["TxPower"]+"dBm");
+                    $("#info_pontxdbm_small").text(data["TxPower"]+"dBm");
+                    $("#info_ponrxdbm").text(data["RxPower"]+"dBm");
+                    $("#info_ponrxdbm_small").text(data["RxPower"]+"dBm");
+                // }
+                // else
+                // {
+                //     $("#info_pontxdbm").text(Math.round(10*(Math.log10(data["TxPower"]/10000)))+"dBm");
+                //     $("#info_ponrxdbm").text(Math.round(10*(Math.log10(data["RxPower"]/10000)))+"dBm");    
+                // }
+                $("#info_ssid24g").text("2.4G WiFi: "+data["SSID24G"]);
+                $("#info_ssid5g").text("5G WiFi: "+data["SSID5G"]);
+                if(data["pppAcc"].length)
+                    $("#info_pppaccinfo").text("上网帐号: "+data["pppAcc"]+" / "+data["pppPwd"]+" ");
+                if(data["voipAcc"].length)
+                    $("#info_voipaccinfo").text("语音帐号1: "+data["voipAcc"]+" / "+data["voipPwd"]+" ");
+                if(data["voipAcc2"].length)
+                    $("#info_voipaccinfo2").text("语音帐号2: "+data["voipAcc2"]+" / "+data["voipPwd2"]+" ");
+                if(data["factory_Mode"].length)
+                    $("#info_factorymode").text("网关状态: "+data["factory_Mode"]+" ");
+
+    			setTimeout(getdevinfo,3000);
+    		});
+    }
+    getdevinfo();
+    </script>
+  </body>
+</html>

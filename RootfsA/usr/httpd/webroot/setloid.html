@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>中国电信智能随选网关</title>
+	<link rel="icon" href="/imgs/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="/imgs/favicon.ico" type="image/x-icon" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+  
+
+<div class="container">
+	<div class="row">
+	<div class="col-md-12">
+	<!-- <img src="/imgs/logo_shtel.png"> -->
+	<h2>欢迎使用中国电信SDN网关</h2>
+	</div>
+	</div>
+</div>
+<div class="mainshow">
+
+    <div class="container">
+    <div class="row">
+    	<div id="msg_1" class="col-md-12">
+    	<h3>
+          <span class="glyphicon glyphicon-scale"></span> 设备状态 
+          <small><br class=" visible-xs visible-sm">设备逻辑ID: <span id="info_myloid"></span>&nbsp;&nbsp;<br class=" visible-xs visible-sm">网关序列号: <span id="info_serialnum"></span></small>
+          </h3>
+    	</div>
+        <div id="msg_2" style="display:none;" class="col-md-12">
+        <h3>
+          <span class="glyphicon glyphicon-scale"></span> 
+          等待网关设备响应...
+          </h3>
+        </div>
+    </div>
+	<div class="row">
+		<div class="col-md-3  hidden-xs hidden-sm">
+			
+			<h4  style="color:#003366">
+				    &nbsp;&nbsp;启动时长: <span id="info_uptime"></span>
+				<br>&nbsp;&nbsp;厂家名称: <span id="info_manu"></span>
+                <br>&nbsp;&nbsp;网关型号: <span id="info_model"></span>
+				<br>&nbsp;&nbsp;硬件版本: <span id="info_hwversion"></span>
+				<br>&nbsp;&nbsp;软件版本: <span id="info_fwversion"></span>
+				<br>&nbsp;&nbsp;光口发帧数: <span id="info_pontx"></span>
+				<br>&nbsp;&nbsp;光口收帧数: <span id="info_ponrx"></span>
+
+				<br><br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatPON"></span> PON光路注册<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatManager"></span> 管理器连接<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatDevAuth"></span> 设备认证<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatController"></span> 控制器连接<br>
+			</h4>
+			<br><br>
+		</div>
+        <div id="checkkey" class="col-md-9" align=center style="display:none;">
+        <h3>
+        <br class=" visible-xs visible-sm">请输入网关背面无线网络密钥的第<span id="info_fkey"></span>、<span id="info_skey"></span>、<span id="info_tkey"></span>位进行验证
+        </h3>
+        <input type=text id="keytext" value="">
+        </div>
+        <div id="setgwloid" class="col-md-9" align=center>
+        <h3>输入设备逻辑ID</h3>
+        <input type=text id="loidtext" value=""><br><br>
+        <a href="#" class="btn btn-lg btn-primary" onclick="setmyloid()">设置设备逻辑ID</a>
+        </div>
+        <div id="tips" class="col-md-9" align=center style="display:none;">
+        <br><br>
+        <h2>请先拔光纤，再设置光口号</h2>
+        </div>
+        <div id="msg_3" style="display:none;" class="col-md-2" align=center>
+        <br>
+        <span style="font-size:500%" class="glyphicon glyphicon-import" id="iicon"></span>
+        </div>
+        <div id="msg_4" style="display:none;" class="col-md-7" align=left>
+            
+        <h2 id="showtext">等待网关响应...</h2>
+        <h3 >当前时间 <span id="myclock"></span></h3>
+        </div>
+
+		<br><br>
+	</div>
+	</div>
+
+</div>
+<br>
+<div class="container">
+	<div class="row">
+	<div id="msg_5" class="col-md-8">
+    <a href="/index.html" class="btn  btn-lg btn-primary"> <span class="glyphicon glyphicon-home"></span> 返回主页</a> &nbsp;&nbsp;
+    <a href="/setloid.html" class="btn btn-lg btn-warning"> <span class="glyphicon glyphicon-download"></span> 重置LOID</a> &nbsp;&nbsp; 
+    <p class=" visible-xs visible-sm"></p> 
+    <a href="/reset.html" class="btn btn-lg btn-danger"> <span class="glyphicon glyphicon-refresh"></span> 恢复出厂</a>
+	</div>
+    <br class=" visible-xs visible-sm">
+    <br class=" visible-xs visible-sm">
+    <div class="col-md-4">
+    <b>Copyright © 2017 中国电信 - All rights reserved</b>
+    </div>
+	</div>
+</div>
+<br><br><br>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+    function randomString(len) {
+　　      len = len || 32;
+　　      var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+　　      var maxPos = $chars.length;
+　　      var pwd = '';
+　　      for (i = 0; i < len; i++) {
+　　　　        pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+　　      }
+　　      return pwd;
+    }
+    function setmyloid()
+    {
+        var msg = randomString(4);
+        if($("#loidtext").val().length==0)
+        {
+            alert("请输入光口号");
+        }
+        else if($("#loidtext").val().length<8)
+        {
+            alert("输入光口号位数太短");
+        }
+        else if($("#loidtext").val().length>32) 
+        {
+            alert("输入光口号位数太长");
+        }
+        else
+        {
+            $.getJSON("/appapi/setloid/"+$("#loidtext").val()+"/"+$("#keytext").val()+msg,function(data){
+                if(data["checkkeystat"]=="NOK")
+                {
+                    alert("验证失败，请重新输入验证码");
+                    location.href="/setloid.html";
+                } 
+                else if(data["checkkeystat"]=="wait")
+                {
+                    alert("错误次数超过5次，请等待20s后重试");
+                    location.href="/setloid.html";
+                }
+                else if(data["checkkeystat"]=="alreadywait")
+                {
+                    alert("错误次数超过5次，已等待20秒，请重试");
+                    location.href="/setloid.html";
+                }
+                else
+                {
+                    document.getElementById("msg_1").style.display="none";
+                    document.getElementById("msg_2").style.display="";
+                    document.getElementById("msg_3").style.display="";
+                    document.getElementById("msg_4").style.display="";
+                    document.getElementById("msg_5").style.display="none";
+                    document.getElementById("checkkey").style.display="none";
+                    document.getElementById("setgwloid").style.display="none";
+                    document.getElementById("tips").style.display="none";
+                    setTimeout(getdevping,20000);
+                    getticktock();
+                }
+            });
+                document.getElementById("msg_1").style.display="none";
+                document.getElementById("msg_2").style.display="";
+                document.getElementById("msg_3").style.display="";
+                document.getElementById("msg_4").style.display="";
+                document.getElementById("msg_5").style.display="none";
+                document.getElementById("checkkey").style.display="none";
+                document.getElementById("setgwloid").style.display="none";
+                document.getElementById("tips").style.display="none";
+                setTimeout(getdevping,20000);
+                getticktock();
+        }
+    }
+
+    function getkey()
+    {
+        $.getJSON("/appapi/getkey/setloid",
+            function(data){
+               $("#info_fkey").text(data["firstkey"].charAt(0));
+               $("#info_skey").text(data["secondkey"].charAt(0));
+               $("#info_tkey").text(data["thirdkey"].charAt(0)); 
+            });
+    }
+    function getdevinfo()
+    {
+    	$.getJSON("/appapi/getstat/000000",
+    		function(data){
+    			$("#info_myloid").text(data["loid"]);
+                if(document.getElementById("msg_1").style.display=="")
+                {
+                    if(data["loid"]=="")
+                    {
+                        document.getElementById("checkkey").style.display="none";
+                        document.getElementById("setgwloid").style.display="";
+                        document.getElementById("tips").style.display="none";
+                    }
+                    else if(data["upstatPON"]=="OK" && data["loid"]!="")
+                    {
+                        document.getElementById("checkkey").style.display="none";
+                        document.getElementById("setgwloid").style.display="none";
+                        document.getElementById("tips").style.display="";
+                    }
+                    else
+                    {
+                        document.getElementById("checkkey").style.display="";
+                        document.getElementById("setgwloid").style.display="";
+                        document.getElementById("tips").style.display="none";
+                    }
+                }
+    			if(data["upstatPON"]=="OK") 
+    				$("#info_upstatPON").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatPON").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+    			if(data["upstatManager"]=="OK") 
+    				$("#info_upstatManager").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatManager").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+    			if(data["upstatDevAuth"]=="OK") 
+    				$("#info_upstatDevAuth").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatDevAuth").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+    			if(data["upstatController"]=="OK") 
+    				$("#info_upstatController").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatController").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+
+    			var uptimestr="";
+                uptimestr+=parseInt(data["passedSystime"]/(24*3600))+"天";
+                uptimestr+=parseInt(data["passedSystime"]%(24*3600)/3600)+"时";
+                uptimestr+=parseInt(data["passedSystime"]%(3600)/60)+"分";
+                uptimestr+=data["passedSystime"]%60+"秒";
+                $("#info_uptime").text(uptimestr);
+    			$("#info_manu").text(data["Manufacturer"]);
+                $("#info_model").text(data["Model"]);
+    			$("#info_hwversion").text(data["CustomerHWVersion"]);
+    			$("#info_fwversion").text(data["CustomerSWVersion"]);
+    			$("#info_serialnum").text(data["SerialNum"]);
+    			$("#info_pontx").text(data["TxFrameCnt"]);
+    			$("#info_ponrx").text(data["RxFrameCnt"]);
+
+    			setTimeout(getdevinfo,3000);
+    		});
+    }
+    var TimePassed=0;
+    function getdevping()
+    {
+        $.getJSON("/appapi/getstat/000000",
+            function(data){
+                
+                location.href="/";
+            })
+        .fail(function(){
+            var dt=new Date();
+            $("#showtext").text("等待网关响应...最后检测时间 "+dt.getHours()+":"+dt.getMinutes()+":"+dt.getSeconds());
+            setTimeout(getdevping,1000);
+        });
+    }
+    function getticktock()
+    {
+        var dt=new Date();
+        $("#myclock").text(dt.getHours()+":"+dt.getMinutes()+":"+dt.getSeconds());
+        setTimeout(getticktock,2000);
+    }
+    getkey();
+    getdevinfo();
+    </script>
+  </body>
+</html>

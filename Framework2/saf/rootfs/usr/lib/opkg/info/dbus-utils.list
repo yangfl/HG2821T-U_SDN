@@ -1,0 +1,3 @@
+/usr/bin/dbus-send
+/usr/bin/dbus-cleanup-sockets
+/usr/bin/dbus-monitor

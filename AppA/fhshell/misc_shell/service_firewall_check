@@ -1,0 +1,132 @@
+#!/bin/sh
+#create by hubo 2012-5-25
+
+COMMON_CONF=/etc/fh_common.conf
+FHBOX_PATH=/usr/bin
+INTER_WEB=$FHBOX_PATH/inter_web
+GETCFG=/rom/fhshell/misc_shell/getcfg
+FW_VAR=/var/firewall
+FIREWALL_PATH=/rom/fhshell/firewall
+INTF_TO_PPP=/var/run/wan4_ppp.conf
+
+#get internet route interface
+Wancc_File_Path=/var/wanintf.conf
+Param_File_Path=/var/misc_run_param.conf
+
+if [ ! -f $Wancc_File_Path ]
+then
+	echo "$Wancc_File_Path does not exist"
+	exit 1
+fi
+
+########internet route####################
+Internet_R_Name=`$GETCFG $Wancc_File_Path internetroute`
+#echo "Internet_R_Name=$Internet_R_Name"
+INTERNET_ROUTE_GETIP=0
+tmpsubID=0
+subwanID=0
+IPC_wanStatus=0
+IPC_Nat_Enabled=0
+PPC_wanStatus=0
+PPC_Nat_Enabled=0
+Curr_INTF_IP=0
+Curr_FW_IP=0
+tmp_Internet_name=0
+
+if [ "$Internet_R_Name" != "-1" ]
+then
+	#if get ip and tx or rx have data,then set internet route led on
+	matchline=`cat $Wancc_File_Path | grep "${Internet_R_Name}$" | sed -n '1p'`
+	tmpID=`echo $matchline | awk -F '=' '{print $1}' | awk -F 'w' '{print $2}'`
+	wanID=`expr $tmpID / 4 + 1`
+	tmpsubID=`expr $tmpID % 8 % 4`
+	subwanID=`expr $tmpsubID % 2 + 1`
+	#echo "tmpID=$tmpID wanID=$wanID tmpsubID =$tmpsubID subwanID=$subwanID"
+	if [ `expr $tmpsubID` -gt 1 ]
+	then
+		PPC_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANPPPC_${subwanID}_ConnectionStatus" |cut -d "=" -f 2`
+		PPC_wanStatus=`$INTER_WEB get $PPC_Num`
+		Curr_INTF_IP_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANPPPC_${subwanID}_ExternalIPAddress" |cut -d "=" -f 2`
+		Curr_INTF_IP=`$INTER_WEB get $Curr_INTF_IP_Num`
+		#echo "PPC_Num=$PPC_Num Curr_INTF_IP_Num=$Curr_INTF_IP_Num"
+		#echo "PPC_wanStatus=$PPC_wanStatus"
+	else
+		IPC_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANIPC_${subwanID}_ConnectionStatus"|cut -d "=" -f 2`
+		IPC_wanStatus=`$INTER_WEB get $IPC_Num`
+		Curr_INTF_IP_Num=`cat $Param_File_Path |grep "IGD_WAND_1_WANCD_${wanID}_WANIPC_${subwanID}_ExternalIPAddress" |cut -d "=" -f 2`
+		Curr_INTF_IP=`$INTER_WEB get $Curr_INTF_IP_Num`
+		#echo "IPC_Num=$IPC_Num Curr_INTF_IP_Num=$Curr_INTF_IP_Num"
+		#echo "IPC_wanStatus=$IPC_wanStatus"
+	fi	
+	
+	if [ "$Internet_R_Name" == "pon0" ]
+	then
+		tmp_Internet_name=`echo "pon0.4093"`
+	else
+		tmp_Internet_name=$Internet_R_Name
+	fi
+	tmp_Internet_name=`ifconfig $tmp_Internet_name | grep "$tmp_Internet_name" | awk -F " " '{print $1}'`
+	#echo "tmp_Internet_name=$tmp_Internet_name"
+	if [ -n $tmp_Internet_name ]
+	then
+		#dhcp or static ip
+		if [ `expr $tmpsubID` -le 1 ]
+		then
+			#echo "IPC_wanStatus=$IPC_wanStatus "
+			if [ "$IPC_wanStatus" == "Connected&" ]
+			then
+				INTERNET_ROUTE_GETIP=1
+			else
+				INTERNET_ROUTE_GETIP=0
+			fi
+		else	
+			#pppoe
+			#echo "PPC_wanStatus=$PPC_wanStatus "
+			if [ "$PPC_wanStatus" == "Connected&" ]
+			then
+				INTERNET_ROUTE_GETIP=1
+			else
+				INTERNET_ROUTE_GETIP=0
+			fi
+		fi
+	else
+		INTERNET_ROUTE_GETIP=0
+	fi
+else
+	INTERNET_ROUTE_GETIP=0
+fi
+#存在internet路由，并且路由拿到了地址
+#echo "INTERNET_LED_STATUS=$INTERNET_LED_STATUS"
+if [ "$INTERNET_ROUTE_GETIP" -eq 1 ] 
+then
+	Curr_FW_IP=`grep "INET_IP="  $FW_VAR/fw.conf | cut -d = -f 2 `
+	if [ `expr $tmpsubID` -gt 1 ]
+	then
+		Real_Intf=`getcfgx $INTF_TO_PPP $tmp_Internet_name`
+		if [ -z $Real_Intf ]
+		then
+			exit 0
+		fi	
+	else
+		Real_Intf=$tmp_Internet_name
+	fi
+	Curr_INTF_IP=`ifconfig $Real_Intf | egrep "inet addr:" | \
+			sed -e 's/^.*inet addr:\([0-9.][0-9.]*\) .*/\1/'`
+	#地址改变		
+	if [ "$Curr_FW_IP" != "$Curr_INTF_IP" ]
+	then
+		$FIREWALL_PATH/fw_main.sh 0> /dev/zero 1>&0 2>&0 & 
+		killall vpnmain >dev/null 2>&1
+		vpnmain >dev/null 2>&1 &
+	else
+		local PROC_ID=`pidof vpnmain`
+		if [ -z "$PROC_ID" ]
+		then
+			vpnmain >dev/null 2>&1 &
+		fi
+		exit 0
+	fi
+else
+	killall vpnmain >dev/null 2>&1
+	exit 0
+fi

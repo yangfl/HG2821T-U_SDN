@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/home_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main_home.js?version=<%=version%>"></script>
+		<script language="javascript">
+			var onOff = true;
+			var activeTimeout = setTimeout("Timeout()", 300000);   
+			  
+			function Timeout() {
+			    XHR.halt();
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+						parent.location = "/cgi-bin/luci";
+					});
+			}
+		
+			function showFloatInfo(eObj,isMouseOver)
+			{
+				var name = eObj.id.split("_")[0];
+
+				clearTimeout(activeTimeout);				
+				activeTimeout = setTimeout("Timeout()", 300000);				
+
+				if (isMouseOver)
+					$("#" + name + "_info_div").removeClass("visibility_hidden");
+				else
+					$("#" + name + "_info_div").addClass("visibility_hidden");
+			}
+			
+			$(document).ready(function(){
+				if(BrowserType() == "IE7")  
+					isIE7 = true;
+
+				(new XHR()).get('<%=luci.dispatcher.build_url('admin/settings/gwinfo')%>',{get:"all"},
+					function(x, json)
+					{
+						$("#gwName").text(json.DevType);
+						$("#gwCls").text(json.ProductCls);
+						$("#gwSN").text(json.ProductSN);
+						$("#gwVer").text(json.SWVer);
+						$("#gwMac").text(string2MACFormat(json.MAC).toUpperCase());
+						$("#gwLan").text(json.LANIP);
+						$("#wanacnt").text(json.wanAcnt);
+
+						$("#ssid5g").css("display", "none");
+						$("#hh").css("display", "none");
+						var tmpssid = "";
+						if (json.ssid2g.length > 0)
+						{
+							if (json.ssid2g.length > 16)
+								tmpssid = json.ssid2g.substr(0,15) + "...";
+							else
+								tmpssid = json.ssid2g;
+							$("#device_wifi_detail_div").children(":first").text(tmpssid);
+							if ((json.ssid5g.length > 0) && (json.ssid2g != json.ssid5g))
+							{
+								wifiBoth = true;
+								if (json.ssid5g.length > 16)
+									tmpssid = json.ssid5g.substr(0,15) + "...";
+								else
+									tmpssid = json.ssid5g;										
+								$("#ssid5g").css("display", "");
+								$("#hh").css("display", "");
+								$("#ssid5g").text(tmpssid);
+							}
+						}
+						else
+						{
+							if (json.ssid5g.length > 16)
+								tmpssid = json.ssid5g.substr(0,15) + "...";
+							else
+								tmpssid = json.ssid5g;										
+							$("#device_wifi_detail_div").children(":first").text(tmpssid);
+						}
+						onOff = json.wifiOnOff;
+						if (!onOff)
+						{
+							wifiOnOff = false;
+							$("#device_wifi_number").hide();
+					        $("#wifi_logo_div").css("backgroundImage","url(\"<%=resource%>/image/home/unlink.png\")");
+
+							$("#device_wifi_info_div").children(":last").html("<span class=\"state_unlink\">无线未开启</span>");						
+						}
+					});					
+				
+				XHR.poll(WEB_POLL_INTERVAL, '<%=luci.dispatcher.build_url('admin/allInfo')%>',null,
+					function(x, json){
+							hasGotten = true;
+						    devListObjs = json;
+							if ((json.wanUpTime == "") || (parseInt(json.wanUpTime) == 0))
+							{
+								$("#uptime").text("0分钟");
+							}
+							else
+							{
+								var tStr = formatTime(parseInt(json.wanUpTime));
+								var tUp = tStr.split(":");
+								$("#uptime").text(tUp[0]+"天"+tUp[1]+"小时"+tUp[2]+"分钟");
+						    }
+
+						    if (json.wanConnect.toUpperCase() == "CONNECTED")
+						    {
+						    	$("#ctst").text("已连接");
+						    	$("#uplink_logo_div").addClass("uplink_logo_on");
+						    }
+						    else
+						    {
+						    	$("#ctst").text("未连接");
+						    	$("#uplink_logo_div").removeClass("uplink_logo_on");
+						    }
+						    		
+							if (onOff && json.wlcount > 0)       //无线
+							{
+							    wifiOnOff = true;
+								$("#device_wifi_number").show();
+								$("#device_wifi_number").text(json.wlcount);
+								wifiCnt = parseInt(json.wlcount);
+								$("#wifi_logo_div").css("backgroundImage","url(\"<%=resource%>/image/home/home_wifi.png\")");
+									
+								$("#device_wifi_info_div").children(":last").html("<span class=\"state_link\">↓" + getNetworkRate(parseInt(json.tWlDown), 1) + "b/s | ↑" + getNetworkRate(parseInt(json.tWlUp), 1) + "b/s</span>");
+								$("#wldevs").text(json.wlcount + "台");
+								$("#device_wifi_detail_div").children(":last").prev().prev().text(getNetworkRate(parseInt(json.tWlDown), 1) + "b/s");
+								$("#device_wifi_detail_div").children(":last").text(getNetworkRate(parseInt(json.tWlUp), 1) + "b/s");
+							}
+							else
+							{
+								$("#device_wifi_number").hide();
+								wifiCnt = 0;
+								if (onOff)
+								{
+									wifiOnOff = true;
+									$("#wifi_logo_div").css("backgroundImage","url(\"<%=resource%>/image/home/home_wifi.png\")");
+									$("#device_wifi_info_div").children(":last").html("<span class=\"state_unlink\">未连接设备</span>");
+									$("#wldevs").text("无");
+								}
+								else
+								{
+									wifiOnOff = false;
+							        $("#wifi_logo_div").css("backgroundImage","url(\"<%=resource%>/image/home/unlink.png\")");
+								    $("#device_wifi_info_div").children(":last").html("<span class=\"state_unlink\">无线未开启</span>");
+							    }
+							}
+							
+							
+							if (json.wcount > 0)    //有线
+							{
+								$("#device_pc_number").show();
+								$("#device_pc_number").text(json.wcount);
+								pcCnt = parseInt(json.wcount);
+								$("#device_pc_info_div").children(":last").html("<span class=\"state_link\">↓" + getNetworkRate(parseInt(json.tWDown), 1) + "b/s | ↑" + getNetworkRate(parseInt(json.tWUp), 1) + "b/s</span>");
+								$("#device_pc_detail_div").children(":first").text(json.wcount + "台");
+								$("#device_pc_detail_div").children(":last").prev().prev().text(getNetworkRate(parseInt(json.tWDown), 1) + "b/s");
+								$("#device_pc_detail_div").children(":last").text(getNetworkRate(parseInt(json.tWUp), 1) + "b/s");									
+							}
+							else
+							{
+								$("#device_pc_number").hide();
+								pcCnt = 0;
+								$("#device_pc_info_div").children(":last").html("<span class=\"state_unlink\">未连接设备</span>");
+								$("#device_pc_detail_div").children(":first").text("无");								
+							}	
+							
+							if (json.itv)       //iTV
+							{
+								 $("#itv_unlink_div").removeClass("unlink_logo");
+								 $("#device_itv_info_div").children(":last").html("<span class=\"state_link\">已开通</span>");
+								 $("#device_itv_detail_div").text("您已开通iTV业务，该功能可正常使用。");				 
+							}
+							else
+							{
+							  $("#itv_unlink_div").addClass("unlink_logo");
+							  $("#device_itv_info_div").children(":last").html("<span class=\"state_unlink\">未开通</span>");
+							  $("#device_itv_detail_div").text("您尚未开通iTV业务，如需了解开通详情请至电信营业厅或拨打10000号咨询。");								
+							}
+							
+							if (json.voip)    //phone
+							{
+									$("#phone_unlink_div").removeClass("unlink_logo");
+									$("#device_phone_info_div").children(":last").html("<span class=\"state_link\">已开通</span>");
+									$("#device_phone_detail_div").text("您已开通电话业务，该功能可正常使用。");							
+							}	
+							else
+							{
+								$("#phone_unlink_div").addClass("unlink_logo");
+								$("#device_phone_info_div").children(":last").html("<span class=\"state_unlink\">未开通</span>");
+								$("#device_phone_detail_div").text("您尚未开通电话业务，如需了解开通详情请至电信营业厅或拨打10000号咨询。");							
+							}
+							
+							//storage
+							if (json.scount > 0)
+							{
+								$("#device_storage_number").show();
+								$("#device_storage_number").text(json.scount); 
+								usbCnt = parseInt(json.scount);
+								$("#device_storage_info_div").children(":last").html("<span class=\"state_link\">已连接</span>");
+								$("#device_storage_detail_div").html("连接设备: <span class=\"theme_color\">" + json.scount + "台</span> <br/>");							
+							}
+							else
+							{
+								$("#device_storage_number").hide();
+								usbCnt = 0;
+								$("#device_storage_info_div").children(":last").html("<span class=\"state_unlink\">未连接</span>");
+								$("#device_storage_detail_div").html("没有USB设备连接");								
+							}
+					});	
+				});					
+	  </script>
+	</head>
+	<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_home_body'>
+		<div id="uplink_router_div">
+			<div id="uplink_info_div" class="visibility_hidden">
+				<div id="uplink_info" class="long_text">
+				上网账号: <span class="theme_color" id="wanacnt"></span> <br/>
+				连接状态: <span class="theme_color" id="ctst"></span> <br/>
+				联网时间: <span class="theme_color" id="uptime"></span>
+				</div>
+			</div>
+			<div id="uplink_logo_div" class="uplink_logo" onmouseover="showFloatInfo(this, true)" onmouseout="showFloatInfo(this, false)"></div>
+			<div id="uplink_rate_div" class="uplink_rate"></div>
+			<div id="router_logo_div" class="router_logo" onmouseover="showFloatInfo(this, true)" onmouseout="showFloatInfo(this, false)" onclick="jumpToPage('setting', 'gateway_info', '', '')"></div>
+			<div id="router_info_div" class="visibility_hidden">
+				<div id="router_info" class="long_text">
+				设备类型: <span class="theme_color" id="gwName"></span> <br/>
+				型号: <span class="theme_color" id="gwCls"></span> <br/>
+				序列号: <span class="theme_color" id="gwSN"></span> <br/>
+				版本号: <span class="theme_color" id="gwVer"></span> <br/>
+				MAC: <span class="theme_color" id="gwMac"></span> <br/>
+				LAN IP: <span class="theme_color" id="gwLan"></span>
+				</div>
+			</div>
+		</div>
+		<div id="wifi_phone_div">
+			<div id="wifi_info_div"></div>
+			<div id="wifi_logo_div" onclick="jumpToPage('wifi', 'base', '', '')"></div>
+            <div id="itv_unlink_div"></div>
+			<div id="phone_unlink_div"></div>
+		</div>
+		<div id="device_logo_div">
+			<div id="device_wifi_logo_div" class="device_wifi_logo_div device_logo_div" onmouseover="showDeviceInfo(this, true)" onmouseout="showDeviceInfo(this, false)" onclick="showDeviceList(this)">
+				<div id="device_wifi_number" class="device_number" style="display:none"></div>
+			</div>
+			<div id="device_pc_logo_div" class="device_pc_logo_div device_logo_div" onmouseover="showDeviceInfo(this, true)" onmouseout="showDeviceInfo(this, false)" onclick="showDeviceList(this)">
+				<div id="device_pc_number" class="device_number" style="display:none"></div>
+			</div>
+			<div id="device_itv_logo_div" class="device_itv_logo_div device_logo_div" onmouseover="showDeviceInfo(this, true)" onmouseout="showDeviceInfo(this, false)" onclick="jumpToPage('device', 'itv', '', '')"></div>
+			<div id="device_phone_logo_div" class="device_phone_logo_div device_logo_div" onmouseover="showDeviceInfo(this, true)" onmouseout="showDeviceInfo(this, false)" onclick="jumpToPage('device', 'phone', '', '')"></div>
+			<div id="device_storage_logo_div" class="device_storage_logo_div device_logo_div" onmouseover="showDeviceInfo(this, true)" onmouseout="showDeviceInfo(this, false)" onclick="showDeviceList(this)">
+				<div id="device_storage_number" class="device_number" style="display:none"></div>
+			</div>
+		</div>
+		<div id="device_info_div">
+			<div id="device_wifi_info_div" class="device_info text_shadow_white">
+				<div class="device_title">无线端</div>
+				<div class="device_state"></div>
+			</div>
+			<div id="device_pc_info_div" class="device_info text_shadow_white">
+				<div class="device_title">有线端</div>
+				<div class="device_state"></div>
+			</div>
+			<div id="device_itv_info_div" class="device_info text_shadow_white">
+				<div class="device_title">iTV</div>
+				<div class="device_state"></div>
+			</div>
+			<div id="device_phone_info_div" class="device_info text_shadow_white">
+				<div class="device_title">电话</div>
+				<div class="device_state"></div>
+			</div>
+			<div id="device_storage_info_div" class="device_info text_shadow_white">
+				<div class="device_title">存储</div>
+				<div class="device_state"></div>
+			</div>
+		</div>
+		<div id="device_detail_div" style="display:none">
+			<div id="device_wifi_detail_div" class="device_detail long_text visibility_hidden">
+				SSID:  <span class="theme_color"></span> <br/>
+				<span class="theme_color" style="margin-left:33px;display:none" id="ssid5g"></span> <br id="hh"/>
+				连接设备: <span class="theme_color" id="wldevs"></span> <br/>
+				下行: <span class="theme_color"></span> <br/>
+				上行: <span class="theme_color"></span>
+			</div>
+			<div id="device_pc_detail_div" class="device_detail visibility_hidden">
+				连接设备: <span class="theme_color"></span> <br/>
+				下行: <span class="theme_color"></span> <br/>
+				上行: <span class="theme_color"></span>
+			</div>
+			<div id="device_itv_detail_div" class="device_detail visibility_hidden">
+			</div>
+			<div id="device_phone_detail_div" class="device_detail visibility_hidden">
+			</div>
+			<div id="device_storage_detail_div" class="device_detail visibility_hidden">
+				
+			</div>
+		</div>
+		<div id="device_list_div" style="display:none" onmouseover="deviceListMouseOver()" onmouseout="deviceListMouseOut()">
+			<div id="device_list_left_div">
+				<div id="device_list_left_arrow_div"></div>
+			</div>
+			<div id="device_list_center_div">
+			</div>
+			<div id="device_list_right_arrow_div"></div>
+			
+			<div id="device_list_float_div" style="display:none">
+				<div id="device_list_float_info_div"></div>
+			</div>
+		</div>
+		
+		<div id="bg_line_div"></div>
+	</body>
+</html>

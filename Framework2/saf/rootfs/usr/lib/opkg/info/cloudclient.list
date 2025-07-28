@@ -1,0 +1,4 @@
+/etc/init.d/cloudclt
+/etc/config/cloudclient
+/etc/config/cloudclient.def
+/sbin/cloudclient

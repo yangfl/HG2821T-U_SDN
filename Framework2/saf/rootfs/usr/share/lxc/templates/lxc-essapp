@@ -1,0 +1,164 @@
+#!/bin/ash
+
+
+LXC_MAPPED_UID=
+LXC_MAPPED_GID=
+
+# Make sure the usual locations are in PATH
+export PATH=$PATH:/usr/sbin:/usr/bin:/sbin:/bin
+
+am_in_userns() {
+    [ -e /proc/self/uid_map ] || { echo no; return; }
+    [ "$(wc -l /proc/self/uid_map | awk '{ print $1 }')" -eq 1 ] || { echo yes; return; }
+    line=$(awk '{ print $1 " " $2 " " $3 }' /proc/self/uid_map)
+    [ "$line" = "0 0 4294967295" ] && { echo no; return; }
+    echo yes
+}
+
+in_userns=0
+[ $(am_in_userns) = "yes" ] && in_userns=1
+
+install_app()
+{
+    rootfs=$1
+
+    tree="\
+$rootfs/etc/init.d \
+$rootfs/etc/rc.d \
+$rootfs/etc/config \
+$rootfs/dev/shm \
+$rootfs/run/shm \
+$rootfs/proc \
+$rootfs/sys \
+$rootfs/bin \
+$rootfs/sbin \
+$rootfs/usr \
+$rootfs/mnt \
+$rootfs/tmp \
+$rootfs/opt/preinstall \
+$rootfs/var/run/dbus \
+$rootfs/root \
+$rootfs/lib \
+$rootfs/lib64"
+
+    mkdir -p $tree
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+
+copy_configuration()
+{
+    path=$1
+    rootfs=$2
+    name=$3
+
+    grep -q "^lxc.rootfs" $path/config 2>/dev/null || echo "lxc.rootfs = $rootfs" >> $path/config
+cat <<EOF >> $path/config
+lxc.utsname = $name
+lxc.pts = 1024
+lxc.kmsg = 0
+lxc.autodev = 0
+lxc.mount.entry = /dev dev none rw,bind 0 0
+lxc.mount.entry = /lib lib none rw,bind 0 0
+lxc.mount.entry = /bin bin none rw,bind 0 0
+lxc.mount.entry = /usr usr none rw,bind 0 0
+lxc.mount.entry = /sbin sbin none rw,bind 0 0
+lxc.mount.entry = proc proc proc nodev,noexec,nosuid 0 0
+lxc.mount.entry = tmpfs tmp tmpfs size=2m
+lxc.mount.entry = /tmp/.uci tmp/.uci none rw,rbind,create=dir 0 0
+lxc.mount.entry = /var/run/dbus/ var/run/dbus none rw,bind 0 0
+lxc.mount.entry = /etc/config etc/config none rw,bind 0 0
+lxc.mount.entry = /opt/preinstall/$3/files files none ro,bind 0 0
+lxc.mount.entry = /opt/preinstall/$3/data data none rw,bind 0 0
+lxc.id_map = g 5 5 1
+EOF
+
+}
+
+remap_userns()
+{
+    path=$1
+
+    if [ -n "$LXC_MAPPED_UID" ] && [ "$LXC_MAPPED_UID" != "-1" ]; then
+        chown $LXC_MAPPED_UID $path/config 2>&1
+        chown -R root $path/rootfs 2>&1
+    fi
+
+    if [ -n "$LXC_MAPPED_GID" ] && [ "$LXC_MAPPED_GID" != "-1" ]; then
+        chgrp $LXC_MAPPED_GID $path/config 2>&1
+        chgrp -R root $path/rootfs 2>&1
+    fi
+}
+
+usage()
+{
+    cat <<EOF
+$1 -h|--help -p|--path=<path>
+EOF
+    return 0
+}
+
+options=$(getopt -o hp:n:u: -l help,rootfs:,path:,name:,mapped-uid:,mapped-gid: -- "$@")
+if [ $? -ne 0 ]; then
+        usage $(basename $0)
+    exit 1
+fi
+eval set -- "$options"
+
+while true
+do
+    case "$1" in
+        -h|--help)      usage $0 && exit 0;;
+        -p|--path)      path=$2; shift 2;;
+        --rootfs)       rootfs=$2; shift 2;;
+        -n|--name)      name=$2; shift 2;;
+        --mapped-uid)   LXC_MAPPED_UID=$2; shift 2;;
+        --mapped-gid)   LXC_MAPPED_GID=$2; shift 2;;
+        --)             shift 1; break ;;
+        *)              break ;;
+    esac
+done
+
+if [ "$(id -u)" != "0" ]; then
+    echo "This script should be run as 'root'"
+    exit 1
+fi
+
+if [ -z "$path" ]; then
+    echo "'path' parameter is required"
+    exit 1
+fi
+
+# detect rootfs
+config="$path/config"
+if [ -z "$rootfs" ]; then
+    if grep -q '^lxc.rootfs' $config 2>/dev/null ; then
+        rootfs=$(awk -F= '/^lxc.rootfs =/{ print $2 }' $config)
+    else
+        rootfs=$path/rootfs
+    fi
+fi
+
+install_app $rootfs $url $name
+if [ $? -ne 0 ]; then
+    echo "failed to install app's rootfs"
+    exit 1
+fi
+
+
+#FIXME: can't create /opt/preinstall/demoapp/demoapp/config: Permission denied
+copy_configuration $path $rootfs $name
+if [ $? -ne 0 ]; then
+    echo "failed to write configuration file"
+    exit 1
+fi
+
+remap_userns $path
+if [ $? -ne 0 ]; then
+    echo "failed to remap files to user"
+    exit 1
+fi

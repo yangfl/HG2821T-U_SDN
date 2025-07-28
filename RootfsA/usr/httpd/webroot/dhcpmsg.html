@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>中国电信智能随选网关</title>
+	<link rel="icon" href="/imgs/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="/imgs/favicon.ico" type="image/x-icon" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+  
+
+<div class="container">
+	<div class="row">
+	<div class="col-md-12">
+	<!-- <img src="/imgs/logo_shtel.png"> -->
+	<h2>欢迎使用中国电信SDN网关</h2>
+	</div>
+	</div>
+</div>
+<div class="mainshow">
+
+    <div class="container">
+    <div class="row">
+    	<div class="col-md-12">
+    	<h3>
+          <span class="glyphicon glyphicon-scale"></span> 设备状态 
+          <small><br class=" visible-xs visible-sm">设备逻辑ID: <span id="info_myloid"></span>&nbsp;&nbsp;<br class=" visible-xs visible-sm">网关序列号: <span id="info_serialnum"></span></small>
+          </h3>
+    	</div>
+    </div>
+	<div class="row">
+		<div class="col-md-3 " style="width:600px;">
+			
+			<h4  style="color:#003366">
+				    &nbsp;&nbsp;启动时长: <span id="info_uptime"></span>
+				<br>&nbsp;&nbsp;B平面ip: <span id="info_dhcpip"></span>
+                <br>&nbsp;&nbsp;dns地址: <span id="info_dhcpdns"></span>
+				<br>&nbsp;&nbsp;网关地址: <span id="info_dhcpgateway"></span>
+				<br>&nbsp;&nbsp;报文发送时间: <span id="info_dhcpdiscover"></span>
+				<br>&nbsp;&nbsp;光口发帧数: <span id="info_pontx"></span>
+				<br>&nbsp;&nbsp;光口收帧数: <span id="info_ponrx"></span>
+
+				<br><br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatPON"></span> PON光路注册<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatManager"></span> 管理器连接<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatDevAuth"></span> 设备认证<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatController"></span> 控制器连接<br>
+			</h4>
+			<br><br>
+		<br><br>
+	</div>
+	</div>
+
+</div>
+<br>
+<div class="container">
+	<div class="row">
+	<div class="col-md-8">
+    <a href="/index.html" class="btn  btn-lg btn-primary"> <span class="glyphicon glyphicon-home"></span> 返回主页</a> &nbsp;&nbsp;
+    <a href="/setloid.html" class="btn btn-lg btn-warning"> <span class="glyphicon glyphicon-download"></span> 重置LOID</a> &nbsp;&nbsp;
+    <p class=" visible-xs visible-sm"></p> 
+    <a href="/reset.html" class="btn btn-lg btn-danger"> <span class="glyphicon glyphicon-refresh"></span> 恢复出厂</a>
+	</div>
+    <div class="col-md-4">
+    <b>Copyright © 2017 中国电信 - All rights reserved</b>
+    </div>
+	</div>
+</div>
+<br><br><br>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+    function getdevinfo()
+    {
+    	$.getJSON("/appapi/getstat/000000",
+    		function(data){
+                $("#info_myloid").text(data["loid"]);
+    			if(data["upstatPON"]=="OK") 
+    				$("#info_upstatPON").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatPON").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+    			if(data["upstatManager"]=="OK") 
+    				$("#info_upstatManager").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatManager").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+    			if(data["upstatDevAuth"]=="OK") 
+    				$("#info_upstatDevAuth").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatDevAuth").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+    			if(data["upstatController"]=="OK") 
+    				$("#info_upstatController").removeClass("glyphicon-remove-circle").removeClass("text-warning").addClass("glyphicon-ok-circle").addClass("text-success");
+                else
+                    $("#info_upstatController").addClass("glyphicon-remove-circle").addClass("text-warning").removeClass("glyphicon-ok-circle").removeClass("text-success");
+
+    			var uptimestr="";
+                uptimestr+=parseInt(data["passedSystime"]/(24*3600))+"天";
+                uptimestr+=parseInt(data["passedSystime"]%(24*3600)/3600)+"时";
+                uptimestr+=parseInt(data["passedSystime"]%(3600)/60)+"分";
+                uptimestr+=data["passedSystime"]%60+"秒";
+                $("#info_uptime").text(uptimestr);
+    			$("#info_serialnum").text(data["SerialNum"]);
+                if(data["DhcpAddr"]=="ipnull")
+                {
+                    $("#info_dhcpip").text("未获取IP地址"); 
+                }
+                else
+                {
+                    $("#info_dhcpip").text(data["DhcpAddr"]); 
+                }     
+                if(data["DhcpDns"]=="dnsnull")
+                {
+                    $("#info_dhcpdns").text("未获取DNS地址"); 
+                }
+                else
+                {
+                    $("#info_dhcpdns").text(data["DhcpDns"]); 
+                }     
+                if(data["DhcpGateway"]=="gatewaynull")
+                {
+                    $("#info_dhcpgateway").text("未获取网关地址"); 
+                }
+                else
+                {
+                    $("#info_dhcpgateway").text(data["DhcpGateway"]); 
+                }     
+                if(data["DhcpDiscover"]=="discovernull")
+                {
+                    $("#info_dhcpdiscover").text("未发送discover报文"); 
+                }
+                else
+                {
+                    $("#info_dhcpdiscover").text(data["DhcpDiscover"]); 
+                }     
+    			$("#info_pontx").text(data["TxFrameCnt"]);
+    			$("#info_ponrx").text(data["RxFrameCnt"]);
+
+    			setTimeout(getdevinfo,3000);
+    		});
+    }
+    getdevinfo();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+# Rules for USBmount
+
+#KERNEL=="sd*", BUS=="usb", ACTION=="add",    RUN="/usr/share/usbmount/usbmount 'add'  '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+KERNEL=="sd*", BUS=="usb", ACTION=="add",    RUN="/usr/share/usbmount/usbmount add"
+#KERNEL=="ub*", BUS=="usb", ACTION=="add",    RUN="/usr/share/usbmount/usbmount 'add'"
+KERNEL=="ttyUSB*", BUS=="usb", ACTION=="add",    RUN="/usr/share/usbmount/usbttymount 'add' '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+KERNEL=="ttyACM*", BUS=="usb", ACTION=="add",    RUN="/usr/share/usbmount/usbcdcmount 'add'  '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+KERNEL=="hidraw*", BUS=="usb", ACTION=="add",    RUN="/usr/share/usbmount/usbhidmount 'add'  '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+#KERNEL=="usb",             ACTION=="remove", RUN="/usr/share/usbmount/usbmount 'remove'"
+#KERNEL=="sd*",             ACTION=="remove", RUN="/usr/share/usbmount/usbmount 'remove'  '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+KERNEL=="sd*",             ACTION=="remove", RUN="/usr/share/usbmount/usbmount remove"
+#KERNEL=="ub*",             ACTION=="remove", RUN="/usr/share/usbmount/usbmount 'remove'"
+KERNEL=="ttyUSB*",         ACTION=="remove", RUN="/usr/share/usbmount/usbttymount 'remove'  '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+KERNEL=="ttyACM*",         ACTION=="remove", RUN="/usr/share/usbmount/usbcdcmount 'remove'  '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+KERNEL=="hidraw*",         ACTION=="remove", RUN="/usr/share/usbmount/usbhidmount 'remove'  '%s{idVendor}' '%s{idProduct}' '%s{serial}' '%M' '%s{vendor}' '%s{product}'"
+#BUS=="usb",             ACTION=="remove", RUN="/usr/share/usbmount/usbmount 'remove'"

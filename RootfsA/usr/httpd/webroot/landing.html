@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>中国电信智能随选网关</title>
+	<link rel="icon" href="/imgs/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="/imgs/favicon.ico" type="image/x-icon" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+  
+
+<div class="container">
+	<div class="row">
+	<div class="col-md-12">
+	<!-- <img src="/imgs/logo_shtel.png"> -->
+	<h2>欢迎使用中国电信SDN网关</h2>
+	</div>
+	</div>
+</div>
+<div class="mainshow">
+
+    <div class="container">
+    <div class="row">
+    	<div class="col-md-12">
+    	<h3>
+          <span class="glyphicon glyphicon-scale"></span> 
+          等待网关设备响应...
+          </h3>
+    	</div>
+    </div>
+	<div class="row">
+		<div class="col-md-3">
+			
+			<h4  style="color:#003366" class=" hidden-xs hidden-sm">
+				    &nbsp;&nbsp;启动时长: <span id="info_uptime"></span>
+				<br>&nbsp;&nbsp;厂家名称: <span id="info_manu"></span>
+				<br>&nbsp;&nbsp;硬件版本: <span id="info_hwversion"></span>
+				<br>&nbsp;&nbsp;软件版本: <span id="info_fwversion"></span>
+				<br>&nbsp;&nbsp;序列号: <span id="info_serialnum"></span>
+				<br>&nbsp;&nbsp;光口发帧数: <span id="info_pontx"></span>
+				<br>&nbsp;&nbsp;光口收帧数: <span id="info_ponrx"></span>
+
+				<br><br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatPON"></span> PON光路注册<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatManager"></span> 管理器连接<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatDevAuth"></span> 设备认证<br>
+				&nbsp;&nbsp;<span class='glyphicon glyphicon-remove-circle' id="info_upstatController"></span> 控制器连接<br>
+			</h4>
+			<br><br>
+		</div>
+        <div class="col-md-2" align=center>
+        <br>
+        <span style="font-size:500%" class="glyphicon glyphicon-import" id="iicon"></span>
+        </div>
+        <div class="col-md-7" align=left>
+            
+        <h2 id="showtext">等待网关响应...</h2>
+        <h3 >当前时间 <span id="myclock"></span></h3>
+        </div>
+
+		<br><br>
+	</div>
+	</div>
+
+</div>
+<br>
+<div class="container">
+	<div class="row">
+	<div class="col-md-8">
+    
+	</div>
+    <br class=" visible-xs visible-sm">
+    <br class=" visible-xs visible-sm">
+    <div class="col-md-4">
+    <b>Copyright © 2017 中国电信 - All rights reserved</b>
+    </div>
+	</div>
+</div>
+<br><br><br>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+
+    var TimePassed=0;
+    function getdevping()
+    {
+    	$.getJSON("/appapi/getstat/000000",
+    		function(data){
+    			
+                location.href="/";
+    		})
+        .fail(function(){
+            var dt=new Date();
+            $("#showtext").text("等待网关响应...最后检测时间 "+dt.getHours()+":"+dt.getMinutes()+":"+dt.getSeconds());
+            setTimeout(getdevping,1000);
+        });
+    }
+    function getticktock()
+    {
+        var dt=new Date();
+        $("#myclock").text(dt.getHours()+":"+dt.getMinutes()+":"+dt.getSeconds());
+        setTimeout(getticktock,2000);
+    }
+    setTimeout(getdevping,21000);
+    getticktock();
+    </script>
+  </body>
+</html>

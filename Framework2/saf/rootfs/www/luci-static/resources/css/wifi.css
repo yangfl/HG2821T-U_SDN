@@ -1,0 +1,218 @@
+/* CSS Document */
+::-ms-clear,::-ms-reveal{
+  display: none;
+}
+
+.wifi-block{
+	margin-left: 11%;
+	margin-top: 5%;
+	font-size: 14px;
+	color: #535353;
+	font-family: "Microsoft YaHei";
+	
+}
+
+.wifi_2G_settings{
+}
+.wifi_5G_settings{
+}
+
+.wifi-switch{
+	height: 36px;
+	line-height: 36px;
+}
+
+ .wifi-block > div > div{
+	margin-right: 20px;
+} 
+
+.wifi-block > div > span{
+	width: 95px;
+	height: 32px;
+	line-height: 32px;
+    text-align: right;
+    display: inline-block;
+    *display: inline;
+ 	*zoom: 1;
+ 	
+	*vertical-align: top;
+}
+
+.wifi-block input{
+	margin: 0 20px 0 20px;
+	width: 238px;
+	padding-left: 10px;
+	height: 32px;
+	line-height: 32px;
+	border-radius: 4px;
+	border: 1px solid #dbdbdb;
+}
+
+ .wifi-block input:focus{
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+	          box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+	border: 1px solid #39ba93;
+	outline: 0;
+} 
+
+.switch-button{
+	margin: 0 0 10px 0;
+	width: 41px !important;
+	line-height: 55px;
+}
+
+.float-left{
+	float: left;
+}
+
+.float-right{
+	float: right;
+}
+
+.wifi-password{
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    display: inline-block;
+    height: 32px;
+    outline: 0 none;
+    width: 248px;
+	background-color: #fff;
+} 
+
+
+ .wifi-password-focus{
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+	          box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+	border: 1px solid #39ba93;
+	outline: 0;
+} 
+
+ .wifi-password input{
+	border: none;
+	margin: 0 auto;
+	width: 212px;
+	/* *width: 180px; */
+	height:30px;
+	line-height:30px;
+	border-radius: none;
+	padding-left: 10px;
+	float:left;
+	border-radius: 4px;
+
+} 
+
+ .wifi-password input:focus{
+	border: none;
+	box-shadow: none;
+} 
+.save{
+	margin: 10px 0 0 20px;
+	width: 248px;
+	height: 36px;
+	background-color: #39ba93;
+	border-radius: 4px;
+	border: 1px solid #39ba93;
+	color: white ;
+}
+.save:hover{
+	cursor: pointer;
+};
+
+.error{
+	display: inline-block;
+	padding-left: 20px;
+	color: #535353;
+}
+
+ .disabled{
+    box-shadow: none;
+    border: 1px solid #dbdbdb;
+}
+
+.disabled:focus{
+	outline: 0;
+	box-shadow: none;
+	border: 1px solid #dbdbdb;
+}; 
+
+/* WIFI advanved settings */
+.wifi-advanced{
+	width: 65px;
+}
+
+.wifi-advanced ul{
+	width: 80px;
+	height: 100px;
+	overflow-x: scroll;
+    overflow-y: scroll;
+}
+
+
+.pwd-show-switch
+{
+	display: inline-block; 
+	padding: 9px 0px; 
+	width: 25px;
+	*display: inline;
+ 	*zoom: 1;
+}
+
+#wifi_strength{
+	z-index: 1;
+}
+
+.wifi_header_blank
+{
+	width:100%;
+	height:30px;
+}
+.wifi_item
+{	
+	height: 25px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.wifi_item_name
+{
+	float: left;
+    height: 100%;
+    line-height: 30px;
+    margin-right: 30px;
+    text-align: right;
+    width: 130px;
+}
+
+.wifi_item_content
+{
+	float:left;
+	height: 100%;
+}
+.wifi_save_advance
+{
+	margin:50px 0 0 140px;
+}
+.wifi_save
+{
+	margin:20px 0 0 140px;
+}
+.wifi_error_hint{
+	font-size: 12px;
+	color: #ff5a00;
+	float: left;
+    height: 100%;
+    line-height: 35px;	
+    padding-left: 5px;
+}
+.input_text_wifi
+{
+	margin:0;
+}
+.password_content_wifi{
+	margin-top:0;
+	float: left;
+} 
+
+.dropdown-menu-narrow li{
+	width: 70px;
+}

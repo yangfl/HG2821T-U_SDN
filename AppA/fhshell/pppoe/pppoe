@@ -1,0 +1,195 @@
+#!/bin/sh
+#create: lqu
+#date:20120510
+COMMON_CONF=/etc/fh_common.conf
+APP_SHELL_PATH_PPPOE_START=`grep "APP_SHELL_PATH_PPPOE_START=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_PPPOE_WAITINGINTFADD=`grep "APP_SHELL_PATH_PPPOE_WAITINGINTFADD=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_PPPOE_START_IPV4=`grep "APP_SHELL_PATH_PPPOE_START_IPV4=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_PPPOE_START_IPV6=`grep "APP_SHELL_PATH_PPPOE_START_IPV6=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_PPPOE_SHELL=`grep "APP_SHELL_PATH_PPPOE_SHELL=" $COMMON_CONF | cut -d = -f 2 `
+APP_SHELL_PATH_PPPOE_START_ONDEMAND=`grep "APP_SHELL_PATH_PPPOE_START_ONDEMAND=" $COMMON_CONF | cut -d = -f 2 `
+
+kill_proccess_by_name()
+{
+    # echo "Proccess name is $1 ,interface name is $2"
+	if [ $# != 2 ]
+	then
+		echo "usage: kill_proccess_by_name PORCESS_NAME INTF_NAME"
+		exit 1
+	fi
+	process_name=$1
+	interface_name=$2
+    
+    PROC_ID=`ps |grep $process_name |grep -v grep |grep $interface_name |head -n 1 | awk '{print $1}'` 
+    if [ -z $PROC_ID ]
+    then    
+        echo "No proccess to kill"     
+        return 0    
+    else
+	i=0
+          #echo "PID exists"
+          #echo "Kill $PID starting.................."
+		 if [ $process_name = "pppd" ]
+         then 
+			while [ "x$PROC_ID" != "x" -a $i -le 4 ]                                                                         
+			do                                                                                                   
+				#echo "*********$PID pid ***********"                                                         
+				#echo "*********$PROC_ID proc_id ***********"                                                 
+				kill $PROC_ID                                                                                
+				sleep 5                                                                                      
+				#echo "trying to kill..."  
+					i=`expr ${i} + 1`
+				PROC_ID=`ps |grep $process_name |grep -v grep |grep $interface_name |head -n 1 | awk '{print $1}'`
+			done
+	    else
+         kill -9 $PROC_ID
+		fi
+    fi
+}
+
+kill_proccess_by_pid()
+{
+	echo $#  $1 $2
+	if [ $# != 2 ]
+	then
+		echo "usage: kill_proccess_by_name pid INTF_NAME"
+		exit 1
+	fi
+#	echo before >>/var/pppemul
+	if [  -f "/var/pppoeemuinfo" ];then
+#		echo ipv4 >>/var/pppemul
+		rm /var/pppoeemuinfo
+	fi
+	if [  -f "/var/pppoeemuinfo6" ];then
+#		echo ipv6 >>/var/pppemul
+		rm /var/pppoeemuinfo6
+	fi
+#	echo after >>/var/pppemul
+	pid=$1
+	process_name=$2
+	#killall dhcp6c	
+	PROC_ID=`ps |grep pppd|grep $pid |grep -v grep|grep $process_name  |head -n 1 | awk '{print $1}'`
+    if [ -z $PROC_ID ]
+    then    
+        echo "No proccess to kill"     
+        return 0    
+    else
+          #echo "$PROC_ID exists"
+          echo "Kill $pid starting.................."
+	  i=0
+			 while [ ! -z $PROC_ID -a $i -le 4 ]                                         
+			do                                                                                                   
+				#echo "*********$pid pid ***********"                                                         
+				echo "*********$PROC_ID proc_id ***********"                                                 
+				kill $PROC_ID                                                                                
+				sleep 2                                                                                      
+				#echo "trying to kill..."    
+				i=`expr ${i} + 1`                                                                 
+				PROC_ID=`ps |grep pppd|grep $pid |grep -v grep|grep $process_name  |head -n 1 | awk '{print $1}'`
+			done
+			kill -9 $PROC_ID  
+			#echo "end $pid starting.................."
+		 #if [ "x$PROC_ID" != "x" ]
+        # then 
+			#kill -9 $PROC_ID
+		#fi
+    fi
+
+}
+if [ $# -lt 1 ]
+then
+	echo "pppoe start INTF STRUSR LINKNAME PPPOERoutFlags MTU"
+	echo "pppoe start-ipv4 INTF STRUSR LINKNAME PPPOERoutFlags MTU"
+	echo "pppoe start-ipv4-ondemand INTF STRUSR LINKNAME PPPOERoutFlags MTU TIME"	
+	echo "pppoe start-ipv6 INTF STRUSR LINKNAME PPPOERoutFlags MTU"
+	echo "pppoe stop INTF"
+	echo "pppoe stop-ipv4 INTF"
+	echo "pppoe stop-ipv4-ondemand INTF"	
+	echo "pppoe stop-ipv6 INTF"
+	exit 1
+fi
+
+case "$1" in
+	start)
+#		echo "pppoe start........."
+		kill_proccess_by_name "pppoe-start" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		if [ "$#" != "7" ]
+		then
+			echo "Arguments erro,are less or more then 6! usage: $APP_SHELL_PATH_PPPOE_SHELL start INTF STRUSR LINKNAME PPPOERoutFlags MTU"
+			exit 1
+		fi
+		$APP_SHELL_PATH_PPPOE_WAITINGINTFADD $2
+		$APP_SHELL_PATH_PPPOE_START $2 $3 $4 $5 $6 $7 &
+		sync
+	;;
+	start-ipv4)
+#		echo "pppoe start-ipv4........."
+		kill_proccess_by_name "pppoe-start-ipv4" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		if [ "$#" != "6" ]
+		then
+			echo "Arguments error,are less or more then 6! usage: $APP_SHELL_PATH_PPPOE_SHELL start-ipv4 INTF STRUSR LINKNAME PPPOERoutFlags MTU"
+			exit 1 
+		fi
+		$APP_SHELL_PATH_PPPOE_WAITINGINTFADD $2
+		$APP_SHELL_PATH_PPPOE_START_IPV4 $2 $3 $4 $5 $6 &
+		/bin/sync
+	;;
+	start-ondemand)
+	#echo "pppoe start-ondemand.........">>/var/ppp_start
+		kill_proccess_by_name "pppoe-ondemand" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		if [ "$#" != "8" ]
+		then
+			echo "Arguments error,are less or more then 7! usage: $APP_SHELL_PATH_PPPOE_SHELL start-ipv4-ondemand INTF STRUSR LINKNAME PPPOERoutFlags MTU TIME"
+			exit 1 
+		fi
+		$APP_SHELL_PATH_PPPOE_WAITINGINTFADD $2
+		$APP_SHELL_PATH_PPPOE_START_ONDEMAND $2 $3 $4 $5 $6 $7 $8&
+		/bin/sync
+	;;
+	start-ipv6)
+#		echo "pppoe start-ipv6........."
+		kill_proccess_by_name "pppoe-start-ipv6" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		if [ "$#" != "6" ]
+		then
+			echo "Arguments error,are less or more then 6! usage: $APP_SHELL_PATH_PPPOE_SHELL start-ipv6 INTF STRUSR LINKNAME PPPOERoutFlags MTU"
+			exit 1 
+		fi
+		$APP_SHELL_PATH_PPPOE_WAITINGINTFADD $2
+		$APP_SHELL_PATH_PPPOE_START_IPV6 $2 $3 $4 $5 $6 &
+		sync
+	;;
+	stop)
+#		echo "pppoe stop........."
+		kill_proccess_by_name "pppoe-start" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		sync
+	;;
+	stop-ipv4)
+#		echo "pppoe stop-ipv4........."
+		kill_proccess_by_name "pppoe-start-ipv4" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		sync
+	;;
+	stop-ondemand)
+	#	echo "pppoe stop-ipv4-ondemand.........">>/var/pp_demand
+		kill_proccess_by_name "pppoe-ondemand" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		sync
+	;;	
+	stop-ipv6)
+#		echo "pppoe stop-ipv6........."
+		kill_proccess_by_name "pppoe-start-ipv6" "$2"
+		kill_proccess_by_name "pppd" "$2"
+		sync
+	;;	
+	stop-pid)
+#		echo "pppoe stop-pid........."
+		kill_proccess_by_pid "$2" "$3"
+		sync
+	;;
+esac
+

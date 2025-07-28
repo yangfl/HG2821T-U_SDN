@@ -1,0 +1,28 @@
+
+body {
+	background-image: url("/imgs/bg.png");
+	background-repeat: no-repeat; 
+	background-attachment: fixed;
+	background-position: center;
+	background-size:100% 100%;
+	font-family: "微软雅黑";
+}
+.m00ainshow{
+	background:rgba(255, 255, 255, 0.5) none repeat scroll 0 0 !important;/*实现FF背景透明，文字不透明*/
+    opacity:0.5;
+    filter:alpha(opacity=50);
+    -moz-opacity:0.5;
+}
+.mainshow {
+	background-color:#ffffff ;
+	filter:alpha(Opacity=75);
+	-moz-opacity:0.75;
+	opacity: 0.75;
+}
+.mainshowd {
+
+	filter:alpha(Opacity=100);
+	-moz-opacity:1.0;
+	opacity: 1.0;
+	position:relative;
+}

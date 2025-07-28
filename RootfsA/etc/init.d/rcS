@@ -1,0 +1,508 @@
+#! /bin/sh
+#creat by LQU 2012-09-21
+#. /etc/preinit.sh
+COMMON_CONF=/etc/fh_common.conf
+FACTORY_CONF=`grep "APP_CONF_PATH_TR069_FACTORY=" $COMMON_CONF | cut -d = -f 2`
+PRE_FACTORY_CONF=`grep "PRODUCT_CONF_PATH_FACTORY=" $COMMON_CONF | cut -d = -f 2`
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/opt/upt/apps/usr/ovs/bin:/opt/upt/apps/usr/ovs/sbin:/usr/ovs/bin:/usr/ovs/sbin
+export LD_LIBRARY_PATH=/lib:/usr/lib:/opt/upt/apps/usr/ovs/lib:/usr/ovs/lib
+
+insmod /rom/fhlib/fh_version_info.ko
+. /etc/export.sh
+
+
+#tianyi up sdn process
+if [ ! -f /data/frist_update -a -f /data/param.xml ];
+then
+        #data
+        mount -o remount rw /data 2>>/var/up.error
+        #flash
+        mount -o remount rw /flash 2>>/var/up.error
+
+        tar xf /rom/flash.tar -C /flash 2>>/var/up.error
+        if [ -f /flash/cfg/misc_conf/registerOlt.config_ok ];
+        then
+                cp /flash/cfg/misc_conf/registerOlt.config_ok /flash/cfg/misc_conf/register.config_ok
+        fi
+        echo "Manufacturer=FiberHome" >> /flash/cfg/agentconf/factory.conf 2>>/var/up.error
+        echo "Model=HG2821T-U" >> /flash/cfg/agentconf/factory.conf 2>>/var/up.error
+        #Appfs
+        mount -o remount rw /rom 2>>/var/up.error
+
+        #UserLocalCT
+        rm /usr/local/* -rf
+        mkdir -p /usr/local/db/ 2>>/var/up.error
+        touch /usr/local/db/conf.fact 2>>/var/up.error
+        chmod 777 /usr/local/ -R 2>>/var/up.error
+
+        #Userdata
+        #macadd
+        cp /rom/macadd /usr/wrifh/mf 2>>/var/up.error
+        sync
+        sync
+
+        if [ ! -s /var/up.error ];
+        then
+                echo "upgrade success!"
+                touch /data/frist_update
+                sync
+
+                rm /rom/flash.tar -f
+                rm /rom/macadd -f
+                sync
+                sync
+                reboot
+        else
+                echo "upgrade fail!"
+                exit 1
+        fi
+
+fi
+
+
+#agent -F /flash/cfg/agentconf/ -M 1 -L 5 -S 2000 -X 1 &
+
+# if [ -f /usr/local/fh/log_switch/console_redirect_log_enable ]
+# then
+	# echo 0 > /proc/fh_panic/switch
+# else
+	# panic_record_enable=`getcfgx /flash/cfg/misc_conf/kernel.conf panic_record`
+	# if [ "x$panic_record_enable" = "x1" ] 
+	# then
+		# echo 1 > /proc/fh_panic/switch
+	# else
+		# echo 0 > /proc/fh_panic/switch
+	# fi
+# fi
+###################
+#68_JoymeV2_EN7526preSDK_160315_dual_band_throughput_patchs_20161009
+#should add before insmod qdma_wan.ko
+echo 6000 > /proc/net/skbmgr_limit
+echo 6000 > /proc/net/skbmgr_4k_limit
+echo 8192 > /proc/net/skbmgr_driver_max_skb
+echo 4096 > /proc/net/skbmgr_hot_list_len
+
+
+
+#2+1纯GPIO包括2、34（used for phy）、35（used for pon）、38
+#4+1纯GPIO包括54、56（used for phy）、57（used for pon）、58
+echo "Loading fhko modules"
+###insmod /lib/fhko/llc.ko
+###insmod /lib/fhko/p8022.ko
+###insmod /lib/fhko/stp.ko
+###insmod /lib/fhko/bridge.ko
+#insmod /usr/lib/fh_route_fast.ko
+###insmod /lib/fhko/ebt_ftos.ko
+###insmod /lib/fhko/ebt_ip.ko
+###insmod /lib/fhko/ebt_ip6.ko
+###insmod /lib/fhko/ebt_mark.ko
+###insmod /lib/fhko/ebt_tc.ko
+###insmod /lib/fhko/ebt_vlan.ko
+###insmod /lib/fhko/ebtables.ko
+###insmod /lib/fhko/ebtable_filter.ko
+###insmod /lib/fhko/ebtable_broute.ko
+###insmod /lib/fhko/ebt_mark_m.ko
+###insmod /lib/fhko/iptable_filter.ko
+#insmod /lib/fhko/ipt_REDIRECT.ko
+###insmod /lib/fhko/ipt_REJECT.ko
+echo "
+|-----------------------  MTK: Load Driver Modules  -------------------------|"
+insmod /lib/module_sel.ko
+insmod /lib/tcledctrl.ko
+insmod /lib/tccicmd.ko
+insmod /lib/sif.ko
+insmod /lib/fe_core.ko
+insmod /lib/qdma_lan.ko
+#insmod /lib/mtk_xpon_multicast.ko
+insmod /lib/eth.ko lan_itf=eth sep_itf=eth itf_start_idx=0 itf_num=4
+insmod /lib/sdn_igmp.ko
+insmod /lib/eth_ephy.ko
+ifconfig eth up
+ifconfig eth down
+ifconfig eth0 up
+ifconfig eth0 down
+insmod /lib/qdma_wan.ko
+insmod /lib/phy.ko
+insmod /lib/xpon.ko
+insmod /lib/bandwidth.ko
+#for 7570 config
+cp /data/bob/7570_bob.conf /tmp/7570_bob.conf
+insmod /lib/xponmap.ko
+insmod /lib/swqos.ko
+###insmod /lib/hw_nat.ko
+insmod /lib/libcrc32c.ko
+###insmod /lib/openvswitch.ko
+
+####### Bind qdma  interrupt to cpu0/cpu1/cpu2  ########
+echo 7 >/proc/irq/23/smp_affinity
+sleep 1
+insmod /lib/scsi_mod.ko
+#insmod /lib/scsi_wait_scan.ko
+insmod /lib/sd_mod.ko
+#insmod /lib/nls_base.ko 
+insmod /lib/nls_utf8.ko
+insmod /lib/nls_cp936.ko
+insmod /lib/fat.ko
+insmod /lib/vfat.ko
+#insmod /lib/usbcore.ko
+#insmod /lib/ohci-hcd.ko
+#insmod /lib/ehci-hcd.ko
+insmod /lib/usb-storage.ko
+insmod /lib/fuse.ko
+
+#usb dongle support
+#insmod /lib/usbserial.ko
+#insmod /lib/pl2303.ko
+#insmod /lib/ftdi_sio.ko
+#insmod /lib/cp210x.ko
+#insmod /lib/ch341.ko
+
+if [ -f /usr/local/fh/mf/factory_mode ]
+then
+	insmod /lib/mt7510sim.ko
+fi
+
+mknod /dev/pon0 c 190 0
+mknod /dev/xponmap c 210 0
+mknod /dev/slic c 231 0
+mknod /dev/vdsp c 232 0
+mknod /dev/spi c 233 0
+mknod /dev/vlanfilter c 238 0
+mknod /dev/ecnt_igmp c 249 0
+ifconfig pon0 up
+mknod /dev/qdma_lan c 119 0
+qdmamgr_lan set rxratelimit config Enable packet
+qdmamgr_lan set rxratelimit value 0 6000
+qdmamgr_lan set rxratelimit value 1 1000000
+
+mknod /dev/qdma_wan c 120 0
+qdmamgr_wan set rxratelimit config Enable packet
+qdmamgr_wan set rxratelimit value 0 6000
+qdmamgr_wan set rxratelimit value 1 1000000
+mknod /dev/fe c 226 0 
+mknod /dev/hwnat0 c 220 0
+###hw_nat -V 1
+###hw_nat -U 300 300 300 300
+echo 1 > /proc/tc3162/vlan_filter_enable
+
+# Clearing the console to fullscreen
+clear
+echo "
+#######      ##                        ##                                 
+##       ##  ##                        ##                                
+##           ##                        ##                                 
+######   ##  #####     #####   ##  ##  ######     ####     ### ##    ##### 
+##       ##  ##  ##   ##   ##  ## ##   ##   ##   ##  ##   ## ## ##  ##   ##
+##       ##  ##   ##  ######   ###     ##   ##  ##    ##  ## ## ##  ###### 
+##       ##  ##  ##   ##       ##      ##   ##   ##  ##   ## ## ##  ##     
+##       ##  #####     ######  ##      ##   ##    ####    ## ## ##   ######
+"
+chip_version=`cat /proc/fh_ver_info/cpu_type`
+TEL_NUM=1
+insmod /usr/lib/fh_gpio.ko
+###insmod /usr/lib/fh_user.ko
+insmod /usr/lib/fh_button_epon.ko
+
+#prior use file flag,if not exist,then get from gpio
+ponflag=`cat $FACTORY_CONF |grep pon_flag | cut -d = -f 2`
+if [ "x$ponflag" = "x" -a -f $PRE_FACTORY_CONF ]; then
+	ponflag=`cat $PRE_FACTORY_CONF |grep pon_flag | cut -d = -f 2`
+fi
+if [ "x$ponflag" = "x" ];then
+	if [ "$chip_version" = "MT7526G" ]
+	then
+		gpio_xpon=`gpio get 23`
+	else
+		gpio_xpon=`gpio get 5`
+	fi
+#	gpio_xpon=`gpio get 1`
+	if [ "$gpio_xpon" -eq 1 ];then
+		ponflag=EPON
+	else
+		ponflag=GPON
+	fi
+	setcfgx $FACTORY_CONF pon_flag "$ponflag"
+fi
+
+#for omci/oam driver recv 
+if [ "$ponflag" != "EPON" ];then
+	ifconfig omci up
+	echo 1 > /proc/sys/net/ipv6/conf/omci/disable_ipv6
+else
+	mknod /dev/epon_mac c 221 0
+	ifconfig oam up 
+	echo 1 > /proc/sys/net/ipv6/conf/oam/disable_ipv6
+fi
+
+if [ "$chip_version" = "MT7526G" ]
+then
+	PCI_ID_5_7612_temp=`cat /proc/bus/pci/devices | cut -f 2 | grep 7612`
+	PCI_ID_5_7662_temp=`cat /proc/bus/pci/devices | cut -f 2 | grep 7662`
+	if [ "${PCI_ID_5_7662_temp}" = "14c37662" -o "${PCI_ID_5_7612_temp}" = "14c37612" ]; then
+		echo "5g is exist"
+	else
+		echo "5g is not exist"
+		#ethphxcmd eth media-type 100FD port 1
+		#ethphxcmd eth media-type 100FD port 2
+		#ethphxcmd eth media-type 100FD port 3
+		#GE change to FE
+		tce miiw 2 9 1c00
+        tce miiw 3 9 1c00
+        tce miiw 4 9 1c00
+	fi
+fi
+
+#default phy
+phytype=`cat $FACTORY_CONF |grep phy_type | cut -d = -f 2`
+
+if [ "x$phytype" = "x" ]
+then
+	if [ "$chip_version" = "MT7526G" ]
+	then
+		gpio_phytype=`gpio get 24`
+		if [ "$gpio_phytype" -ne 1 ];then
+			phytype=1GE+3FE
+		else
+			if [ "${PCI_ID_5_7662_temp}" = "14c37662" -o "${PCI_ID_5_7612_temp}" = "14c37612" ]; then
+				phytype=4GE
+			else
+				phytype=1GE+3FE
+			fi
+		fi
+	else
+		gpio_phytype=`gpio get 6`
+		if [ "$gpio_phytype" -ne 1 ];then
+			phytype=1GE+1FE
+		else
+			phytype=2FE
+			tce miiw 12 9 400
+		fi
+	fi
+	
+#	gpio5=`gpio get 5`
+	#if [ "$gpio5" -ne 1 ];then
+		#phytype=FE
+		#del ge ability
+		#tce miiw 12 9 400
+	#else
+		#phytype=GE
+	#fi
+	
+	setcfgx $FACTORY_CONF phy_type "$phytype"
+fi
+
+# insmod /lib/fhko/nf_fp.ko
+# echo 0 > /proc/net/nfp/nfp_enable
+
+#get pon_flag from gpio if not exist
+#if [ "x$ponflag" = "x" ]
+#then
+#	ponflag=GPON
+	
+#	if [ ! -z "$chip_version" ]
+#	then
+		#gpio57=`cli /home/cli/hal/chip/gpio_read -v gpio 57 | grep level | grep 1`
+#		if [ ! -z "$gpio57" ]
+#		then
+#			ponflag=EPON
+#		fi
+#	else
+		#gpio35=`cli /home/cli/hal/chip/gpio_read -v gpio 35 | grep level | grep 1`
+#		if [ ! -z "$gpio35" ]
+#		then
+#			ponflag=EPON
+#		fi
+#	fi
+	
+	#setcfgx $FACTORY_CONF pon_flag "$ponflag"
+#fi
+
+
+
+#enbale skb mark
+
+
+#GE/FE adjust
+#get phytype from gpio if not exist
+
+
+
+#lan workmode
+
+#-------------------------------move from local to here start
+
+#ulimit -S -c unlimited
+#[ -d /usr/local/fh/core ] || mkdir -p /usr/local/fh/core
+#echo /usr/local/fh/core/core.%e.%p > /proc/sys/kernel/core_pattern
+
+# echo 30 > /proc/sys/kernel/panic
+# echo 1 > /proc/sys/kernel/panic_on_oops
+
+# insmod /usr/lib/fh_gpio.ko
+# insmod /usr/lib/fh_user.ko
+# insmod /usr/lib/fh_button_epon.ko
+
+ bobinit&
+
+#fastpath
+# ipv4_mode=`getcfgx /flash/cfg/misc_conf/kernel.conf ipv4_mode`
+# ipv6_mode=`getcfgx /flash/cfg/misc_conf/kernel.conf ipv6_mode`
+# /rom/fhshell/misc_shell/fastpath.sh ${ipv4_mode}
+# /rom/fhshell/misc_shell/fastpath_ipv6.sh ${ipv6_mode}
+
+[ -d /var/info ] || mkdir -p /var/info
+[ -d /var/run ] || mkdir -p /var/run
+[ -d /var/run/NS ] || mkdir -p /var/run/NS
+[ -d /var/etc/netns ] || mkdir -p /var/etc/netns
+[ -d /var/run/xl2tpd ] || mkdir -p /var/run/xl2tpd
+[ -d /var/log ] || mkdir -p /var/log
+[ -d /var/run/vsftpd ] || mkdir -p /var/run/vsftpd
+[ -d /var/db ] || mkdir -p /var/db 
+[ -d /var/portmap ] || mkdir -p /var/portmap
+[ -d /var/ct/tmp ] || mkdir -p /var/ct/tmp
+[ -d /var/wlan ] || mkdir -p /var/wlan
+[ -d /var/diagnose ] || mkdir -p /var/diagnose
+[ -d /var/voip ] || mkdir -p /var/voip
+
+#for oam interface
+[ -d /var/WEB-GUI ] || mkdir -p /var/WEB-GUI && touch /var/WEB-GUI/webgui.conf && echo usb_number=1 >> /var/WEB-GUI/webgui.conf && echo wireless_enable=2 >> /var/WEB-GUI/webgui.conf && echo Telinterface_number=1 >> /var/WEB-GUI/webgui.conf && echo DeviceType=HG2821T-U >> /var/WEB-GUI/webgui.conf && echo SoftwareVersion=`fhtool getfwversion` >> /var/WEB-GUI/webgui.conf && echo HardwareVersion=`fhtool gethwversion` >> /var/WEB-GUI/webgui.conf
+[ ! -f /var/fec_status ] && echo "fecStatus=0" > /var/fec_status
+#loop interface up
+#ifconfig lo up
+
+#echo 262144 > /proc/sys/net/ipv4/netfilter/ip_conntrack_max
+echo 1024 > /proc/sys/net/netfilter/nf_conntrack_expect_max
+echo 1 > /proc/sys/net/ipv4/ip_forward
+echo 300000 > /proc/sys/net/nf_conntrack_max
+
+###brctl addbr br0
+###br0_ip=`cat /flash/cfg/app_conf/udhcpd/udhcpd_lan.conf|grep router|grep option|cut -d "	" -f 3`
+###br0_subnet=`cat /flash/cfg/app_conf/udhcpd/udhcpd_lan.conf|grep subnet|grep option|cut -d "	" -f 3`
+###ifconfig br0 $br0_ip netmask $br0_subnet
+###brctl sethello br0 1                                                            
+###brctl setfd br0 4                                                               
+###brctl setmaxage br0 6
+###ip -6 addr del fe80::200:ff:fe00:0/64 dev br0
+###ip -6 addr add fe80::1/64 dev br0 
+#临时启动网口
+#fh_br_init
+#临时启动网口
+#---------------------------move from local to here end
+
+#if [ -f /usr/local/fh/debug_mode ]
+#then
+#	echo "-------STOP SYSSTART and ENTER DEBUG MODE------!"
+#	echo "exe fh_br_init!"
+#	fh_br_init >/dev/null 2>&1
+#	echo "start telnetd!"
+#	telnetd -p 23 &
+#	/usr/local/fh/mf/AllLightOn.sh &
+#	echo "Now Can Debug!"
+#	exit
+#fi
+
+# if [ -f /usr/local/zhpnoexist ]
+# then
+# insmod /lib/sys_mod.ko
+# insmod /lib/pcm.ko
+# insmod /lib/lec.ko
+# insmod /lib/slic3.ko
+# insmod /lib/fxs3.ko slic1="le9641"
+# insmod /lib/ksocket.ko
+# insmod /lib/ortp.ko
+# insmod /lib/acodec_x.ko
+# insmod /lib/foip.ko
+# insmod /lib/ovdsp.ko
+# insmod /lib/pcmDump.ko
+# sleep 1
+
+# fi
+
+#/rom/fhshell/voice/voiploader.sh
+#taskset -p 0x8 `pidof ORTP_TASK`
+#taskset -p 0x8 `pidof fxs_task`
+#taskset -p 0x8 `pidof DSPProc`
+#taskset -p 0x8 `pidof DspDlTask`
+#taskset -p 0x8 `pidof DspUlTask`
+
+# mknod /dev/slic c 251 0
+# mknod /dev/vdsp c 245 0
+
+
+#echo 8 > /proc/irq/12/smp_affinity
+/usr/bin/voip_loader check
+
+SLIC_TYPE=
+if [ -f /var/voipslictype ]
+then
+	SLIC_TYPE=`cat /var/voipslictype | cut -f 2 -d " " | sed -n '1p'`
+	if [ "$SLIC_TYPE" = "le9641" ] || [ "$SLIC_TYPE" = "si32176" ] 
+	then
+		TEL_NUMX=1
+	else
+		TEL_NUMX=0
+	fi
+else
+	TEL_NUMX=0
+fi
+
+echo SLIC_TYPE=$SLIC_TYPE
+echo TEL_NUMX=$TEL_NUMX
+TEL_NUM=$TEL_NUMX
+
+###ifconfig br0 up
+###ifconfig br0 192.168.1.1
+ifconfig eth up
+ifconfig eth0 up
+ifconfig eth1 up
+ifconfig eth2 up
+ifconfig eth3 up
+LAN_MAC=`getcfgx /flash/cfg/agentconf/factory.conf brmac`
+ifconfig eth hw ether $LAN_MAC
+ifconfig eth0 hw ether $LAN_MAC
+ifconfig eth1 hw ether $LAN_MAC
+ifconfig eth2 hw ether $LAN_MAC
+ifconfig eth3 hw ether $LAN_MAC
+###brctl addif br0 eth0
+###brctl addif br0 eth1
+###brctl addif br0 eth2
+###brctl addif br0 eth3
+gpio setmode 16 output
+gpio set 16 0
+tce set7530_15R_L on
+ethphxcmd eth vlanpt enable
+syslogd -O /var/messages -b 0 -m 0 -l 4 && klogd
+. /etc/init.d/local
+
+#echo 512 > /proc/net/skbmgr_4k_limit
+#echo 1024 > /proc/net/skbmgr_4k_limit
+#echo 4096 > /proc/net/skbmgr_driver_max_skb
+#echo 3072 > /proc/net/skbmgr_limit
+
+echo 1 > /proc/tc3162/vport_enable
+#echo 1 >/var/bob_type 
+
+# for avalanche throughput
+###/rom/fhshell/misc_shell/throughput.sh &
+
+
+#
+#单口成环后，限速处理
+#
+ethphxcmd gsww2 1 24 00160016
+ethphxcmd gsww2 1 1c 60166016
+ethphxcmd gsww2 1 20 60166016
+ethphxcmd gsww2 0 1C 00100010
+ethphxcmd gsww2 0 251C 68010101
+
+qdmamgr_lan set rxratelimit config Enable packet
+qdmamgr_lan set rxratelimit value 0 6000
+qdmamgr_lan set rxratelimit value 1 1000000
+
+qdmamgr_wan set rxratelimit config Enable packet
+qdmamgr_wan set rxratelimit value 0 6000
+qdmamgr_wan set rxratelimit value 1 1000000
+
+
+#/bin/sh

@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/device.css?version=<%=version%>' rel="stylesheet" type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script>
+		var activeTimeout = setTimeout("Timeout()", 300000);    
+		  
+		function Timeout() {
+			(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+				{ token: '<%=token%>' }, 
+				function(x){
+				parent.location = "/cgi-bin/luci";
+				});	
+		}
+		
+		$(document).ready(function(){
+			(new XHR()).get('<%=luci.dispatcher.build_url('admin/device/itvVoipReg')%>',null,
+				function(x, json){
+					if (json.voip)
+					{
+						$("#voipReg").text("您已开通电话业务，该功能可正常使用。");
+					}
+					else
+					{
+						$("#voipReg").text("您尚未开通电话业务, 如需了解开通详情请至当地营业厅或拨打10000号咨询。");
+				  }
+				});	
+		});	
+		</script>			
+	</head>
+
+	<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body' style="padding-top: 0px; padding-bottom: 0px;">
+	
+		<div style="text-align: center; margin-top: 15%;">
+			<span id="voipReg"></span>
+		</div>
+		
+	</body>
+</html>

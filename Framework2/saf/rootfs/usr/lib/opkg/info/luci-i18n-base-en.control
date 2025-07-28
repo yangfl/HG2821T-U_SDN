@@ -1,0 +1,8 @@
+Package: luci-i18n-base-en
+Version: R1707
+Depends: libc, luci-base
+Source: feeds/luci/modules/luci-base
+Section: luci
+Architecture: all
+Installed-Size: 725
+Description:  Translation for luci-base - English

@@ -1,0 +1,10 @@
+Package: libubox
+Version: 2016-11-20-7f671b1e68a6664b5baf3e3cffc1bb0880984267
+Depends: libc
+Source: package/libs/libubox
+License: ISC
+Section: libs
+Maintainer: Felix Fietkau <nbd@openwrt.org>
+Architecture: mt7526
+Installed-Size: 20782
+Description:  Basic utility library

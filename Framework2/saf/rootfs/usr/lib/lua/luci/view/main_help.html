@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/main_help.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.nicescroll.min.js?version=<%=version%>"></script>
+		<script language='javascript'>
+			var activeTimeout = setTimeout("Timeout()", 300000);    
+			  
+			function Timeout() {
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+					parent.location = "/cgi-bin/luci";
+					});	
+			}
+		
+		    $(function(){
+		    	 $("#problemDesc").hide();
+		    	 $("#solvingDiv").hide();
+		    });
+		    
+		 	function tabsOption(produceObj,tabsId,showIndex){
+		 		$(".tabs li").removeClass("tabs_bg");
+		 		
+		 		var $liObj = $("#"+tabsId);
+		 		$liObj.addClass("tabs_bg");
+		 		var position = $liObj.position();
+		 		var triangleLeft = position.left + 134;
+		 		$(".tabs .triangle-up").css({"left":triangleLeft});
+		 		
+		 		$("#problemDiv").hide();
+		 		$("#solvingDiv").show();
+		 		$(".answer").hide();
+		 		$(".question" + $("#problemlist_value").val()).show();
+		 	}
+		 	
+		 	function problemClick(){
+                $(".tabs li").removeClass("tabs_bg");
+		 		
+		 		var $liObj = $("#problem");
+		 		$liObj.addClass("tabs_bg");
+		 		$(".tabs .triangle-up").css({left:182,top:5});
+		 		
+		 		$("#solvingDiv").hide();
+		 		$("#problemDiv").show();
+		 	}		 	
+		 	
+		 	function menuOption(obj,objName){
+		 		$(".problemOption li").removeClass("menu_bg");
+		 		$(obj).addClass("menu_bg");
+		 		
+		 		$("#problemSelect").hide();
+		 		$("#problemDesc").hide();
+		 		
+		 		$("#"+objName).show();
+                if (objName == "problemDesc" )
+                {
+                    $(".problemNext").hide();
+                }
+                else
+                {
+                    $(".problemNext").show();
+                }
+		 	}
+			
+			$(document).ready(function(){
+				customSelectInit();
+				customScrollBar("#problemlist");
+			});
+		</script>
+	</head>
+	<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_help_body'>
+		<div id="container">
+		
+		     <div class="head">
+		     	<h3>帮助中心</h3>
+		     </div>
+		
+			 <div class="tabs">
+			    <ul>
+			       <li id="problem" class="tabs_bg cor_pointer" onclick="problemClick()">描述问题</li>
+			       <li id="solving">解决方案</li>
+			    </ul>
+			 	<div class="triangle-up"></div>
+			 </div>
+			 
+			 <div class="tabsContent">
+			     
+				 <!-- 描述问题DIV -->
+				 <div id="problemDiv">
+				     <dl>
+				       <dd><img src="<%=resource%>/image/gateway.png"></dd>
+				       <dt>天翼网关</dt>
+				    </dl>
+				    <div class="problemOption">
+				        <ul>
+				           <li class="border_rigrt menu_bg" onclick="menuOption(this,'problemSelect')">从列表中选择问题</li>
+				           <li onclick="menuOption(this,'problemDesc')">更多帮助</li>
+				        </ul>
+				        
+				    </div>
+				        <div class="problemContent">
+				        
+						<div class="dropdown-select help_select" hidefocus="true" id="problemSelect">
+							<label class="select-value" style="width: 300px;">什么是天翼网关？</label>
+							<input type="hidden" id="problemlist_value" value="1" />
+							<div class="select-arrow"></div>
+							<ul id="problemlist" class="dropdown-menu-select help_drop">
+								<li livalue="1">什么是天翼网关？</li>
+								<li livalue="2">天翼网关的主要功能？</li>
+								<li livalue="3">天翼网关WIFI速率具体是多少？</li>
+								<li livalue="4">如何查询WIFI密码？</li>
+								<li livalue="5">如何更改WIFI密码？</li>
+								<li livalue="6">如何进行短按RESET键操作恢复出厂设置？</li>
+								<li livalue="7">如何获取宽带识别码？</li>
+								<li livalue="8">如何下载安装客户端？</li>
+								<li livalue="9">如何通过客户端绑定天翼网关？</li>
+							</ul>
+						</div>
+				       		<div id="problemDesc" >
+                                <div id="morehelpimg" style="float:left;"><img src="<%=resource%>/image/qrcode.jpg" width="80" height="80"  /></div>
+                                <div id="morehelptext">如需更多帮助请拨打网关运营中心客服热线:4008219898<br>或扫二维码添加网关微信公众号</div>
+
+                            </div>
+				        </div>
+				        
+				        <div class="problemNext" onclick="tabsOption(this,'solving',2)">下一步</div>
+				 </div>
+				 
+				 <!-- 解决方案DIV -->
+			     <div id="solvingDiv">
+				     <div class="border_bottom solving_produce">
+				     	<div class="solving_produce_img"><img src="<%=resource%>/image/gateway.png"></div>
+				     	<div class="solving_produce_type">天翼网关</div>
+				     	<div class="solving_produce_desc"></div>
+				     </div>
+				     <div class="solving_content">
+				        <div class="answer question1">
+					                            天翼网关是智慧家庭的核心终端，作为“光猫+智能路由器”的集合体，采用了全新的硬件、外观及智能操作系统，除支持原PON上行E8-C家庭网关所有功能外，新增支持手机客户端智能操控，并集成了丰富的智能应用（如智能家居、智能加速、远程下载等），可满足中高端家庭客户使用需求，突显创新与极致体验。
+				        </div>
+				        <div class="answer question2">
+					                            天翼网关设备在支持原PON上行E8-C家庭网关所有功能的基础上，内置2*2天线提供WIFI信号，增加了手机客户端智能操控功能，集成了丰富的插件应用（DDNS、HOME NAS、DLNA、定时WIFI 、设备休眠等），并能够加载各种新增应用（如智能家居、智能加速、远程下载等）。
+				        </div>
+				        <div class="answer question3">
+					                            天翼网关支持WIFI 发射功率调节，内置2*2天线支持波束成形智能天线，300MBPS无线速率接口，良好环境下能够承载80M无线上网业务，具体速率取决用户家中带宽及当前网络环境。
+				        </div>
+				        <div class="answer question4">
+					                            如您没有更改，设备底部信息标签上有原始默认密码。如果修改后忘记了，请使用短按RESET键恢复出厂设置恢复成原始默认密码。
+				        </div>
+				        <div class="answer question5">
+					                            <p>方式一：在WEB浏览器页面输入HTTP://192.168.1.1，输入用户名和密码进行登录（默认用户名和密码可见网关底座标签），在登录后显示的页面上，使用鼠标滑到无线连接（页面会自动显示当前WIFI 信息，如SSID、密码、WIFI 连接的实时上下行速率等），点击图标，在弹出简易WIFI 设置弹窗进行设置修改</p>
+												              <p>方式二：可下载安装手机客户端软件，在客户端帮助中查看具体设置方法</p>
+				        </div>
+				        <div class="answer question6">
+					                            请短按RESET键（2秒即可，且必须小于10秒）实现恢复出厂设置操作，仅能恢复用户帐号可通过本地GUI界面修改的内容（如无线SSID-1的名称及密码、用户帐号密码、黑白名单等），不会影响上网、IPTV、VOIP的业务。
+				        </div>
+				        <div class="answer question7">
+					                            新装光宽带用户由上门装维人员提供；已有光宽带用户可咨询本省10000号电话查询获取。
+				        </div>
+				        <div class="answer question8">
+					                            下载安装客户端，您可以采用以下几种方式：
+																			1.	用户使用手机内安装的二维码扫描软件，如浏览器、微信、QQ手机端等，扫描网关背面的二维码，后台将根据手机操作系统分别提示用户下载安卓版本或者IOS企业帐号版本；
+																			2.	安卓手机用户可以通过安卓市场、360、百度、豌豆荚、小米、应用宝等搜索“天翼网关”客户端软件并下载；
+																			3.	苹果手机用户可通过苹果的APP STORE搜索“天翼网关”客户端并下载安装。
+				        </div>
+				        <div class="answer question9">
+					                            首次使用客户端中网关相关功能时，需要先用天翼帐号绑定网关。操作前提：需要客户端绑定的网关已经可以正常上网。
+																			1.	使用天翼帐号登录后，弹出绑定提示，点击确定按钮；
+																			 
+																			2.	连接网关WIFI ，可通过扫一扫二维码连接连接WIFI ；点击“扫一扫连接WIFI“后，如无法扫描成功，请点击”手动连接“，通过手动连接的方式连接天翼网关WIFI 。
+																			
+																			      
+																				1)	连接网关WIFI  后，则自动进入绑定流程；
+																				2)	客户端提示输入useradmin密码（如未修改过useradmin密码并通过扫描二维码方式连接WIFI则不需要手动输入），输入密码后点击下一步；
+																			 
+																			3.	确定绑定。
+				        </div>				        				        				        
+				     </div>
+			     </div> 
+			     
+			 </div>
+		</div>
+	</body>
+</html>

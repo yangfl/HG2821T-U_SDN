@@ -1,0 +1,119 @@
+#!/bin/sh
+
+COMMON_CONF=/etc/fh_common.conf
+APP_LIB_PATH_PPPOE_RP_PPPOE=`grep "APP_LIB_PATH_PPPOE_RP_PPPOE=" $COMMON_CONF | cut -d = -f 2 `
+if [ $# == 6 ]; then
+	intf=$1
+	user=$2
+	tmpln=$3
+	routflags=$4
+	mtu_value=$5
+	password=$6
+else
+	intf=$1
+	user=$2
+	tmpln=$3
+	routflags=""
+	mtu_value=1492
+fi	
+
+count=0
+if [ -f /var/curPppStatus.log ] ; then
+  echo "curPppStatus Dial Status File Existed..."
+else
+  touch /var/curPppStatus.log
+fi
+if [ -f /var/curPppStatus6.log ] ; then
+  echo "curPppStatus6 Dial Status File Existed..."
+else
+  touch /var/curPppStatus6.log
+fi
+#add by mjqiao for int error ,if curPppStatus not exist do nothing
+setcfgx /var/curPppStatus.log ${intf}_errorcode "NONE"
+setcfgx /var/curPppStatus.log $intf "ERROR_NONE"
+setcfgx /var/curPppStatus6.log $intf "ERROR_NONE"
+setcfgx /var/curPppStatus6.log dslite_$intf "ERROR_NONE"
+area_code=`getcfgx /data/tr069_control.conf area_code `
+
+seq=`cat /rom/cfg/agentconf/hgcxml.conf | grep IGD_DI_XCTCOMA_AlarmNumber | cut -d '=' -f 2 | sed -n '2p;2q'`  
+
+PONAUTH_PATH=/var/phyauthstates
+
+#while :
+#do
+#	pon_status=`cat $PONAUTH_PATH`
+#
+#	if [ $pon_status = "1" ]
+#	then
+#		sleep 1
+#		pon_status=`cat $PONAUTH_PATH`
+#		if [ $pon_status = "1" ]
+#		then
+#			break
+#		else
+#			sleep 2
+#		fi
+#	else
+#		sleep 2
+#	fi 
+#done
+
+#PPPLOG=/var/ppptest.log
+#touch $PPPLOG
+
+while [ 1 ]
+do
+result=`getcfgx /var/curPppStatus.log $intf `
+
+
+if [ "x${result}" = "xERROR_ISP_TIME_OUT" ]
+then
+#Wait for the end of the simulation, and then dial
+	if [  -f "/var/pppoeemuinfo" ];then
+	sleep 3
+	continue
+	fi
+fi
+
+#    date >> $PPPLOG
+#    echo "--- check ponstatus --" >> $PPPLOG
+
+	while :
+	do
+		pon_status=`cat $PONAUTH_PATH`
+		if [ $pon_status != "1" ]
+		then
+#			date >> $PPPLOG
+#			echo "---pon_status : $pon_status !!   start to sleep for 5s" >> $PPPLOG
+			sleep 5
+		else
+#			date >> $PPPLOG
+#			echo "---pon_status : $pon_status !!   PREPARE to START pppd" >> $PPPLOG
+			break
+		fi 
+	done
+
+
+	if [  -f "/var/pppoeemuinfo" ];then
+#		echo ipv4 >>/var/pppemul
+		rm /var/pppoeemuinfo
+	fi
+	if [  -f "/var/pppoeemuinfo6" ];then
+#		echo ipv6 >>/var/pppemul
+		rm /var/pppoeemuinfo6
+	fi
+
+    pppd plugin /usr/lib/rp-pppoe.so nic-${intf} linkname ${tmpln} ${routflags} noipdefault noauth default-asyncmap hide-password nodetach usepeerdns mtu ${mtu_value} mru ${mtu_value} noaccomp nodeflate nopcomp novj novjccomp user ${user} password ${password} lcp-echo-interval 20 lcp-echo-failure 10 nopersist +ipv6
+    led_ctrl set internet off    
+	count=$(($count+1))
+    if [ $count -eq 10 ]; then
+    inter_web set $seq 104111
+           fi
+	
+#    date >> $PPPLOG
+#    echo "---ppp exit. and start to sleep for 10s" >> $PPPLOG
+
+    sleep 10
+    
+    
+done

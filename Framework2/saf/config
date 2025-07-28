@@ -1,0 +1,21 @@
+lxc.rootfs = overlayfs:/opt/upt/framework/saf/rootfs:/opt/upt/apps/apps
+lxc.haltsignal = SIGUSR1
+lxc.utsname = saf
+lxc.tty = 1
+lxc.pts = 1
+lxc.aa_profile = lxc-container-default-with-nesting
+
+lxc.network.type = none
+lxc.mount.entry = sysfs sys sysfs defaults 0 0
+lxc.mount.auto = cgroup-full:rw
+lxc.mount.entry = proc proc proc defaults 0 0
+lxc.mount.entry = shm /dev/shm tmpfs defaults 0 0
+lxc.mount.entry = tmpfs tmp tmpfs size=24m
+lxc.mount.entry = /tmp e8ctmp none rw,rbind 0 0
+lxc.mount.entry = /mnt mnt none rw,rbind 0 0
+lxc.mount.entry = /dev/pts dev/pts none rw,bind 0 0
+lxc.mount.entry = /var/run/dbus var/run/dbus none rw,bind 0 0
+lxc.mount.entry = /opt/upt/apps/etc/dbus-1 etc/dbus-1 none rw,bind 0 0
+lxc.mount.entry = /opt/upt/framework/saf/rootfs opt/rootfs none rw,bind 0 0
+lxc.mount.entry = /opt/upt/apps/info opt/info none rw,bind 0 0
+lxc.cgroup.cpu.shares = 512

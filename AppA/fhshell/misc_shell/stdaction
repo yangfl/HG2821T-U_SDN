@@ -1,0 +1,247 @@
+#!/bin/sh
+COMMON_CONF=/etc/fh_common.conf
+#MANAGER_INC=`grep "MANAGER_INC_CONF_PATH_HGCXML=" $COMMON_CONF | cut -d = -f 2`
+#TELNET=`grep "IGD_DI_XCTCOMSM_TelnetEnable=" $MANAGER_INC | cut -d = -f 2`
+#FTP=`grep "IGD_DI_XCTCOMSM_FtpEnable=" $MANAGER_INC | cut -d = -f 2`
+#-----lqu modify 20120816
+
+kill_proccess_by_name()
+{
+    # echo "Proccess to kill is $1"
+    PROC_ID=`pidof $1` 
+    if [ -z "$PROC_ID" ]
+    then    
+        echo "No proccess to kill"     
+        return 0    
+    else
+        while [ "x$PROC_ID" != "x" ]
+        do
+            kill -9 $PROC_ID
+            sleep 2      
+            PROC_ID=`pidof $1`
+        done
+    fi
+}
+
+tr069_kill()
+{
+   rm -rf /var/*.log
+   sync
+   echo 3 > /proc/sys/vm/drop_caches
+   sleep 1
+	 sync
+	 echo 3 > /proc/sys/vm/drop_caches
+}
+
+recvimg_kill()
+{
+   killall misc_run.sh
+   #killall fh_nsm
+   killall agent
+   killall wancc
+   killall hgcsip
+   killall hgcmegaco
+   #killall vsftpd
+   killall hgcntpd
+   killall pppoe-start
+   killall pppd
+   killall udhcpc-start
+   killall udhcpc
+   killall dhcp6c_start
+   killall dhcp6c
+   killall udhcpd
+   killall dnsmasq
+   killall rastatus6
+   #killall mpa
+   #killall upnpCtrlpt
+   #killall thttpd
+   killall loop
+   #killall itms_control
+   #killall collect_data
+   killall dpid
+   killall fhomci
+   killall fhoam
+   rm -rf /var/*.log
+   sync
+   echo 3 > /proc/sys/vm/drop_caches
+   sleep 1
+	 sync
+	 echo 3 > /proc/sys/vm/drop_caches
+}
+
+upgrade_kill()
+{
+   #killall misc_run.sh
+   #killall fh_nsm
+   #killall agent
+   #killall wancc
+   killall hgcsip
+   #killall hgcmegaco
+   #killall vsftpd
+   #killall hgcntpd
+   #killall pppoe-start
+   #killall pppoe-start-ipv4
+   #killall pppoe-start-ipv6
+   killall pppd
+   #killall udhcpc-start
+   killall udhcpc
+   #killall dhcp6c_start
+   #killall dhcp6c
+   killall udhcpd
+   #killall dnsmasq
+   killall dnsmasqx
+   #killall rastatus6
+   #killall mpa
+   #killall upnpCtrlpt
+   #killall thttpd
+   killall loop
+   #killall itms_control
+   #killall collect_data
+   killall fhomci
+   killall fhoam
+   #killall dpid
+   killall wlancfg
+   killall ovsdb-server
+   killall ovs-vswitchd
+   killall cm
+   killall dm
+   killall inetd
+   killall arping
+   rm -rf /var/*.log
+   sync
+   echo 3 > /proc/sys/vm/drop_caches
+}
+
+
+if [ $# -lt 1 ]
+then
+	echo "stdaction upgrade_conf_restore"
+	echo "stdaction reboot"
+	echo "stdaction killproc PROCESSNAME"
+	echo "stdaction factory"
+	exit 1
+fi
+
+case "$1" in
+	reboot)
+		echo "reboot........."
+		#mv /var/agent.log /usr/local/fh/logbak/agent.log.bak -f
+		mv /var/fhomci.log /usr/local/fh/logbak/fhomci.log.bak -f
+		cp -rf /var/messages /usr/local/fh/logbak/messages
+		sleep 1
+		sync
+		reboot
+	;;
+
+	killproc)
+		echo "killproc $2 starting........."
+		ARG=$2
+		# echo $ARG
+		if [ -z $ARG ]
+		then
+			echo "usage: stdaction killproc PROCESSNAME"
+			return
+		fi
+		kill_proccess_by_name "$ARG"
+	;;
+
+	upgrade_conf_restore)
+		echo "upgrade_conf_restore........."
+	;;
+
+	upgrade_precf)
+		PRECF_AUTO=/usr/local/ct/upgrade_precf_auto
+		if [ -f $PRECF_AUTO ]; then
+			IMAGE_TITLE=`grep "name=" $PRECF_AUTO | cut -d = -f 2 `
+			rm -f $PRECF_AUTO
+			sync
+			TITLE_SECTION=`echo ${IMAGE_TITLE%@*}`
+			SECTION_LEN=`echo ${#TITLE_SECTION}`
+			PRO_PATH=/province/
+			if [ `echo ${#SECTION_LEN}` -lt 10 -o `ls $PRO_PATH |grep $TITLE_SECTION |wc -l` != 1 ]; then
+				exit
+			fi
+			PRECF_TITLE=`ls $PRO_PATH |grep $TITLE_SECTION`
+			PRECF_NAME=$PRO_PATH$PRECF_TITLE
+			if [ -f $PRECF_NAME ]; then
+				echo "upgrade_conf_auto........."
+				TARGET_IM=/var/Image
+				cp $PRECF_NAME $TARGET_IM -f
+				upgrade web_M
+				sleep 60
+			fi
+		fi
+	;;
+
+	factory)
+		ARG=$2
+		if [ -z $ARG ]
+		then
+			echo "need argument!"
+		else
+			case "$2" in
+				precfg_in)
+					echo "enter factory mode........."
+					#if [ ! -f /usr/local/fh/mf/factory_mode ]
+					#then
+						GETTEL=`inter_web get $TELNET |awk -F '&' '{print $1}'` 
+						if [ "$GETTEL" != "1" ]                                
+						then                                               
+							inter_web set $TELNET 1                    
+						fi
+						inter_web set $FTP 1
+						touch /usr/local/fh/mf/factory_mode
+						sync
+						wifi_dev=`cat /proc/bus/pci/devices | cut -f 1`
+						if [ ! -z $wifi_dev ]
+						then
+							wifi open
+							/usr/bin/UDPserver &
+						fi
+						mount -o remount,rw /data
+                        			#for sdn hg                        
+                        			/usr/init_scripts/return_factory.sh
+					#else
+						#echo "in factory mode already"	
+					#fi
+				;;
+				precfg_out)
+					echo "leave factory mode........."
+					rm -f /usr/local/fh/mf/factory_mode
+					/rom/fhshell/misc_shell/cfg_bak_restore.sh "factory_reset"  "remote_reset"  "all"
+				;;
+				temp)
+					echo "enter temp factory mode........."
+					if [ ! -f /var/factory_mode ]
+					then
+						touch /var/factory_mode
+					else
+						echo "in temp factory mode already"	
+					fi
+				;;
+			esac
+		fi
+	;;
+	
+	killprocess)
+		ARG=$2
+		if [ -z $ARG ]
+		then
+			echo "need argument!"
+		else
+		case "$2" in
+				tr069)
+					tr069_kill
+				;;
+				recvimg)
+					recvimg_kill
+				;;
+				upgrade)
+					upgrade_kill
+				;;
+		esac
+		fi
+	;;
+		
+esac
+

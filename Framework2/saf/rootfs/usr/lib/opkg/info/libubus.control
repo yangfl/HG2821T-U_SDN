@@ -1,0 +1,10 @@
+Package: libubus
+Version: 2017-01-03-ad5333a73b222e95458e05d52f349194df9ae7c6
+Depends: libc, libubox
+Source: package/system/ubus
+License: LGPL-2.1
+Section: libs
+Maintainer: Felix Fietkau <nbd@openwrt.org>
+Architecture: mt7526
+Installed-Size: 10118
+Description:  OpenWrt RPC client library

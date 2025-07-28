@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"></script>
+		<script language='javascript'>
+			var activeTimeout = setTimeout("Timeout()", 300000);    
+			  
+			function Timeout() {
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+					parent.location = "/cgi-bin/luci";
+					});	
+			}
+			
+			function doLogout()
+			{
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+				    parent.location = "/cgi-bin/luci";					
+					});					
+			}
+			
+			function checkUserPassword()
+			{
+					$("#promptText1").css("display", "none");
+					if (($("#new").val().length < 5) || ($("#new").val().length > 20))
+					{
+						  $(".save_error").text("设置密码长度错误，必须在五到二十个字符之间");
+						  return false;
+					}	
+					if ($("#new").val().indexOf(" ") != -1)
+					{
+						  $(".save_error").text("密码不能包含空格");
+						  return false;						  
+					}				
+					if ($("#new").val() != $("#confirm").val())
+					{
+						  $(".save_error").text("新的密码和确认密码不一致，请重新输入");
+						  return false;
+					}	
+					
+					return true;			
+			}
+			
+			function doChangeUserPasswd()
+			{
+				cleanPopWindowContentFromIframe();
+				
+				//填充内容
+				$("#pop_window_title", window.parent.document).html("修改确认");
+				$("#pop_window_icon", window.parent.document).html('<div class="pop_window_icon_alert"></div>');
+				$("#pop_window_message", window.parent.document).html("请确认修改登录信息内容");
+				
+				//更改确认操作函数
+				var eid = parent.document.getElementById("confirm");
+				if ( isIE7 )
+				{
+					eid.onclick = function() { realChangeUserPasswd() };
+				}
+				else
+				{
+					eid.setAttribute("onclick","document.getElementById('setting_iframe').contentWindow.realChangeUserPasswd()");
+				}
+				showOrHidePopWindowFromIframe("show");
+			}
+			
+			function realChangeUserPasswd()
+			{
+				showOrHidePopWindowFromIframe("hide");
+				
+				$("#chpdBtn").attr("disabled","disabled");
+				$("#chpdBtn").removeClass("input_button");
+				$("#chpdBtn").addClass("grey_button");
+
+				clearTimeout(activeTimeout);
+				activeTimeout = setTimeout("Timeout()", 300000);				
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/settings/change_passwd')%>',
+					{ token: '<%=token%>', old: $("#current").val(), newPasswd: $("#new").val() }, 
+					function(x){
+						if (x.responseText.substr(2, 7) == "DOCTYPE")
+            					parent.location = "/cgi-bin/luci";
+            				else
+            				{
+							var retVal = eval("("+x.responseText+")");
+							if (retVal.message == 0)
+							{
+								$(".save_error").text("修改密码成功");
+								setTimeout("doLogout()", 1000); 
+							}
+							else
+							{ 
+								if (retVal.message == 1)
+									$(".save_error").text("当前密码错误，请重新输入");
+							    else if (retVal.message == 2)
+									$(".save_error").text("修改密码失败");
+							    else
+									$(".save_error").text("未知错误，密码修改失败");
+								  
+								$("#chpdBtn").removeClass("grey_button");
+								$("#chpdBtn").addClass("input_button");	
+								$("#chpdBtn").removeAttr("disabled");
+							}
+					    }
+					});						
+			}			
+			
+			$(document).ready(function(){
+				customPasswordInit();
+				$(".input_button").click(function(){
+					if (!checkUserPassword())
+						return;
+				
+					doChangeUserPasswd();				
+				});
+	    });
+	    
+		function keyCapscheck(e)
+		{
+			if (capsFlg && (e.keyCode == 20))
+			{
+				if ($("#promptText1").css("display") != "none")
+					$("#promptText1").css("display", "none");
+			}
+		}	     				
+		</script>
+	</head>
+	<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body' onkeydown='keyCapscheck(event, 1)'>
+		<form>
+			<div class="main_header">
+				<p class="main_header_title">修改登录信息</p>
+				<p class="main_header_hint">您可以通过经常更换登录信息让您的账户更加安全</p>
+			</div>
+			<div class="main_content">
+				<div class="main_item">
+					<div class="main_item_name">用户名</div>
+					<div class="main_item_content">useradmin</div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">当前密码</div>
+					<div class="main_item_content">
+						<div class="password_content">
+							<input type="password" id="current" name="current" placeholder="Current Password" maxlength="128" onkeypress ="detectCapsLock(event, 1, 'user')"/>
+							<div class="password_switch password_switch_unfocus"></div>
+						</div>
+					</div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">新的密码</div>
+					<div class="main_item_content">
+						<div class="password_content">
+							<input type="password" id="new" name="new" placeholder="New Password" maxlength="20" onkeypress ="detectCapsLock(event, 1, 'user')"/>
+							<div class="password_switch password_switch_unfocus"></div>
+						</div>
+					</div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">确认密码</div>
+					<div class="main_item_content">
+						<div class="password_content">
+							<input type="password" id="confirm" name="confirm" placeholder="Confirm Password" maxlength="20" onkeypress ="detectCapsLock(event, 1, 'user')"/>
+							<div class="password_switch password_switch_unfocus"></div>
+						</div>
+					</div>
+				</div>
+				
+				<div id="promptText1" style="margin-left: 130px;display:none;">
+					<div style="color: #535353;">大写锁定键已开启，请注意大小写
+					</div>
+				</div>				
+				
+				<div id="error_hint" style="margin-left: 130px;">
+					<div class="save_error" style="color: #535353;">
+					</div>
+				</div>							
+				
+			</div>
+			<div class="main_save">
+				<input type="button" id="chpdBtn" class="input_button" value="保存设置"/>
+			</div>
+		</form>
+		
+	</body>
+</html>

@@ -1,0 +1,113 @@
+#!/bin/sh
+#
+# ipv6-down
+#
+# Called by pppd after IPV6CP/down was finished
+#
+# This file should not be modified -- make local changes to
+# /etc/ppp/ipv6-down.local instead
+#
+#
+# Taken from:
+# (P) & (C) 2001-2006 by Peter Bieringer <pb@bieringer.de>
+#
+#  You will find more information on the initscripts-ipv6 homepage at
+#   http://www.deepspace6.net/projects/initscripts-ipv6.html
+#
+# RHL integration assistance by Pekka Savola <pekkas@netcore.fi>
+#
+# Calling parameters:
+#  $1: interface name
+#  $6: logical interface name (set by pppd option ipparam)
+#
+# Version 2006-08-02
+#
+# Uses following information from /etc/sysconfig/network:
+#  NETWORKING_IPV6=yes|no: controls IPv6 initialization (global setting)
+#
+# Uses following information from /etc/sysconfig/network-scripts/ifcfg-$1:
+#  IPV6INIT=yes|no: controls IPv6 configuration for this interface
+#
+
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+export PATH
+
+LOGDEVICE=$6
+REALDEVICE=$1
+COMMON_CONF=/etc/fh_common.conf
+LogFileName=/var/pppoe_ipv6_down_proc.log
+APP_CONF_PATH_PPPOE=`grep "APP_CONF_PATH_PPPOE=" $COMMON_CONF | cut -d = -f 2 `
+FHBOX_BIN=`grep "FHBOX_BIN=" $COMMON_CONF | cut -d = -f 2 `
+SEND=$FHBOX_BIN/send
+interface_name=$1
+tty_device=$2
+echo "interface name is :"$interface_name >> $LogFileName
+echo "tty_device is :"$tty_device >> $LogFileName
+emuinfo_file=/var/pppoeemuinfo
+if [  -f $emuinfo_file ];then
+	exit 0
+fi
+if [ ! -f $emuinfo_file ];then
+	sed "/$2=$1/d" /var/run/wan_ppp.conf >/var/temp && mv /var/temp /var/run/wan_ppp.conf
+	sed "/$2=$1/d" $fpath/wan4_ppp.conf >$fpath/wan4_ppp.conf.bak && mv $fpath/wan4_ppp.conf.bak $fpath/wan4_ppp.conf
+fi
+ps axu | grep dhcp6c > /var/pppoe_ipv6_dhcp_status
+STR=`grep "dhcp6c_$tty_device" /var/pppoe_ipv6_dhcp_status`
+if [ "x$STR" != "x"  ]
+then 
+  echo "found proc !" >> $LogFileName
+  echo "STR info is $STR" >> $LogFileName
+  dhcp6c_pid=`echo $STR | awk '{print $1}'`
+  echo "dhcp6c_pid is:"$dhcp6c_pid >> $LogFileName 
+  kill -9 $dhcp6c_pid 
+  echo "kill -9 $dhcp6c_pid"
+  
+else
+  echo "not found proc !" >> $LogFileName
+fi
+if [ "$LINKNAME" == "all" ] || [ "$LINKNAME" == "internet" ] || [ "$LINKNAME" == "voip_internet" ] || [ "$LINKNAME" == "tr069_internet" ]
+then
+	#lqu added to zhouhaiping 2013-08-15 
+rm -fr /var/pppoe_duration_time
+fi
+rm -rf  /var/pppoe_ipv6_dhcp_status
+
+[ -f /etc/sysconfig/network ] || exit 0
+. /etc/sysconfig/network
+
+cd /etc/sysconfig/network-scripts
+. ./network-functions
+
+CONFIG=$LOGDEVICE
+[ -f "$CONFIG" ] || CONFIG=ifcfg-$CONFIG
+source_config
+
+# Test whether IPv6 should be configured, else stop
+[ "${NETWORKING_IPV6}" = "yes" ] || exit 0
+
+[ -f /etc/sysconfig/network-scripts/network-functions-ipv6 ] || exit 1
+. /etc/sysconfig/network-scripts/network-functions-ipv6
+
+[ -x $APP_CONF_PATH_PPPOE/ipv6-down.local ] && $APP_CONF_PATH_PPPOE/ipv6-down.local "$@"
+
+
+if [ "$IPV6_CONTROL_RADVD" = "yes" ]; then
+	# Control running radvd
+	ipv6_trigger_radvd down "$IPV6_RADVD_TRIGGER_ACTION" $IPV6_RADVD_PIDFILE
+fi
+
+# IPv6 test, no module loaded, exit if system is not IPv6-ready
+ipv6_test testonly || exit 0
+
+# Test device status
+ipv6_test_device_status $REALDEVICE
+if [ $? != 0 -a $? != 11 ]; then
+	# device doesn't exist or other problem occurs
+	exit 1
+fi
+
+# Delete all current configured IPv6 addresses on this interface
+ipv6_cleanup_device $REALDEVICE
+	$SEND 7
+exit 0

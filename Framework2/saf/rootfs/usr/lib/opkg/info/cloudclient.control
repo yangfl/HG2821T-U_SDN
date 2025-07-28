@@ -1,0 +1,10 @@
+Package: cloudclient
+Version: CC1.1_CT_MT7526_R1773
+Depends: libc, jansson, glib2, libcapi, libuci, libubox, libcurl, libarchive
+Source: package/upointech/cloudclient
+Section: base
+Essential: yes
+Maintainer: Upointech
+Architecture: mt7526
+Installed-Size: 103930
+Description:  cloud client for smart gateway device

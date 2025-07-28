@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?ver=1418' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/wifi.css?ver=1418' rel="stylesheet" type='text/css'/>
+		<script src="<%=resource%>/xhr.js"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js"></script>
+		<script src="<%=resource%>/js/jquery.nicescroll.min.js"></script>
+		<script>
+		function frmLoad()
+		{
+					(new XHR()).get('<%=luci.dispatcher.build_url('admin/appconfig/getAppParas')%>',{config:"test"},
+						function(x, json)
+						{
+							if (parseInt(json.ret))
+							{
+								$("#max_connections").val(json.main.max_connections);
+								$("#cgi_prefix").val(json.main.cgi_prefix);
+								$("#commonname").val(json.px5g.commonname);
+							}
+						});				
+		}
+		
+		function checkAppParas()
+		{
+			return true;
+		}
+			
+	$(document).ready(function(){
+		customScrollBar("#testapp_scrolldiv");
+		customSwitchInit();
+		customSelectInit();
+	});			
+		</script>
+		
+	</head>
+	<body onLoad='frmLoad()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+		<div id="testapp_scrolldiv" style="width:800px;height:500px">
+		<form class='main_config_body' method="post" action="<%=url("admin/appconfig/setAppParas")%>" onsubmit="return checkAppParas();">
+			<input type="hidden" name="token" value="<%=token%>" />
+			<input type="hidden" name="config" id="config" value="test" />			
+			<div class="main_header">
+				<p class="main_header_title">Testapp配置</p>
+				<p class="main_header_hint">您可以通过本页面配置Testapp相关参数</p>
+			</div>
+			<div class="main_content">
+				<div class="main_item">
+					<div class="main_item_name">文本参数1</div>
+					<div class="main_item_content">
+							<input type="text" id="max_connections" name="main.max_connections" class="input_text"/>
+					</div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">文本参数2</div>
+					<div class="main_item_content">
+							<input type="text" id="cgi_prefix" name="main.cgi_prefix" class="input_text"/>
+					</div>
+				</div>
+				<div class="main_item">
+					<div class="main_item_name">文本参数3</div>
+					<div class="main_item_content">
+							<input type="text" id="commonname" name="px5g.commonname" class="input_text"/>
+					</div>
+				</div>	
+				
+				<div class="main_item">
+					<div class="main_item_name">开关参数</div>
+					<div class="main_item_content">
+						<div class="switch_content switch_content_on" id="para_switch">
+							<input type="hidden" id="para_switch_value" name="paraEnbl" value="1" />
+						</div>
+					</div>
+				</div>	
+				
+				<div class="main_item">
+					<div class="main_item_name">下拉参数</div>
+					<div class="main_item_content">
+						<div class="dropdown-select main_item_content_select" hidefocus="true">
+							<label class="select-value">列表值1</label>
+							<input type="hidden" id="list_value" name="list_val" value="val1" />
+							<div class="select-arrow"></div>
+							<ul id="protocol" class="dropdown-menu-select">
+								<li livalue="val1">列表值1</li>
+								<li livalue="val2">列表值2</li>
+								<li livalue="val3">列表值3</li>
+							</ul>
+						</div>
+					</div>
+				</div>													
+				
+			</div>
+			<div class="main_save">
+				<input type="submit" class="input_button" value="保存设置"/>
+			</div>
+		</form>
+		</div>
+	</body>
+</html>

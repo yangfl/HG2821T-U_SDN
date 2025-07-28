@@ -1,0 +1,288 @@
+#!/bin/sh
+# hexiansheng@fiberhome.com.cn 2012-10-05
+#update for mtk tianzhw@fiberhome.com.cn  2015-5-7
+######################COMMON PATH######################
+. /usr/init_scripts/env_para.sh
+
+COMMON_CONF=/etc/fh_common.conf
+
+#path of apcfg
+APCFG=/var/wlan/apcfg
+
+#path of wlan script
+WLAN_SHELL=`grep "APP_SHELL_PATH_WLAN" $COMMON_CONF | cut -d = -f 2`
+
+#path of rtl8192cd.ko
+MODULE_PATH=/lib/fhko
+FHSHELL=/rom/fhshell/misc_shell
+#path of iwpriv
+WLAN_BIN=`grep "APP_PATH_WLAN" $COMMON_CONF | cut -d = -f 2`
+IWPRIV_CMD=$WLAN_BIN/iwpriv
+
+#path of wlan log
+DEBUG_LOG=/var/wlan/log
+
+DOWN_FILE=/var/wlan/.down_2g
+
+GETCFGX=/usr/bin/getcfgx
+RATE_PRIORITY_CONFIG=/flash/cfg/app_conf/mpa/wlan/ratepriority_config
+######################COMMON PATH######################
+VAP_MAX_INDEX=2
+
+#. $APCFG
+while read line; do
+if echo "$line" | grep -q '=';then
+    name=`echo ${line} | cut -d'=' -f1`
+    value=`echo ${line} | cut -d'=' -f2`
+    line=${name}=\"${value}\"
+#	echo ${line}
+    eval "$line"
+fi
+done < $APCFG
+
+if [ "${WIFIENABLE}" = "0" ]; then
+    echo "ap: WiFi module disabled"
+	
+	if [ -f ${DOWN_FILE} ]; then
+		echo "wifi was down already..."
+		exit 1
+	fi
+	touch ${DOWN_FILE}
+
+	ifconfig ra0 down
+###	brctl delif br0 ra0
+
+	ifconfig ra1 down
+###	brctl delif br0 ra1
+
+	ifconfig ra2 down
+###	brctl delif br0 ra2
+
+	ifconfig ra3 down
+###	brctl delif br0 ra3
+
+    exit 1
+fi
+
+rm -f $DEBUG_LOG
+touch $DEBUG_LOG
+
+IWPRIV () {
+	echo "$IWPRIV_CMD $@" >> $DEBUG_LOG
+	$IWPRIV_CMD "$@"
+}
+
+DEBUG_WLAN() {
+	echo "$@" >> $DEBUG_LOG
+}
+
+remove_modules() {
+	if [ "${MODLIST}" != "" ]; then
+###		brctl delif br0 ra0
+###		brctl delif br0 ra1
+###		brctl delif br0 ra2
+###		brctl delif br0 ra3
+		
+		DEBUG_WLAN "rmmod $MODULE_PATH/mt7603eap.ko"
+		rmmod $MODULE_PATH/mt7603eap.ko
+	fi
+}
+
+#root ACL
+set_root_acl() {
+	#1 set acl mode -> 0:allow all;   1: white list;    2:bleak list
+	IWPRIV wlan0 set_mib aclmode=$ACLCMD_0
+	
+	#2 add mac list
+	if [ "$ACLCMD_0" = "1" -o "$ACLCMD_0" = "2" ];then
+		#clear acl
+		IWPRIV wlan0 set_mib aclnum=0
+				
+		#add mac list
+		COUNT_MAC_ACL=`echo $ACLMAC_0 | awk -F ',' '{print NF-1}'`
+		COUNT_ACL=0
+		while [ ${COUNT_ACL} -le ${COUNT_MAC_ACL} ] 
+		do
+			let INDEX_ACL=${COUNT_ACL}+1
+			ADDMAC_ACL=`echo $ACLMAC_0 | cut -f "${INDEX_ACL}" -d ","`
+			if [ "$ADDMAC_ACL" != "" ]; then
+				IWPRIV wlan0 set_mib acladdr=$ADDMAC_ACL
+			fi
+			let COUNT_ACL+=1
+		done			
+	fi
+}
+
+#root security
+set_root_security() {
+	if [ "$AUTHMODE_0" = "open" ]; then
+			if [ "$ENCRYPTYPE_0" = "none" ]; then
+					IWPRIV wlan0 set_mib authtype=0
+					IWPRIV wlan0 set_mib encmode=0
+					IWPRIV wlan0 set_mib 802_1x=0
+					IWPRIV wlan0 set_mib wpa_cipher=0
+					IWPRIV wlan0 set_mib wpa2_cipher=0
+					IWPRIV wlan0 set_mib wapiType=0
+			elif [ "$ENCRYPTYPE_0" = "wep" ]; then
+					#key
+					KEY=WEPKEY0_${KEYINDEX_0}
+					eval KEY=\$${KEY}
+					
+					DEBUG_WLAN "$WLAN_SHELL/set_wep.sh wlan0 $AUTHMODE_0 $WEPLEN_0 $KEYINDEX_0 $KEY"
+					$WLAN_SHELL/set_wep.sh wlan0 $AUTHMODE_0 $WEPLEN_0 $KEYINDEX_0 $KEY
+			else
+					echo "auth: open. encryptype should be none or wep"
+					exit 1
+			fi
+	elif [ "$AUTHMODE_0" = "shared" -o "$AUTHMODE_0" = "both" ]; then
+			if [ "${ENCRYPTYPE_0}" = "wep" ]; then
+					#key
+					KEY=WEPKEY0_${KEYINDEX_0}
+					eval KEY=\$${KEY}
+					
+					DEBUG_WLAN "$WLAN_SHELL/set_wep.sh wlan0 $AUTHMODE_0 $WEPLEN_0 $KEYINDEX_0 $KEY"
+					$WLAN_SHELL/set_wep.sh wlan0 $AUTHMODE_0 $WEPLEN_0 $KEYINDEX_0 $KEY
+			else
+					echo "auth: $AUTHMODE_0, encryptype should be wep"
+			fi
+	elif [ "$AUTHMODE_0" = "wpa" -o "$AUTHMODE_0" = "wpa2" -o "$AUTHMODE_0" = "wpa_wpa2_mixed" ]; then
+			if [ "$ENCRYPTYPE_0" = "tkip" ]; then
+					enc=tkip
+			elif [ "$ENCRYPTYPE_0" = "aes" ]; then
+					enc=aes
+			elif [ "$ENCRYPTYPE_0" = "aes+tkip" ]; then
+					enc=tkip_aes_mixed
+			else
+					echo "apcfg:The variable ENCRYPTYPE is illegal"
+					exit 1
+			fi
+			
+			DEBUG_WLAN "$WLAN_SHELL/set_wpa.sh wlan0 $AUTHMODE_0 $enc $wpa_passphrase_0"			
+			$WLAN_SHELL/set_wpa.sh wlan0 $AUTHMODE_0 $enc $wpa_passphrase_0
+			
+			IWPRIV wlan0 set_mib expired_time=$wpa_group_rekey_0
+	else
+			echo "auth should be open,shared,both,wpa,wpa2,wpa_wpa2_mixed"
+			exit 1
+	fi
+}
+
+
+#config wifi here
+if [ "${1}" = "up" ]; then
+	if [ ! -f ${DOWN_FILE} ]; then
+		echo "wifi 2G was up already..."
+		exit 1
+	fi
+	rm -rf ${DOWN_FILE}
+	
+	if [ "$ENABLE_0" = "1" ]; then
+		ifconfig ra0 up
+###		brctl addif br0 ra0
+	else
+		echo "2G SSID 1 is Disable"
+	fi
+	
+	if [ "$ENABLE_1" = "1" ]; then
+		ifconfig ra1 up
+###		brctl addif br0 ra1
+	else
+		echo "2G SSID 2 is Disable"
+	fi
+
+	if [ "$ENABLE_2" = "1" ]; then
+		ifconfig ra2 up
+###		brctl addif br0 ra2
+	else
+		echo "2G SSID 3 is Disable"
+	fi
+	
+	if [ "$ENABLE_3" = "1" ]; then
+		ifconfig ra3 up
+###		brctl addif br0 ra3
+	else
+		echo "2G SSID 4 is Disable"
+	fi
+	
+	if [ "$ENABLE_0" = "1" -o "$ENABLE_1" = "1" -o "$ENABLE_2" = "1" -o "$ENABLE_3" = "1" ]; then
+		notify2 "WIFI_2.4" "UP"
+		ip link set ra0 netns MNG		
+		$OVS_VSCTL --may-exist add-port SDN-bridge ra0 -- set interface ra0 ofport_request=11
+		$OVS_VSCTL set Port ra0 other_config:rstp-enable=true
+		
+		var=`ip netns exec MNG ifconfig -a |grep ra0`
+		if [ "$var" = "" ]; then
+			ip link set ra0 netns MNG
+			$OVS_VSCTL --may-exist add-port SDN-bridge ra0 -- set interface ra0 ofport_request=11
+			$OVS_VSCTL set Port ra0 other_config:rstp-enable=true
+			ip netns exec MNG ifconfig ra0 up
+		else
+			echo 4 >> /var/test
+			ip netns exec MNG ifconfig ra0 down
+			#sleep 2
+			ip netns exec MNG ifconfig ra0 up
+		fi
+	fi
+	
+###	$FHSHELL/init_vlan_binding_ra.sh 
+				
+	#wps
+	#DEBUG_WLAN "$WLAN_SHELL/set_wps.sh open"
+#默认关闭WPS，只在按键时开启
+#	$WLAN_SHELL/set_wps.sh open
+	
+elif [ "${1}" = "down" ]; then
+	if [ -f ${DOWN_FILE} ]; then
+		echo "wifi was down already..."
+		exit 1
+	fi
+	touch ${DOWN_FILE}
+	
+	#bring down
+
+#	if [ "$ENABLE_0" = "0" ]; then
+		ifconfig ra0 down
+###		brctl delif br0 ra0
+#	else
+#		echo "SSID 1 is Disable"
+#	fi
+	
+#	if [ "$ENABLE_1" = "0" ]; then
+		ifconfig ra1 down
+###		brctl delif br0 ra1
+#	else
+#		echo "SSID 2 is Disable"
+#	fi
+
+#	if [ "$ENABLE_2" = "0" ]; then
+		ifconfig ra2 down
+###		brctl delif br0 ra2
+#	else
+#		echo "SSID 3 is Disable"
+#	fi
+	
+#	if [ "$ENABLE_3" = "0" ]; then
+		ifconfig ra3 down
+###		brctl delif br0 ra3
+#	else
+#		echo "SSID 4 is Disable"
+#	fi
+
+	
+	if [ "${2}" = "modules" ]; then
+		remove_modules
+	fi
+	
+	#wps
+	#DEBUG_WLAN "$WLAN_SHELL/set_wps.sh close"
+#默认关闭WPS，只在按键时开启
+#	$WLAN_SHELL/set_wps.sh close
+
+elif [ "${1}" = "show" ]; then
+	$WLAN_SHELL/wifi_show.sh
+else
+    echo "ap: invalid argument"
+    exit 1
+fi
+
+exit 0

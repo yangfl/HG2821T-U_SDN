@@ -1,0 +1,228 @@
+#!/bin/sh
+###sleep 1
+
+COMMON_CONF=/etc/fh_common.conf
+APCFG=/var/wlan/apcfg
+APCFG_5=/var/wlan/apcfg_5
+WLAN_SHELL=`grep "APP_SHELL_PATH_WLAN" $COMMON_CONF | cut -d = -f 2`
+WLAN_CONF=`grep "APP_CONF_PATH_WLAN" $COMMON_CONF | cut -d = -f 2`
+FAC_MODE=/usr/local/fh/mf/factory_mode
+MODULE_PATH=/lib/fhko
+XMLCONF=/rom/fhshell/web/web_gui/hgcxml_wlaninfo.conf
+SSIDIndex=1
+SSIDIndex_5G=1
+touch /var/wlan/.down_2g
+touch /var/wlan/.down_5g
+
+###if [ ! -f "/var/manager_finished" ]; then
+###    echo "wlan is waiting for manager finished ..."
+###    sleep 6
+###fi
+###if [ ! -f "/var/manager_finished" ]; then
+###    echo "wlan is waiting for manager finished ..."
+###    sleep 2
+###fi
+###if [ ! -f "/var/manager_finished" ]; then
+###    echo "wlan is waiting for manager finished ..."
+###    sleep 2
+###fi
+###if [ ! -f "/var/manager_finished" ]; then
+###    echo "ignore manager, wlan starting ..."
+###fi
+###sleep 15
+
+if [ ! -f ${APCFG} ]; then
+	echo "${APCFG} is missing, rebuild it ..."
+	[ -d /var/wlan ] || mkdir -p /var/wlan
+	cp -rf ${WLAN_CONF}/apcfg /var/wlan
+fi
+
+if [ ! -f ${APCFG_5} ]; then
+	echo "${APCFG_5} is missing, rebuild it ..."
+	[ -d /var/wlan ] || mkdir -p /var/wlan
+	cp -rf ${WLAN_CONF}/apcfg_5 /var/wlan
+fi
+
+CPUTYPE=`cat /proc/fh_ver_info/cpu_type`
+#PCI_ID=`cat /proc/bus/pci/devices | cut -f 2 | sed -n '3p'`
+PCI_ID=`cat /proc/bus/pci/devices | cut -f 2 | grep 7603`
+module=`lsmod | grep mt7603eap`
+PCI_ID_5_7612=`cat /proc/bus/pci/devices | cut -f 2 | grep 7612`
+PCI_ID_5_7662=`cat /proc/bus/pci/devices | cut -f 2 | grep 7662`
+module_5=`lsmod | grep mt7662e_ap`
+#if [ "${PCI_ID}" = "10ec8191" ]; then
+#	if [ "${module}" = "" ]; then
+#		insmod $MODULE_PATH/rtl8192cd.ko
+#	fi
+#elif [ "${PCI_ID}" = "10ec818b" ]; then
+#	if [ "${module}" = "" ]; then
+#		insmod $MODULE_PATH/rtl8192er.ko
+#	fi
+#	$WLAN_SHELL/set_calibration.sh wlan0
+#elif [ "${PCI_ID}" = "14c37603" ]; then
+
+if [ "${CPUTYPE}" = "MT7526G" ]; then
+#if [ "${PCI_ID}" = "14c37603" ]; then
+	if [ "${module}" = "" ]; then
+		insmod $MODULE_PATH/mt7603eap.ko
+		ifconfig ra0 up
+	fi
+#	$WLAN_SHELL/set_calibration.sh ra0
+#else
+#	echo "unknown pci id, wlan init failed ..."
+#	exit 1
+#fi
+
+if [ "${PCI_ID_5_7662}" = "14c37662" -o "${PCI_ID_5_7612}" = "14c37612" ]; then
+	if [ "${module_5}" = "" ]; then
+		insmod $MODULE_PATH/mt7662e_ap.ko
+		ifconfig rai0 up
+	fi
+	setcfgx /var/WEB-GUI/webgui.conf wifi5g 1
+else
+	echo "5g is not exist"
+	setcfgx /var/WEB-GUI/webgui.conf wifi5g 0
+fi	
+else
+#if [ "${PCI_ID}" = "14c37603" ]; then
+	if [ "${module}" = "" ]; then
+		insmod $MODULE_PATH/mt7603eap.ko
+	fi
+	setcfgx /var/WEB-GUI/webgui.conf wifi5g 0
+#	$WLAN_SHELL/set_calibration.sh ra0
+#else
+#	echo "unknown pci id, wlan init failed ..."
+#	exit 1
+#fi
+fi
+
+AP_ID=`getcfgx ${XMLCONF} IGD_LAND_1_WLANC_1_X_FIB_COM_AP_MAC`
+if [ "$AP_ID" != "" ]; then
+	AP_MAC=`inter_web get $AP_ID | cut -b 1-17`
+	inter_web set $AP_ID $AP_MAC
+fi
+
+#Use Mac in factory.conf, by xliao
+#setcfgx ${APCFG} MacAddress `getcfgx /flash/cfg/agentconf/factory.conf APMAC`
+#setcfgx ${APCFG_5} MacAddress `getcfgx /flash/cfg/agentconf/factory.conf APMAC_5G`
+
+if [ -f ${FAC_MODE} ]; then
+	echo "factory mode, set auth to open none"
+#	setcfgx ${APCFG} AUTHMODE_0 open
+#	setcfgx ${APCFG} ENCRYPTYPE_0 none
+	OrgAuthModeParam=`getcfgx ${APCFG} AuthMode`
+	OrgEncryTypeParam=`getcfgx ${APCFG} EncrypType`
+	NewAuthModeParam=""
+	NewEncryTypeParam=""
+	SignalAuthParam="OPEN"
+	SignalEncrypTypeParam="NONE"
+	
+	OrgAuthModeParam_5G=`getcfgx ${APCFG_5} AuthMode`
+	OrgEncryTypeParam_5G=`getcfgx ${APCFG_5} EncrypType`
+	NewAuthModeParam_5G=""
+	NewEncryTypeParam_5G=""
+	SignalAuthParam_5G="OPEN"
+	SignalEncrypTypeParam_5G="NONE"
+#generate AuthMode Param
+	for i in 1 2 3 4
+	do
+	if [ "$i" != "$SSIDIndex" ];then
+        TEMP=`echo "$OrgAuthModeParam" | cut -d ';' -f "$i"`
+	else
+        TEMP="$SignalAuthParam"
+	fi
+        NewAuthModeParam="$NewAuthModeParam""$TEMP"";"
+	done
+	NewAuthModeParam=${NewAuthModeParam%;}
+
+	for i in 1 2 3 4
+	do
+	if [ "$i" != "$SSIDIndex_5G" ];then
+        TEMP_5G=`echo "$OrgAuthModeParam_5G" | cut -d ';' -f "$i"`
+	else
+        TEMP_5G="$SignalAuthParam_5G"
+	fi
+        NewAuthModeParam_5G="$NewAuthModeParam_5G""$TEMP_5G"";"
+	done
+	NewAuthModeParam_5G=${NewAuthModeParam_5G%;}
+	
+#generate EncrypType Param
+	for i in 1 2 3 4
+	do
+	if [ "$i" != "$SSIDIndex" ];then
+        TEMP=`echo "$OrgEncryTypeParam" | cut -d ';' -f "$i"`
+	else
+        TEMP="$SignalEncrypTypeParam"
+	fi
+        NewEncryTypeParam="$NewEncryTypeParam""$TEMP"";"
+	done
+	NewEncryTypeParam=${NewEncryTypeParam%;}
+	
+	for i in 1 2 3 4
+	do
+	if [ "$i" != "$SSIDIndex_5G" ];then
+        TEMP_5G=`echo "$OrgEncryTypeParam_5G" | cut -d ';' -f "$i"`
+	else
+        TEMP_5G="$SignalEncrypTypeParam_5G"
+	fi
+        NewEncryTypeParam_5G="$NewEncryTypeParam_5G""$TEMP_5G"";"
+	done
+	NewEncryTypeParam_5G=${NewEncryTypeParam_5G%;}
+	
+	setcfgx ${APCFG} AuthMode "$NewAuthModeParam"
+	setcfgx ${APCFG} EncrypType "$NewEncryTypeParam"
+	
+	setcfgx ${APCFG_5} AuthMode "$NewAuthModeParam_5G"
+	setcfgx ${APCFG_5} EncrypType "$NewEncryTypeParam_5G"	
+	/usr/bin/UDPserver &
+fi
+
+#ifconfig wlan0 hw ether 00:00:01:00:00:01
+#ifconfig wlan0-va0 hw ether 00:00:01:00:00:01
+#ifconfig wlan0-va1 hw ether 00:00:01:00:00:01
+#ifconfig wlan0-va2 hw ether 00:00:01:00:00:01
+#ifconfig wlan0-va3 hw ether 00:00:01:00:00:01
+
+#ifconfig ra0 hw ether 00:00:01:00:00:01
+#ifconfig ra1 hw ether 00:00:01:00:00:01
+#ifconfig ra2 hw ether 00:00:01:00:00:01
+#ifconfig ra3 hw ether 00:00:01:00:00:01
+
+#ifconfig wlan0-va0 down
+#ifconfig wlan0-va1 down
+#ifconfig wlan0-va2 down
+#ifconfig wlan0-va3 down
+#ifconfig wlan0 down
+
+ifconfig ra0 down
+ifconfig ra1 down
+ifconfig ra2 down
+ifconfig ra3 down
+
+touch /var/wlan/.down_2g
+
+#wifi up &
+touch /var/wlan/.wifi_reload_2g
+
+#5g
+if [ "${CPUTYPE}" = "MT7526G" ]; then
+  if [ "${PCI_ID_5_7662}" = "14c37662" -o "${PCI_ID_5_7612}" = "14c37612" ]; then
+	ifconfig rai0 down
+	ifconfig rai1 down
+	ifconfig rai2 down
+	ifconfig rai3 down
+
+	touch /var/wlan/.down_5g
+
+#	wifi_5 up &
+	touch /var/wlan/.wifi_reload_5g
+  fi 	
+fi
+
+WLANCFGPID=`pidof wlancfg`
+if [ "${WLANCFGPID}x" = "x" ]; then
+	/usr/bin/wlancfg
+fi
+
+#/usr/bin/wlancmd &   海思方案使用的？
+

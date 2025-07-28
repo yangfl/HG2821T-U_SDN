@@ -1,0 +1,88 @@
+#!/bin/sh
+
+
+
+# For local short reset. clean smart param
+
+killctc()
+{
+	killall ovsdb-server
+	killall ovs-vswitchd
+	killall cm
+	killall dm
+	killall dnsmasqx
+	killall arping
+	killall udhcpc
+	killall hgcsip
+	killall xl2tpd
+	killall pppd
+}
+
+restore_0()
+{
+	killctc
+	rm -f /flash/cfg/wlan_conf/apcfg
+	rm -f /flash/cfg/wlan_conf/apcfg_5
+    rm -rf /usr/ovsdb/*
+	touch /usr/ovsdb/conf.fact
+    rm -f /flash/cfg/misc_conf/register.config_ok
+	sync
+
+    echo "restore_0"
+
+	return
+}
+
+#For local long reset. clean smart param
+restore_1()
+{
+	killctc
+	rm -f /flash/cfg/wlan_conf/apcfg
+	rm -f /flash/cfg/wlan_conf/apcfg_5
+    rm -rf /usr/ovsdb/*
+	touch /usr/ovsdb/conf.fact
+	sync
+
+    echo "restore_1"
+
+	return
+}
+# Function main for the Entrance of the Tool.
+main()
+{    
+
+    # For the Module.
+    case "$1" in
+        # For the Module of Agent.
+        0)
+            restore_0
+        ;; # end of agent)   
+        
+        # For the Factory reset Module.
+        1)
+            restore_1
+        ;; # end of factory_reset)   
+        
+        # For the Default Module, usually not surpport.
+        *)
+            echo "Module Not Surpport."
+        ;; # end of *)
+    esac
+    
+    return
+}
+
+# Check the arguments input by Usrs. And echo the help if Necessary.
+if [ $# -ne 1 ]
+then
+   echo "#"
+   echo "# Usage:"
+   echo "#       0 for remove loid; 1 for keep loid"
+   echo "#"
+   
+else
+    # Get the functions to do
+    main $1
+	reboot
+fi
+

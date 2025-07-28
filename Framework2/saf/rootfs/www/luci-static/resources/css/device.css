@@ -1,0 +1,117 @@
+/* CSS Document */
+.device-mngt-table{
+	margin: 50px 0 10px 0;
+	width:820px;
+	background-color: transparent;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border-color: gray;
+	display: table;
+	text-align: center;
+	font-family: "Microsoft YaHei";
+	font-size: 12px;
+}
+
+.device-mngt-table thead{
+	font-size: 14px;
+	color: #535353;
+	font-weight: lighter;
+	border-bottom: 1px solid #dcdcdc;
+	height: 30px;
+	vertical-align: top;
+}
+
+.device-mngt-table thead th{
+	padding-left: 30px;
+}
+.device-mngt-table tr{
+	display: table-row;
+	padding: 10px 0 10px 0; 
+}
+
+.device-mngt-table input{
+	height: 12px;
+}
+
+.network-restriction span{
+	margin-bottom: 2px;
+}
+
+td div{
+	display: inline-block;
+	text-align: left;
+	vertical-align: middle;
+}
+
+td div:first-child{
+	margin-right: 15px;
+}
+
+td{
+	/* padding: 10px 0 10px 0; */
+	padding-left: 40px;
+    text-align: left;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.label-content{
+	font-size: 12px;
+	color: #39ba93;
+}
+.label-desc{
+	font-size: 12px;
+	color: #535353;	
+}
+
+/* .network-restriction{
+	margin-top: 20px;
+} */
+.network-restriction input{
+	width: 45px;
+
+}
+.network-restriction label{
+	font-family: "Microsoft YaHei";
+	color: #535353;
+	font-size: 12px;
+}
+
+.restriction-td{
+	width: 160px;
+	padding: 0 auto;
+	text-align: center;
+	/* padding-left: 0;
+	padding-right: 0; */
+}
+
+tr td:nth-child(4){
+	width: 160px;
+}
+
+.tr-bg-selected{
+	background-color: gray;
+}
+
+.tr-bg{
+	background-color: #f2f2f2;
+}
+
+tbody tr:first-child td{
+	/* margin-top: 10px; */
+	padding-top: 25px;
+}
+.device-type input{
+	 width: 135px; 
+	height: 12px;
+}
+.apply-button{
+	cursor: pointer;
+}
+
+.restriction-tr td{
+	padding-bottom: 5px;
+}
+.switch-button{
+	cursor: pointer;
+}

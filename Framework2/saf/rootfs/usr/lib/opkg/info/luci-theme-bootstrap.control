@@ -1,0 +1,8 @@
+Package: luci-theme-bootstrap
+Version: R159
+Depends: libc
+Source: feeds/luci/themes/luci-theme-bootstrap
+Section: luci
+Architecture: all
+Installed-Size: 13052
+Description:  Bootstrap Theme (default)

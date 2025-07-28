@@ -1,0 +1,216 @@
+@charset "gb2312";
+
+ul, li {
+    list-style: none;
+}
+
+a {
+    color: #39BA93;
+    text-decoration: underline;
+}
+
+.main_config_body {
+    padding: 10px 40px 0;
+	font-size:12px;
+}
+
+.green {
+    color: #39BA93;
+}
+
+.container {
+    width: 100%;
+}
+
+.status_top {
+    height: 145px;
+	width: 90%;
+	margin-top: 30px;    
+    border-bottom: 1px solid #EBEBEB;
+}
+
+.status_top > div{
+    height: 100%;
+}
+
+.Icon {
+    width: 115px;
+    float: left;
+    height: 100%;
+    cursor: pointer;
+}
+
+.localstorage .Icon {
+	background-image:url("../image/Storage-LocalIco.png");
+	background-position: center 10px;
+	background-repeat: no-repeat;
+}
+
+.localstorage_info {
+    width: 500px;
+    float: left;
+}
+
+.storage_info_title {
+    margin-bottom: 20px;
+    color: #39BA93;
+	font-size:14px;
+}
+
+.storage_info_detail {
+    width: 100%;
+}
+
+.storage_info_detail li {
+    margin-top: 10px;
+    width: 100%;
+    height: 20px;
+}
+
+.storage_info_detail li > * {
+    float: left;
+}
+
+.storage_info_detail li .sid_item {
+    width: 60px;
+}
+
+.storage_info_detail li .sid_item + span {
+}
+
+.storage_info_detail li .sid_item + span > * {
+    float: left;
+}
+
+.progress_bar {
+    background-color: #39BA93;
+    width: 40%;
+    height: 100%;
+}
+
+.sid_progress {
+    border-radius: 2px;
+    height: 10px;
+    width: 100px;
+    margin-right: 10px;
+    margin-top: 4px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    border: 1px solid #39BA93;
+}
+
+.IO + span {
+    float: right;
+}
+
+.fileType + span {
+    margin-left: 30px;
+}
+.fileType, .IO
+{
+	margin-bottom:0;
+}
+
+#container_IO {
+	float:right;
+    width: 95%;
+    height: 150px;
+    margin-top: 30px;
+}
+
+#container_fileType {
+	height: 100%;
+    width: 150px;
+	float:left;
+}
+
+.storage_type {
+    cursor: pointer;
+    color: #39BA93;
+    text-decoration: underline;
+	margin-right: 10px;
+}
+
+.active {
+    color: #535353;
+    text-decoration: none;
+}
+
+.slideThree_switch {
+    width: 41px;
+    height: 18px;
+}
+.area
+{
+	 height: 100%;
+    width: 390px;
+}
+.pie
+{
+	 height: 100%;
+    width: 400px;
+	margin-left:10px;
+}
+.pie_header
+{
+	width: 100%;
+	height:30px;
+	line-height:30px;
+}
+.pie_body
+{
+	width:100%;
+	height:150px;
+	margin-top: 15px;
+}
+#container_fileType_describe
+{
+	height: 100%;
+    width: 230px;
+	float:left;
+	margin-top: 20px;
+}
+.pie_describe
+{
+	width:100%;
+	height:20px;
+	line-height:20px;
+}
+.pie_describe_color
+{
+	height:10px;
+	width:5px;
+	margin:5px 20px 5px 30px;
+	float:left;
+}
+.pie_describe_percent
+{
+	color:#39ba93;
+	width:50px;
+	height:100%;
+	float:left;
+}
+.pie_describe_size
+{
+	width:60px;
+	height:100%;
+	
+	float:left;
+}
+.pie_describe_type
+{
+	width:50px;
+	height:100%;
+	float:left;
+}
+.area_header
+{
+	width: 100%;
+	height:30px;
+	line-height:30px;
+}
+.usb_label
+{ 
+	color:#39BA93; 
+	cursor:pointer;
+}

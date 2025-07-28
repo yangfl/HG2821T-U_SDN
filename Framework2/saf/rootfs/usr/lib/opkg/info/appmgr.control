@@ -1,0 +1,10 @@
+Package: appmgr
+Version: R1772
+Depends: libc, libubox, liblxc, glib2, libcapi, libuci, libcurl, libopenssl, libarchive
+Source: package/upointech/appmgr
+Section: base
+Essential: yes
+Maintainer: Upointech
+Architecture: mt7526
+Installed-Size: 46624
+Description:  Application manager for smart gateway device

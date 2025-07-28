@@ -1,0 +1,18 @@
+# ~/.bashrc: executed by bash(1) for non-login interactive shells. 
+export PATH=\
+/bin:\
+/sbin:\
+/usr/bin:\
+/usr/sbin:\
+/opt/upt/apps/usr/ovs/bin:\
+/opt/upt/apps/usr/ovs/sbin:\
+/usr/ovs/bin:\
+/usr/ovs/sbin
+
+export LD_LIBRARY_PATH=\
+/lib:\
+/usr/lib:\
+/opt/upt/apps/usr/ovs/lib:\
+/usr/ovs/lib
+
+export OVS_RUNDIR=/var/ovs

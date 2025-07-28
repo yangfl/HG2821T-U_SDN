@@ -1,0 +1,12 @@
+Package: shadow
+Version: 4.2.1-4
+Depends: libc, shadow-chage, shadow-groupadd, shadow-groupdel, shadow-groupmod, shadow-groups, shadow-passwd, shadow-su, shadow-useradd, shadow-userdel, shadow-usermod
+Source: feeds/packages/utils/shadow
+License: BSD-3-Clause
+Section: utils
+Maintainer: Steven Barth <cyrus@openwrt.org>
+Architecture: mt7526
+Installed-Size: 104
+Description:  Full versions of standard shadow utilities. Normally, you would not
+ use this package, since the functionality in BusyBox is more than
+ sufficient and much smaller.

@@ -1,0 +1,8 @@
+Package: luci-lib-nixio
+Version: R71
+Depends: libc, liblua
+Source: feeds/luci/libs/luci-lib-nixio
+Section: luci
+Architecture: mt7526
+Installed-Size: 31982
+Description:  NIXIO POSIX library

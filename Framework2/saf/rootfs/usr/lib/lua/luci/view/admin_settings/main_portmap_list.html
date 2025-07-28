@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/main_portmap_list.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main_portmap_list.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.nicescroll.min.js?version=<%=version%>"></script>
+	</head>
+	<script language="javascript">
+	var activeTimeout = setTimeout("Timeout()", 300000);    
+	  
+	function Timeout() {
+		(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+			{ token: '<%=token%>' }, 
+			function(x){
+			parent.location = "/cgi-bin/luci";
+			});	
+	}
+		
+	function enableSingle(name)
+	{
+		clearTimeout(activeTimeout);
+		activeTimeout = setTimeout("Timeout()", 300000);	
+		(new XHR()).post('<%=url('admin/settings/pmSetSingle')%>',
+			{ token: '<%=token%>', op: 'enable', srvname : name  }, 
+			function(x){
+				window.location = '<%=luci.dispatcher.build_url('admin/settings/portmap_list')%>';
+			});		  
+	}
+	function disableSingle(name)
+	{
+		clearTimeout(activeTimeout);
+		activeTimeout = setTimeout("Timeout()", 300000);	
+		(new XHR()).post('<%=url('admin/settings/pmSetSingle')%>',
+			{ token: '<%=token%>', op: 'disable', srvname : name  }, 
+			function(x){
+				window.location = '<%=luci.dispatcher.build_url('admin/settings/portmap_list')%>';
+			});		
+	}
+	function removeSingle(name)
+	{
+		clearTimeout(activeTimeout);
+		activeTimeout = setTimeout("Timeout()", 300000);	
+		(new XHR()).post('<%=url('admin/settings/pmSetSingle')%>',
+			{ token: '<%=token%>', op: 'del', srvname : name  }, 
+			function(x){
+				window.location = '<%=luci.dispatcher.build_url('admin/settings/portmap_list')%>';
+			});		
+	}	
+	
+	function realDeleteAll()
+	{
+		showOrHidePopWindowFromIframe("hide");
+		clearTimeout(activeTimeout);
+		activeTimeout = setTimeout("Timeout()", 300000);		
+		//执行删除所有动作
+		(new XHR()).post('<%=url('admin/settings/pmSetAll')%>',
+			{ token: '<%=token%>', op: 'del' }, 
+			function(x){
+				window.location = '<%=luci.dispatcher.build_url('admin/settings/portmap_list')%>';
+			});			
+	}
+	function realDisableAll()
+	{
+		showOrHidePopWindowFromIframe("hide");
+		clearTimeout(activeTimeout);
+		activeTimeout = setTimeout("Timeout()", 300000);		
+		//执行关闭所有动作
+		(new XHR()).post('<%=url('admin/settings/pmSetAll')%>',
+			{ token: '<%=token%>', op: 'disable' }, 
+			function(x){
+				window.location = '<%=luci.dispatcher.build_url('admin/settings/portmap_list')%>';
+			});		
+	}
+	function realEnableAll()
+	{
+		showOrHidePopWindowFromIframe("hide");
+		clearTimeout(activeTimeout);
+		activeTimeout = setTimeout("Timeout()", 300000);		
+		//执行开启所有动作
+		(new XHR()).post('<%=url('admin/settings/pmSetAll')%>',
+			{ token: '<%=token%>', op: 'enable' }, 
+			function(x){
+				window.location = '<%=luci.dispatcher.build_url('admin/settings/portmap_list')%>';
+			});		
+	}			
+				
+	function frmLoad()
+	{
+		(new XHR()).get('<%=luci.dispatcher.build_url('admin/settings/pmDisplay')%>',null,
+			function(x, json){
+				var rule;
+				for (var i = 1; i <= parseInt(json.count); i++)
+				{
+					eval("rule = json.pmRule" + i);
+					if (rule.enable)
+					{
+						  $("#table_list").append("<tr><td width=\"10%\">"+i+"</td><td width=\"15%\">"+rule.desp+"</td><td width=\"15%\">"+rule.client+"</td><td width=\"10%\">"+rule.protocol.toUpperCase()+"</td><td width=\"13%\">"+rule.inPort+"</td><td width=\"13%\">"+rule.exPort+"</td><td width=\"10%\">生效</td><td width=\"7%\"><a href=\"javascript:void(0);\" onclick=\"disableSingle('"+rule.desp+"')\" >关闭</a></td><td width=\"7%\"><a href=\"javascript:void(0);\" onclick=\"removeSingle('"+rule.desp+"')\" >删除</a></td></tr>");
+					}
+					else
+					{
+						  $("#table_list").append("<tr><td width=\"10%\">"+i+"</td><td width=\"15%\">"+rule.desp+"</td><td width=\"15%\">"+rule.client+"</td><td width=\"10%\">"+rule.protocol.toUpperCase()+"</td><td width=\"13%\">"+rule.inPort+"</td><td width=\"13%\">"+rule.exPort+"</td><td width=\"10%\">失效</td><td width=\"7%\"><a href=\"javascript:void(0);\" onclick=\"enableSingle('"+rule.desp+"')\" >开启</a></td><td width=\"7%\"><a href=\"javascript:void(0);\" onclick=\"removeSingle('"+rule.desp+"')\" >删除</a></td></tr>");
+					}
+				}
+
+				if (parseInt(json.count) > 0)
+					$("#action_content").css("display", "");
+			});					  
+	}
+
+	$(document).ready(function () {
+	     customScrollBar("#portmap_list");
+	});      
+	</script>	
+	<body onLoad='frmLoad()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+		<form>
+			<div class="main_header">
+				<p class="main_header_title">映射列表</p>
+				<p class="main_header_hint">您可以对已添加的端口映射进行管理</p>
+			</div>
+			<div id="portmap_head">
+				<table cellpadding="0" cellspacing="0">
+					<tr id="table_head">
+						<td width="10%">序号</td>
+						<td width="15%">虚拟服务名称</td>
+						<td width="15%">局域网IP</td>
+						<td width="10%">协议</td>
+						<td width="13%">内部端口</td>
+						<td width="13%">外部端口</td>
+						<td width="10%">状态</td>
+						<td width="14%" colspan="2">操作</td>
+					</tr>
+				</table>
+			</div>
+			<div id="portmap_list" style="height:280px;">
+				<table cellpadding="0" cellspacing="0" id="table_list">
+
+				</table>
+			</div>			
+			
+			<div id="action_content" style="display:none;">
+				<input type="button" class="action_button action_white" value="全部开启" onclick="enableAll()"/>
+				<input type="button" class="action_button action_white" value="全部关闭" onclick="disableAll()"/>
+				<input type="button" class="action_button action_green" value="全部删除" onclick="deleteAll()"/>
+			</div>
+		</form>
+	</body>
+</html>

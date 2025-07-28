@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"></script>
+		<script language='javascript'>
+			var activeTimeout = setTimeout("Timeout()", 300000);    
+			  
+			function Timeout() {
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+					parent.location = "/cgi-bin/luci";
+					});	
+			}
+			
+			var isIE7 = false;
+			function frmLoad()
+			{
+				if (BrowserType() == "IE7")
+					isIE7 = true;
+			}
+			function doRestore()
+			{
+				cleanPopWindowContentFromIframe();
+				
+				//填充内容
+				$("#pop_window_title", window.parent.document).html("重置提醒");
+				$("#pop_window_icon", window.parent.document).html('<div class="pop_window_icon_alert"></div>');
+				$("#pop_window_message", window.parent.document).html("警告：恢复出厂设置后，网关的相关设置信息将会恢复到出厂状态，您自行设置的信息将会丢失");
+				
+				//更改确认操作函数
+				var eid = parent.document.getElementById("confirm");
+				if ( isIE7 )
+				{
+					eid.onclick = function() { realRestore() };
+				}
+				else
+				{
+					eid.setAttribute("onclick","document.getElementById('setting_iframe').contentWindow.realRestore()");
+				}
+				showOrHidePopWindowFromIframe("show");
+			}
+			function realRestore()
+			{
+				showOrHidePopWindowFromIframe("hide");
+				//执行恢复出厂
+
+				$("#rstBtn").attr("disabled","disabled");
+				$("#rstBtn").removeClass("input_button");
+				$("#rstBtn").addClass("grey_button");
+				$(".save_error").text("恢复出厂配置需要2～3分钟，请耐心等待...");
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/settings/doRestore')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+						if (x.responseText.substr(2, 7) == "DOCTYPE")
+	      					parent.location = "/cgi-bin/luci";
+	      				else					
+						    setTimeout("doReLogin()", 180000);
+					});					
+			}
+			
+			function doReLogin()
+			{
+				(new XHR()).get('<%=luci.dispatcher.build_url('admin/regWifiSsid')%>',null,
+				function(x,json)
+				{
+					top.location.href = location.protocol + "//" + json.lanIp;
+				});				
+			}
+		</script>
+	</head>
+	<body onLoad='frmLoad()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+		<form>
+			
+			<div class="main_header">
+				<p class="main_header_title">恢复出厂设置</p>
+				<p class="main_header_hint">恢复出厂设置后，网关的相关配置信息将恢复到出厂状态，您自行设置的信息将会丢失。</p>
+			</div>
+			<div class="main_content" >
+				<div id="error_hint" style="margin-left: 130px;">
+					<div class="save_error" style="color: #535353;">
+					</div>
+				</div>							
+				
+			</div>				
+			<div class="restore_action_div">
+				<input type="button" id="rstBtn" class="input_button" value="恢复出厂设置" onclick="doRestore()"/>
+			</div>
+			<div id="test" style="background-color:red"></div>
+		</form>
+		
+	</body>
+</html>

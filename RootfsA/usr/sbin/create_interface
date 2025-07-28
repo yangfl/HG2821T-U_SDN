@@ -1,0 +1,47 @@
+#!/bin/sh
+if [ ! -f "/var/mac.log" ]; then
+	MAC=$(grep "internetmac" /data/factory.conf | awk -F "=" '{print $2}')
+	touch /var/mac.log
+	fh_set_flow 0 $1 0 INTERNET 1 1
+	sleep 1s
+	if [ $1 == 0 ]
+	then
+		ifconfig pon0.4093 hw ether $MAC
+	else
+		ifconfig pon0.$1 hw ether $MAC
+	fi
+		echo "$1,$MAC" > /var/mac.log
+	exit
+else
+	fh_set_flow 0 $1 0 INTERNET 1 1
+	MAC=$(grep "internetmac" /data/factory.conf | awk -F "=" '{print $2}')
+	while true
+	do	
+		IS_MAC_USED=`grep $MAC /var/mac.log`
+		if [ -z $IS_MAC_USED ]
+		then
+			if [ $1 == 0 ]
+			then	
+				ifconfig pon0.4093 hw ether $MAC
+			else
+				ifconfig pon0.$1 hw ether $MAC
+			fi
+			echo "$1,$MAC" >> /var/mac.log
+			exit
+		fi
+		NUM=`echo $MAC | awk -F: '{print $6}'`
+		if [ "$NUM" == "ff" ] || [ "$NUM" == "FF" ]
+		then
+			NUM="00"
+		fi
+		NUM=0x$NUM
+		RESULT=`printf "%x\n" $(($NUM+1))`  #b0
+		if [ ${#RESULT} == 1 ]
+		then
+			MAC_NEW="${MAC:0:15}""0""$RESULT"
+		else
+			MAC_NEW="${MAC:0:15}""${RESULT:0:2}"
+		fi
+		MAC=$MAC_NEW
+	done
+fi

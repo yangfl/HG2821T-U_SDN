@@ -1,0 +1,455 @@
+#!/bin/sh
+# This script mounts USB mass storage devices when they are plugged in
+# and unmounts them when they are removed.
+# Copyright (C) 2004, 2005 Martin Dickopp
+#
+# This file is free software; the copyright holder gives unlimited
+# permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This file is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+#
+set -e
+#exec > /dev/null 2>&1
+
+. /etc/profile
+# Log a string via the syslog facility.
+log()
+{
+    if test $1 != debug || expr "$VERBOSE" : "[yY]" > /dev/null; then
+	logger -p user.$1 -t "usbmount[$$]" -- "$2"
+    fi
+}
+
+
+if test -e "/var/usbmounttest"; then
+	filesize=`ls -l /var/usbmounttest |  awk -F " " '{print $5}'`
+			
+	if [ $filesize -gt 256000 ]
+	then 
+		rm -rf  /var/usbmounttest 
+	fi						
+fi
+
+# Test if the first parameter is in the list given by the second
+# parameter.
+in_list()
+{
+    for v in $2; do
+	test "$1" != "$v" || return 0
+    done
+    return 1
+}
+
+
+# Test if /lib/udev/vol_id is executable.
+#test -x /lib/udev/vol_id || { log err "cannnot execute /lib/udev/vol_id"; exit 1; }
+
+touch /var/usbmounttest
+echo "***********************" >> /var/usbmounttest
+echo "opt=$1" >> /var/usbmounttest
+echo "DEVNAME=$DEVNAME" >> /var/usbmounttest
+#echo "start==" >> /var/usbmounttest
+#echo start date=`date` >> /var/usbmounttest
+#echo start opt=$1 >> /var/usbmounttest
+#echo start idVendor=$2 >> /var/usbmounttest
+#echo start idProduct=$3 >> /var/usbmounttest
+#echo start serial=$4 >> /var/usbmounttest
+#echo start M=$5 >> /var/usbmounttest
+#echo start vendor=$6 >> /var/usbmounttest
+#echo start product=$7 >> /var/usbmounttest
+#echo start 8=$8 >> /var/usbmounttest
+
+#add by sdzhang for dbus usb info 
+if [ ! -d /tmp/usbconf ]
+then
+	mkdir -p /tmp/usbconf
+fi
+#add end by sdzhang for dbus usb info 
+
+if [ -n "${2}" ]
+then
+	echo  "${2}" >> /var/usbmounttest
+fi
+
+
+# Default values for configuration variables.
+MOUNTPOINTS=""
+FILESYSTEMS=""
+MOUNTOPTIONS=""
+FS_MOUNTOPTIONS=""
+VERBOSE="no"
+
+# Read configuration file.
+if test -r /etc/usbmount/usbmount.conf; then
+    . /etc/usbmount/usbmount.conf
+fi
+
+umask 000
+
+#if [ -f /flash/etc/midware_enable ]
+#then
+#	vfatoptions="-o codepage=936,iocharset=gb2312"
+#else
+	vfatoptions="-o iocharset=utf8 -o errors=continue -o fmask=0000 -o dmask=0000"
+#fi
+
+
+#vfatoptions="-o codepage=936,iocharset=gb2312"
+ntfsoptions="-o iocharset=utf8,rw"
+mountinfo=""
+if test "$1" = add; then
+
+    # Acquire lock.
+#    log debug "trying to acquire lock /var/run/usbmount/.mount.lock"
+#    lockfile-create --retry 3 /var/run/usbmount/.mount || \
+#	{ log err "cannot acquire lock /var/run/usbmount/.mount.lock"; exit 1; }
+#    trap '( lockfile-remove /var/run/usbmount/.mount )' 0
+#    log debug "acquired lock /var/run/usbmount/.mount.lock"
+
+    # Try to read from the device.  Some devices need a few seconds
+    # initialization time before they can be accessed.  Give up after
+    # 20 seconds.  Thanks to Peter Stelmachovic for his help with
+    # debugging this.
+    log debug "testing whether $DEVNAME is readable"
+    read_success=no
+    for t in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19; do
+	if dd if="$DEVNAME" of=/dev/null bs=512 count=1; then
+	    read_success=yes
+	    break
+	fi
+	log debug "attempt $t to read from $DEVNAME failed"
+	sleep 1
+    done
+    if test "$read_success" != yes; then
+	echo "can not read from $DEVNAME"
+	log err "cannot read from $DEVNAME"
+	exit 1
+    fi
+	echo "FLAGS=1" >> /var/usbmounttest
+
+    # Test if the device contains a filesystem.  If it doesn't, no
+    # further action is required, but calling vol_id has the side effect
+    # that the partition table is read and partition devices are created.
+    if /lib/udev/vol_id "$DEVNAME" | egrep -q '^ID_FS_USAGE=(filesystem|disklabel)$'; then
+	log debug "$DEVNAME contains a filesystem or disklabel"
+
+	fstype="`/lib/udev/vol_id   \"$DEVNAME\" | egrep '^ID_FS_TYPE' | awk -F "=" '{print $2}'`"
+	#fstype=vfat
+	log debug "$DEVNAME contains filesystem type $fstype"
+	echo "FLAGS=2" >> /var/usbmounttest
+	# Test if the filesystem type is in the list of filesystem
+	# types to mount.
+	if in_list "$fstype" "$FILESYSTEMS"; then
+
+	    # Search an available mountpoint.
+#	    for v in $MOUNTPOINTS; do
+#		if ! grep -q "^[^ ][^ ]*  *$v " /proc/mounts; then
+#		    mountpoint="$v"
+#			rm -rf "$mountpoint"
+#			mkdir -p "$mountpoint"
+#		    log debug "mountpoint $mountpoint is available for $DEVNAME"
+#		    break
+#		fi
+#	    done
+		#mountpoint="`/usr/bin/mkmdir \"$DEVNAME\"`"
+		tmp_mainChar=`echo ${DEVNAME:7:1}`
+		echo "tmp_mainChar=$tmp_mainChar" >> /var/usbmounttest
+		tmp_mainNum=`echo $tmp_mainChar | sed s/a/1/g | sed s/b/2/g | sed s/c/3/g | sed s/d/4/g`
+		echo "tmp_mainNum=$tmp_mainNum" >> /var/usbmounttest 
+		tmp_followNum=`echo ${DEVNAME:8}`  
+		if test -z "$tmp_followNum"; then
+		    tmp_followNum=0
+		fi		
+		echo "tmp_followNum=$tmp_followNum" >> /var/usbmounttest
+		mountpoint=/mnt/usb${tmp_mainNum}_${tmp_followNum}  
+		mkdir -p ${mountpoint}                            
+		echo "mountpoint=$mountpoint" >> /var/usbmounttest
+		echo "FSTYPE=$fstype" >> /var/usbmounttest
+		echo "***********************" >> /var/usbmounttest
+	    if test -n "$mountpoint"; then
+		# Determine mount options.
+		options=
+		for v in $FS_MOUNTOPTIONS; do
+		    if expr "$v" : "-fstype=$fstype,."; then
+			options="`echo \"$v\" | sed 's/^[^,]*,//'`"
+			break
+		    fi
+		done
+		if test -n "$MOUNTOPTIONS"; then
+		    options="$MOUNTOPTIONS${options:+,$options}"
+		fi
+
+
+		# Mount the filesystem.
+		log info "executing command: mount -t$fstype ${options:+-o$options} $DEVNAME $mountpoint"
+#		mount "-t$fstype" "${options:+-o$options}" "$DEVNAME" "$mountpoint"
+		if [ "$fstype" == "vfat" ] 
+		then
+			mountinfo="`mount -t ${fstype} ${vfatoptions} ${DEVNAME} ${mountpoint}`"
+#			check if mount opt success,added by zyzhou,20090416
+			mountflag=""
+			mountflag=`mount | grep ${DEVNAME}`
+			if [ ! -z "${mountflag}" ]
+			then
+				/usr/bin/led_ctrl set usb on
+			else
+				rm -rf ${mountpoint}
+			fi
+		fi
+
+		if [ "$fstype" == "ntfs" ]
+		then
+			mountinfo="`/usr/bin/ntfs-3g ${DEVNAME} ${mountpoint} -o use_ino,direct_io,big_writes`"
+#			check if mount opt success,added by zyzhou,20090416
+			mountflag=""
+			mountflag=`mount | grep ${DEVNAME}`
+			if [ ! -z "${mountflag}" ]
+			then
+				/usr/bin/led_ctrl set usb on
+			else
+				rm -rf ${mountpoint}
+			fi
+		fi
+
+		if [ "$fstype" == "ext2" ]
+		then
+			mount "-t$fstype" "$DEVNAME" "$mountpoint"
+			/usr/bin/led_ctrl set usb on
+		fi
+
+		if [ "$fstype" == "ext3" ]
+		then
+			mount "-t$fstype" "$DEVNAME" "$mountpoint"
+			/usr/bin/led_ctrl set usb on
+		fi
+		
+		# Determine vendor and model.
+		vendor=
+		if test -r "/sys$DEVPATH/device/vendor"; then
+		    vendor="`cat \"/sys$DEVPATH/device/vendor\"`"
+		elif test -r "/sys$DEVPATH/../device/vendor"; then
+		    vendor="`cat \"/sys$DEVPATH/../device/vendor\"`"
+		elif test -r "/sys$DEVPATH/device/../manufacturer"; then
+		    vendor="`cat \"/sys$DEVPATH/device/../manufacturer\"`"
+		elif test -r "/sys$DEVPATH/../device/../manufacturer"; then
+		    vendor="`cat \"/sys$DEVPATH/../device/../manufacturer\"`"
+		fi
+		vendor="`echo \"$vendor\" | sed 's/^ *//; s/ *$//'`"
+		model=
+		if test -r "/sys$DEVPATH/device/model"; then
+		    model="`cat \"/sys$DEVPATH/device/model\"`"
+		elif test -r "/sys$DEVPATH/../device/model"; then
+		    model="`cat \"/sys$DEVPATH/../device/model\"`"
+		elif test -r "/sys$DEVPATH/device/../product"; then
+		    model="`cat \"/sys$DEVPATH/device/../product\"`"
+		elif test -r "/sys$DEVPATH/../device/../product"; then
+		    model="`cat \"/sys$DEVPATH/../device/../product\"`"
+		fi
+		model="`echo \"$model\" | sed 's/^ *//; s/ *$//'`"
+
+		# check if ctce8.cfg is exist
+		#if [ -f  $mountpoint/ctce8.cfg ]
+		#then
+		#	cp -rf $mountpoint/ctce8.cfg /flash/etc/hgc-xml
+		#	cp -rf $mountpoint/ctce8.cfg /flash/WEB-GUI/hgc-xml
+		#fi
+		
+		# check if /fhhg2x0/autoscript is exist
+		#if [ -f  $mountpoint/fhhg2x0/autoscript ]
+		#then
+		#	/bin/cp -rf $mountpoint/fhhg2x0/autoscript /var/run/autoscript
+		#	/bin/chmod +x /var/run/autoscript
+		#	/bin/sync
+		#	/var/run/autoscript $mountpoint &
+		#fi
+		
+		# Run hook scripts; ignore errors.
+		export UM_DEVICE="$DEVNAME"
+		export UM_MOUNTPOINT="$mountpoint"
+		export UM_FILESYSTEM="$fstype"
+		export UM_MOUNTOPTIONS="$options"
+		export UM_VENDOR="$vendor"
+		export UM_MODEL="$model"
+
+		echo "MOUNTPOINT=$mountpoint" >> /var/usbmounttest
+		echo "FSTYPE=$fstype" >> /var/usbmounttest
+		echo "***********************" >> /var/usbmounttest
+
+		#add by sdzhang for dbus usb info 	
+		TMPRESULTFILE=/tmp/usbconf/usbinfo${tmp_mainNum}${tmp_followNum} 
+		if [ ! -f $TMPRESULTFILE ]
+		then
+			touch $TMPRESULTFILE
+		fi
+		#setcfgx $TMPRESULTFILE DEVPATH${tmp_mainNum} "$DEVPATH"
+		#if [ "x${tmp_followNum}" = "x" ]
+		#then
+			#DEVICEID="`cat /sys$DEVPATH/../../../../../../idProduct`"
+		#else
+			#DEVICEID="`cat /sys$DEVPATH/../../../../../../../idProduct`"
+		#fi
+		DEVICEID=10${tmp_mainNum}${tmp_followNum}	
+		DEVICETYPE_TEMP="usb-storage"
+		#if [ "x${tmp_followNum}" = "x" ]
+		#then
+			#DEVICETYPE_TEMP="`cat /sys$DEVPATH/../../../../../uevent | grep 'DRIVER' | cut -d = -f 2`" 
+		#else
+			#DEVICETYPE_TEMP="`cat /sys$DEVPATH/../../../../../../uevent | grep 'DRIVER' | cut -d = -f 2`" 
+		#fi				
+		if [ "$DEVICETYPE_TEMP" = "usb-storage" ];then 
+			DEVICETYPE="CT_USB_DEV_STORAGE"
+		fi
+		#VENDOR="`cat /sys$DEVPATH/../../../vendor`"
+		#MODEL="`cat /sys$DEVPATH/../../../model`"
+		if [ -r $mountpoint ];then
+			WRITEPROTECTION=0
+		else
+			WRITEPROTECTION=1
+		fi
+		LABEL=
+		#LABEL="`/lib/udev/vol_id $DEVNAME -l`"
+		LABEL="`/lib/udev/vol_id $DEVNAME | egrep 'ID_FS_LABEL' | cut -d = -f 2 | sed -n '1p'`"
+		if [ -z "$LABEL" ]; then
+			LABEL="USB_disc"
+		fi
+		TOTALSIZE_TEMP=`df | grep $DEVNAME | awk '{print $2}'`
+		TOTALSIZE=`expr $TOTALSIZE_TEMP \* 1024`
+		USEDSIZE_TEMP=`df | grep $DEVNAME | awk '{print $3}'`
+		USEDSIZE=`expr $USEDSIZE_TEMP \* 1024`
+		FREESIZE_TEMP=`df | grep $DEVNAME | awk '{print $4}'`	
+		FREESIZE=`expr $FREESIZE_TEMP \* 1024`
+		
+		setcfgx $TMPRESULTFILE DeviceType "$DEVICETYPE"
+		setcfgx $TMPRESULTFILE DeviceId "$DEVICEID"
+		setcfgx $TMPRESULTFILE DeviceName "$DEVNAME"
+		setcfgx $TMPRESULTFILE Vendor "$vendor"
+		setcfgx $TMPRESULTFILE Model "$model"
+		setcfgx $TMPRESULTFILE Fstype "$fstype"
+		setcfgx $TMPRESULTFILE WriteProtection "$WRITEPROTECTION"
+		setcfgx $TMPRESULTFILE MountPoint "$mountpoint"
+		setcfgx $TMPRESULTFILE TotalSize "$TOTALSIZE"
+		setcfgx $TMPRESULTFILE UsedSize "$USEDSIZE"
+		setcfgx $TMPRESULTFILE FreeSize "$FREESIZE"
+		setcfgx $TMPRESULTFILE Label "$LABEL"
+		
+		RESULT="{\"Event\":\"USB_DEV_ACTION\",\"ActionType\":\"USB_DEV_INSERT\",\"DevType\":\"USB_STORAGE\",\"DevName\":\"$DEVNAME\",\"Label\":\"$LABEL\",\"DevId\":\"$DEVICEID\",\"Inst_num\":\"$tmp_mainNum$tmp_followNum\"}"
+		setcfgx $TMPRESULTFILE RESULT "$RESULT"
+		
+		if [ ! -f /var/powerctlsystemstandby ]
+		then
+			notify "$RESULT" 18302 &
+		fi
+	
+		if [ -f /var/powerctlsystemstandby ]
+		then
+			umount -l "$mountpoint"
+		fi
+		#add end by sdzhang for dbus usb info	
+		
+	    else
+		# No suitable mount point found.
+		log warning  "no mountpoint found for $DEVNAME"
+		exit 1
+	    fi
+	fi
+    else
+	 log debug "$DEVNAME does not contain a filesystem or disklabel"
+    fi
+
+elif test "$1" = remove; then
+	if [ -f /var/powerctlsystemstandby ]
+	then
+		if [ -f $mountpoint ]
+		then
+			rm -rf "$mountpoint"
+		fi
+		
+		# Run hook scripts; ignore errors.
+		export UM_DEVICE="$DEVNAME"
+		export UM_MOUNTPOINT="$mountpoint"
+		export UM_FILESYSTEM="$fstype"
+		echo "FSTYPE=$fstype" >> /var/usbmounttest
+		echo "***********************" >> /var/usbmounttest
+			
+		#add by sdzhang for dbus usb info 	
+		tmp_mainChar=`echo ${DEVNAME:7:1}`
+		tmp_mainNum=`echo $tmp_mainChar | sed s/a/1/g | sed s/b/2/g | sed s/c/3/g | sed s/d/4/g`
+		tmp_followNum=`echo ${DEVNAME:8}`  
+		if test -z "$tmp_followNum"; then
+		    tmp_followNum=0
+		fi	
+		
+		TMPRESULTFILE=/tmp/usbconf/usbinfo${tmp_mainNum}${tmp_followNum} 
+		
+		rm -rf $TMPRESULTFILE
+		if [ -f $TMPRESULTFILE ]
+		then
+			rm -rf $TMPRESULTFILE
+		fi
+		
+		#if [ "`ls -A \"/tmp/usbconf\"`" = "" ]
+		#then
+			#rm -rf /tmp/usbconf
+		#fi
+		#add end by sdzhang for dbus usb info	
+		
+	else
+		# A block or partition device has been removed.
+		# Test if it is mounted.
+		while read device mountpoint fstype remainder; do
+	#	check if mounted dev
+		if test "$DEVNAME" = "$device"; then
+			# If the mountpoint and filesystem type are maintained by
+			# this script, unmount the filesystem.
+	#	    if in_list "$mountpoint" "$MOUNTPOINTS" 
+			if in_list "$fstype" "$FILESYSTEMS"; then
+				log info "executing command: umount -l $mountpoint"
+				umount -l "$mountpoint"
+				rm -rf "$mountpoint"
+				# Run hook scripts; ignore errors.
+				export UM_DEVICE="$DEVNAME"
+				export UM_MOUNTPOINT="$mountpoint"
+				export UM_FILESYSTEM="$fstype"
+				echo "FSTYPE=$fstype" >> /var/usbmounttest
+				echo "***********************" >> /var/usbmounttest
+				
+				#add by sdzhang for dbus usb info 
+				tmp_mainChar=`echo ${DEVNAME:7:1}`
+				tmp_mainNum=`echo $tmp_mainChar | sed s/a/1/g | sed s/b/2/g | sed s/c/3/g | sed s/d/4/g`
+				tmp_followNum=`echo ${DEVNAME:8}` 
+				if test -z "$tmp_followNum"; then
+					tmp_followNum=0
+				fi	
+				TMPRESULTFILE=/tmp/usbconf/usbinfo${tmp_mainNum}${tmp_followNum} 
+				DEVICEID=10${tmp_mainNum}${tmp_followNum}
+				#mountpoint=getcfgx $TMPRESULTFILE MountPoint	
+				LABEL=`getcfgx $TMPRESULTFILE Label`
+				RESULT="{\"Event\":\"USB_DEV_ACTION\",\"ActionType\":\"USB_DEV_PULL\",\"DevType\":\"USB_STORAGE\",\"DevName\":\"$DEVNAME\",\"Label\":\"$LABEL\",\"DevId\":\"$DEVICEID\",\"Inst_num\":\"$tmp_mainNum$tmp_followNum\"}"
+				notify "$RESULT" 18302 &
+				
+				rm -rf $TMPRESULTFILE
+				if [ -f $TMPRESULTFILE ]
+				then
+					rm -rf $TMPRESULTFILE
+					notify "$RESULT" 18302 &
+				fi
+				
+				#if [ "`ls -A \"/tmp/usbconf\"`" = "" ]
+				#then
+					#rm -rf /tmp/usbconf
+				#fi			
+				#add end by sdzhang for dbus usb info	
+			
+			fi
+			break
+		fi
+		done < /proc/mounts
+	fi
+	
+	/usr/sbin/usbremove
+fi
+exit 0

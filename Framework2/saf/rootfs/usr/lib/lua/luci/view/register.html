@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta HTTP-EQUIV="pragma" CONTENT="no-cache">
+	<meta HTTP-EQUIV="Cache-Control" CONTENT="no-store, must-revalidate">
+	<meta HTTP-EQUIV="expires" CONTENT="0"> 	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title> 中国电信智能网关 </title>
+	<link rel="shortcut icon" href="<%=resource%>/image/favicon.ico">
+	<link rel="bookmark" href="<%=resource%>/image/favicon.ico">	
+	<link href="<%=resource%>/css/register.css?version=<%=version%>" rel="stylesheet">
+	<script src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+	<script src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+	<script src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+	<script src="<%=resource%>/js/register.js?version=<%=version%>"></script>
+  </head>
+  <body onkeydown='keyCapscheck(event, 2)'>
+  <div class="login_bg">
+	<form method="post" id="argform">
+		<input type="hidden" name="login" id="login" value="1" />					
+		<input type="submit" style="display:none"/>
+	</form>  
+    <div class="logo"><img src="<%=resource%>/image/logo_tianyi.png" alt="logo"></div>
+    <div class="line" id="line">
+      <table align=left cellpadding=0 cellspace=0 border=0>
+        <tr>
+          <td id="line1" valign="top">
+          <img src="<%=resource%>/image/line.png" style="opacity:0.2;">
+        </td>
+        <td id="line2" valign="top">
+          <img src="<%=resource%>/image/line.png" style="margin-left:-3px;opacity:0.2;">  
+        </td>
+        </tr>
+      </table>
+    </div>
+    <div id="copyright_div">Copyright &copy; 2015 中国电信 All Rights Reserved.
+    </div>    
+  </div>
+
+  <div class="container-fluid login_block">
+  <!--++++++++++++++++++++++++++++ Login step 1 +++++++++++++++++++++++++++++++++-->
+    <div class="row" id="login_setup_1_div" >
+      <div class="content-left" id="step1_tip" style="display:none">
+   	  	<img src="<%=resource%>/image/login/step1_tip.png" width="470" height="283" alt=""/> 
+      </div>
+      <div class="content-right content-offset">
+		<br/>
+        <br/>
+    	<font face="微软雅黑" style="font-size: 20px;">设备注册</font>
+        <font face="Arial" style="font-size: 14px;">&nbsp;REGISTER</font>
+          <div class="login-input">
+            <div class="login-block" style="background:white url(<%=resource%>/image/login/login_user-1.png) no-repeat left;">
+               <input type="text" placeholder="宽带识别码" class="form-control" id="loid" name="loid" value="">
+            </div>
+            <div class="login-block password_block" style="background:white url(<%=resource%>/image/login/login_password-1.png) no-repeat left;">
+               <input id="loidPwd" name="loidPwd" value="" type="password" placeholder="Password" class="form-control login-password"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" AutoCompleteType="Disabled" onkeypress ="detectCapsLock(event, 1, 'reg')">
+               <span class="pwd-show-switch filled" id="loid_password_show"></span>
+            </div>
+            <div id='promptText1' style="display:none;"><span  style="border: 1px solid #dbdbdb;position:relative;top:0;left:50px;height:auto; font-size:12px;font-family: 'Microsoft YaHei', 'Microsoft sans-serif';display:inline;color:black;">大写锁定键已开启，请注意大小写</span></div>
+            <div class="step-block">
+              <img src="<%=resource%>/image/login/register_loading_1.png" width="66" height="21" alt="register loading step 1" style="float: right"/>
+            </div>
+          </div>
+          <button type="submit" class="btn" id="btn_login_step_1">下一步</button>
+        </div>
+      </div>
+ <!--++++++++++++++++++++++++++++ Login step 2 +++++++++++++++++++++++++++++++++-->
+    <div class="row" id="login_setup_2_div" style="display:none">
+      <div class="content-left" id="step2_tip">
+   	  	<img src="<%=resource%>/image/login/step2_tip.png" width="470" height="283" alt=""/> 
+      </div>
+      <div class="content-right content-offset">
+		<br/>
+        <br/>
+    	<font face="微软雅黑" style="font-size: 20px;">无线设置</font>
+        <font face="Arial" style="font-size: 14px;">&nbsp;WIFI SETTING</font>
+          <div class="login-input">
+            <div class="login-block" style="background:white url(<%=resource%>/image/login/WIFI_name.png) no-repeat left center;">
+             	<input type="text" placeholder="Ssid" class="form-control " id="login_WIFI_SSID" name="login_WIFI_SSID" maxLength="32">
+            </div>
+            <div class="login-block password_block" style="background:white url(<%=resource%>/image/login/login_password-1.png) no-repeat left center;">
+             	<input type="password" placeholder="Password" class="form-control login-password" id="login_WIFI_password" name="login_WIFI_password" autocomplete="off" maxLength="32" onkeypress ="detectCapsLock(event, 2, 'reg')">
+              <span class="pwd-show-switch filled" id="wifi_password_show"></span>
+            </div>
+            <div id='promptText2' style="display:none;"><span  style="border: 1px solid #dbdbdb;position:relative;top:0;left:50px;height:auto; font-size:12px;font-family: 'Microsoft YaHei', 'Microsoft sans-serif';display:inline;color:black;">大写锁定键已开启，请注意大小写</span></div>
+            <div class="step-block">
+              <img src="<%=resource%>/image/login/register_loading_2.png" width="66" height="21" alt="register loading step 2" style="float: right"/>
+            </div>
+          </div>
+          <button type="submit" class="btn" id="btn_login_step_2" disabled>下一步</button>
+        </div>
+      </div>
+<!--++++++++++++++++++++++++++++ configuration block +++++++++++++++++++++++++++++++++-->
+    <div class="conf-block" id="login_conf_div" style="display: none">
+      <div class="round-bg"></div>
+      <div class="round-content">
+        <div class="conf-content">
+          <div style="margin-bottom: 10px;"><span></span></div>
+          <div><img src="<%=resource%>/image/home/router.png" alt="device"></div>
+          <div>
+            <span id="conf_process" style="font-size: 60px; font-family: 'Arial';">0</span>
+            <span style="font-size: 24px; font-family: 'Arial';">%</span>
+          </div>
+          <div>
+            <span id="conf-status" style="font-size: 18px; font-family: 'Microsoft YaHei';"></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="conf-notice"><span></span><br/><br/><span id="refresh_notice">网关注册过程中请勿刷新页面</span></div>
+	
+    </div>
+    
+  </div>
+  
+  </body>
+</html>

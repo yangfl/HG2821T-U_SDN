@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/wifi.css?version=<%=version%>' rel="stylesheet" type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/util.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/wifi_advanced.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/main.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.nicescroll.min.js?version=<%=version%>"></script>
+		<script language='javascript'>
+			var activeTimeout = setTimeout("Timeout()", 300000);    
+			  
+			function Timeout() {
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+					parent.location = "/cgi-bin/luci";
+					});	
+			}
+
+			function frmLoad()
+			{
+				(new XHR()).get('<%=luci.dispatcher.build_url('admin/wifi/adv_settings')%>',null,
+					function(x, json){
+					if (json.timerEnbl != ($("#wifi_timing_switch_value").val()))
+					{
+						if (json.timerEnbl)
+						{
+							$("#wifi_timing_switch").removeClass("switch_content_off");
+							$("#wifi_timing_switch").addClass("switch_content_on");
+							$("#wifi_timing_switch").children("span").html("&nbsp;ON");
+						}
+						else
+						{
+							$("#wifi_timing_switch").removeClass("switch_content_on");
+							$("#wifi_timing_switch").addClass("switch_content_off");
+							$("#wifi_timing_switch").children("span").html("OFF&nbsp;");
+						}
+					}
+					$("#wifi_timing_switch_value").val(json.timerEnbl);
+					$("#wifi_start_hour_value").val(json.startTime.substring(0,2));
+					$("#wifi_start_hour_value").parent().find("label.select-value").text(json.startTime.substring(0,2));
+					$("#wifi_start_minute_value").val(json.startTime.substring(3,5));
+					$("#wifi_start_minute_value").parent().find("label.select-value").text(json.startTime.substring(3,5));
+					$("#wifi_end_hour_value").val(json.endTime.substring(0,2));
+					$("#wifi_end_hour_value").parent().find("label.select-value").text(json.endTime.substring(0,2));
+					$("#wifi_end_minute_value").val(json.endTime.substring(3,5));
+					$("#wifi_end_minute_value").parent().find("label.select-value").text(json.endTime.substring(3,5));
+					
+					$("#sys_time").html("当前系统时间是北京时间" + json.sysTime);	
+					
+					$(".wifi_item").show();	
+					$(".wifi_save_advance").show(); 
+
+					if (!json.timerEnbl)
+						$(".timing_settings").css("display", "none");
+				});					
+			}
+
+			function checkTimeRange()
+			{
+				if (parseInt($("#wifi_timing_switch_value").val()) == 1)
+				{
+					var start_time = $("#wifi_start_hour_value").val() + $("#wifi_start_minute_value").val();
+					var end_time = $("#wifi_end_hour_value").val() + $("#wifi_end_minute_value").val();
+					if (parseInt(start_time, 10) == parseInt(end_time, 10))
+					{
+						alert("您设置的开启时间和关闭时间相同，请重新设置！");
+						return false;
+					}
+				}
+
+				$("#wifi_start_time").val($("#wifi_start_hour_value").val() + ":" + $("#wifi_start_minute_value").val());
+				$("#wifi_end_time").val($("#wifi_end_hour_value").val() + ":" + $("#wifi_end_minute_value").val());
+
+				return true;
+			}
+			
+		function confirmSave()
+		{
+			cleanPopWindowContentFromIframe();
+			
+			//填充内容
+			$("#pop_window_title", window.parent.document).html("保存确认");
+			$("#pop_window_icon", window.parent.document).html('<div class="pop_window_icon_alert"></div>');
+			$("#pop_window_message", window.parent.document).html("请确认保存当前设置内容");
+			
+			//更改确认操作函数
+			var eid = parent.document.getElementById("confirm");
+			if ( isIE7 )
+			{
+				eid.onclick = function() { realSave() };
+			}
+			else
+			{
+				eid.setAttribute("onclick","document.getElementById('wifi_iframe').contentWindow.realSave()");
+			}
+			showOrHidePopWindowFromIframe("show");
+		}	
+		
+		function realSave()
+		{
+			showOrHidePopWindowFromIframe("hide");
+			$("#saveBtn").attr("disabled","disabled");
+			$("#saveBtn").removeClass("input_button");
+			$("#saveBtn").addClass("grey_button");				
+			$("#wifi_advanced_form").submit();
+		}		
+		
+		function saveCheck()
+		{
+			if (!checkTimeRange())
+				return false;
+			
+			confirmSave();
+		}			
+
+		</script>
+	</head>
+	<body onLoad='frmLoad()' onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body'>
+		<form id="wifi_advanced_form" method="post" action="<%=url("admin/wifi/wifiAdv")%>">
+		    <input type="hidden" name="token" value="<%=token%>" />
+		    <input type="hidden" name="wifi_start_time" id="wifi_start_time" value="" />
+		    <input type="hidden" name="wifi_end_time" id="wifi_end_time" value="" />
+
+			<div class="wifi_item" style="display:none">
+				<div class="wifi_item_name"><label for="wifi_timing_switch">WiFi&nbsp;定时开关</label></div>
+				<div class="wifi_item_content">
+					<div class="switch_content wifi_switch switch_content_on" id="wifi_timing_switch">
+						<input type="hidden" id="wifi_timing_switch_value" name="wifi_timing_switch" value="1" />
+						<span>&nbsp;ON</span>
+					</div>
+				</div>
+			</div>
+			<div class="wifi_item timing_settings" style="display:none">
+				<div class="wifi_item_name"><label for="wifi_timing_setting">开启时间</label></div>
+				<div class="wifi_item_content">
+				
+					<div tabindex="2" hidefocus="true"  class="dropdown-select dropdown-select-wifi wifi-advanced" id="wifi_timing_start_hour" style="width: 80px; float:left;">
+						<label class="select-value timing">08</label>
+						<input type="hidden" id="wifi_start_hour_value" value="" />
+						<div class="select-arrow"></div>
+						<ul class="dropdown-menu-select dropdown-menu-narrow" id="wifi_start_hour">
+						</ul>
+					</div>
+					<div style="float:left;">&nbsp;&nbsp;&#58;&nbsp;&nbsp;</div>
+					<div tabindex="3" hidefocus="true"  class="dropdown-select dropdown-select-wifi wifi-advanced" id="wifi_timing_start_minute" style="width: 80px; float:left;">
+						<label class="select-value timing">30</label>
+						<input type="hidden" id="wifi_start_minute_value" value="" />
+						<div class="select-arrow"></div>
+						<ul class="dropdown-menu-select dropdown-menu-narrow" id="wifi_start_minute">
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="wifi_item timing_settings" style="display:none">
+				<div class="wifi_item_name"><label for="wifi_timing_setting">关闭时间</label></div>
+				<div class="wifi_item_content">
+					<div tabindex="2" hidefocus="true"  class="dropdown-select dropdown-select-wifi wifi-advanced" id="wifi_timing_end_hour" style="width: 80px; float:left;">
+						<label class="select-value timing">21</label>
+						<input type="hidden" id="wifi_end_hour_value" value="" />
+						<div class="select-arrow"></div>
+						<ul class="dropdown-menu-select dropdown-menu-narrow" id="wifi_end_hour">
+						</ul>
+					</div>
+					<div style="float:left;">&nbsp;&nbsp;&#58;&nbsp;&nbsp;</div>
+					<div tabindex="5" hidefocus="true"  class="dropdown-select dropdown-select-wifi wifi-advanced" id="wifi_timing_end_minute" style="width: 80px; float:left;">
+						<label class="select-value timing">30</label>
+						<input type="hidden" id="wifi_end_minute_value" value="" />
+						<div class="select-arrow"></div>
+						<ul class="dropdown-menu-select dropdown-menu-narrow" id="wifi_end_minute">
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="wifi_item" style="display:none">
+				<div class="wifi_item_name">&nbsp;</div>
+				<div class="wifi_item_content" style="color:#898989" id="sys_time">
+				</div>
+			</div>
+			<div class="wifi_save_advance" style="display:none">
+				<input type="button" id="saveBtn" class="input_button" value="保存设置" onclick="saveCheck()"/>
+			</div>
+		</form>
+		
+	</body>
+</html>

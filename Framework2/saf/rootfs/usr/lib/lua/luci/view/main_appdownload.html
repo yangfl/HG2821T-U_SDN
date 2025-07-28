@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>中国电信智能网关</title>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+		<meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+		<link href='<%=resource%>/css/main_style.css?version=<%=version%>' rel='stylesheet' type='text/css'/>
+		<link href='<%=resource%>/css/appdownload.css?version=<%=version%>' rel="stylesheet" type='text/css'/>
+		<script language="javascript" src="<%=resource%>/xhr.js?version=<%=version%>"></script>
+		<script language="javascript" src="<%=resource%>/js/jquery.js?version=<%=version%>"></script>
+		<script language='javascript'>
+			var activeTimeout = setTimeout("Timeout()", 300000);
+			
+			function browser() 
+			{
+			    var u = navigator.userAgent.toLowerCase();
+			    var app = navigator.appVersion.toLowerCase();
+			    return {
+			        txt: u, // 浏览器版本信息
+			        version: (u.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1], // 版本号       
+			        msie: /msie/.test(u) && !/opera/.test(u), // IE内核
+			        mozilla: /mozilla/.test(u) && !/(compatible|webkit)/.test(u), // 火狐浏览器
+			        safari: /safari/.test(u) && !/chrome/.test(u), //是否为safair
+			        chrome: /chrome/.test(u), //是否为chrome
+			        opera: /opera/.test(u), //是否为oprea
+			        presto: u.indexOf('presto/') > -1, //opera内核
+			        webKit: u.indexOf('applewebkit/') > -1, //苹果、谷歌内核
+			        gecko: u.indexOf('gecko/') > -1 && u.indexOf('khtml') == -1, //火狐内核
+			        mobile: !!u.match(/applewebkit.*mobile.*/), //是否为移动终端
+			        ios: !!u.match(/\(i[^;]+;( u;)? cpu.+mac os x/), //ios终端
+			        android: u.indexOf('android') > -1, //android终端
+			        iPhone: u.indexOf('iphone') > -1, //是否为iPhone
+			        iPad: u.indexOf('ipad') > -1, //是否iPad
+			        webApp: !!u.match(/applewebkit.*mobile.*/) && u.indexOf('safari/') == -1 //是否web应该程序，没有头部与底部
+			    };
+			}
+	
+			function open_appstore() 
+			{
+				var b=browser();
+				if(b.ios||b.iPhone||b.iPad){
+					window.open("itms-apps://itunes.apple.com/cn/app/tian-yi-wang-guan/id982725967?mt=8");
+				}else{
+					window.open("https://itunes.apple.com/cn/app/tian-yi-wang-guan/id982725967?mt=8");
+				}
+			}     
+ 
+			function Timeout() {
+				(new XHR()).post('<%=luci.dispatcher.build_url('admin/logout')%>',
+					{ token: '<%=token%>' }, 
+					function(x){
+					parent.location = "/cgi-bin/luci";
+					});	
+			}
+			
+			$(document).ready(function(){
+				$("#openApp").click(function(){
+					open_appstore();
+				});
+			});
+		</script>
+	</head>
+	<body onkeydown='parent.kFlg;parent.keycheck(event)' class='main_config_body' style="padding: 25px 0px 0 0;">
+		<div class="appdwn-block">
+			<div class="appdwn-left">
+				<div class="app-title">
+					<p><font face="微软雅黑" style="font-size:16px"><b>&nbsp;天翼智能网关APP</b></font></p>
+				</div>
+				<div style="height: 250px; width:100%">
+					<div class="float-left" style="width: 28%; margin-top: 8px;margin-left: 5px;">
+               	    	<img src="<%=resource%>/image/app-code.png" width="110" height="110" alt=""/> </div>
+					<div class="float-right" style="width: 59%; margin-left: 4%; margin-right: 1%;">
+						<ul>
+							<li><p><font face="微软雅黑">通过天翼智能网关可以随时随地查看天翼网关的状态，防蹭网、排除故障;</p></font></li>
+							<li><p><font face="微软雅黑">可以对网关进行智能操控，实现绿色定时、低辐射调节、智能加速等功能;</p></font></p></li>
+							<li><p><font face="微软雅黑">可以控制网关脱机下载大片等功能。</p></font></p></li>
+							<p><font face="微软雅黑">......</p></font></p>
+							<p><font face="微软雅黑">更多的功能等待您发现！</p></font></p>
+						</ul>
+					</div>
+				</div>
+				<div class="clearfix">
+					<div class="float-left">
+						<a id="openApp">
+							<img src="<%=resource%>/image/iphone.png" style="width:160px;height:40px;cursor:pointer;" alt="iphone download"/>
+						</a>
+					</div>
+					<div style="margin-right: 70px;" class="float-right">
+						<a href="http://download.189cube.com/update/App/android/yueme.apk" target="_blank">
+							<img src="<%=resource%>/image/androidapp.png" width="160" height="40" alt="android download"/>
+						</a>
+					</div>
+			  </div>
+			  <div class="appdwn-description" style="margin-top:22%;">
+			  </div>
+			</div>
+			<div class="appdwn-right">
+       	    <img src="<%=resource%>/image/appdownload.png" width="350" height="480" alt="app download" style="float: right;"/> </div>
+		</div>
+		
+	</body>
+</html>

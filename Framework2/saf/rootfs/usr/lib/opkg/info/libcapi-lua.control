@@ -1,0 +1,9 @@
+Package: libcapi-lua
+Version: R1733
+Depends: libc, jansson, glib2, libcapi, libubox, liblua
+Source: package/upointech/sgwconfig
+Section: libs
+Maintainer: Upointech
+Architecture: mt7526
+Installed-Size: 22927
+Description:  http configuration for smart gateway device

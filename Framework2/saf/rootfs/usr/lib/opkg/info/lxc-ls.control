@@ -1,0 +1,10 @@
+Package: lxc-ls
+Version: 1.0.8-1
+Depends: libc, lxc, lxc-common, lxc-config
+Source: feeds/packages/utils/lxc
+License: LGPL-2.1+ BSD-2-Clause GPL-2.0
+Section: utils
+Maintainer: Luka Perkov <luka@openwrt.org>
+Architecture: mt7526
+Installed-Size: 1528
+Description:  Utility lxc-ls from the LXC userspace tools
