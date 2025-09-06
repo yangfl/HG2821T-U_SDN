@@ -1,0 +1,80 @@
+BGA IC
+Xtal:1
+DDR3 init.
+DRAMC init done.
+Calculate size.
+DRAM size=512MB(supported max size)
+Set new TRFC.
+ddr-1066
+
+7512DRAMC V1.2.2 (0)
+Set SPI Flash Clock to 25 Mhz
+
+
+EN751221 at Tue Dec 19 07:26:18 CST 2017 version 1.1 free bootbase
+
+Memory size 512MB
+
+Set SPI Flash Clock to 25 Mhz
+spi_nand_probe: mfr_id=0x98, dev_id=0xcb
+Dected SPI NAND Flash : _SPI_NAND_DEVICE_ID_TC58CVG1S3H, Flash Size=0x10000000
+bmt pool size: 163
+BMT & BBT Init Success
+
+Press any key in 3 secs to enter boot command mode.
+.................................
+bldr> help
+
+?                                   Print out help messages.
+help                                Print out help messages.
+go                                  Booting the linux kernel.
+decomp                              Decompress kernel image to ram.
+memrl <addr>                        Read a word from addr.
+memwl <addr> <value>                Write a word to addr.
+dump <addr> <len>                   Dump memory content.
+jump <addr>                         Jump to addr.
+flash <dst> <src> <len> <oob>       Write to flash from src to dst(oob: write nand oob if 1).
+imginfo                             Show images info.
+spi nand rw test                    SPI NAND Test
+bdstore <flash dst> <bin src>       Do backdoor config store
+bdshow                              Show backdoor config
+bdswitch[1|0]                       Enable or disable backdoor function
+ddrcalswitch[1|0]                   Enable or disable ddr calibration funciton
+drambistswitch[0|1|2]               disable or enable, and quick or normal test
+xmdm <addr> <len>                   Xmodem receive to addr.
+miir <phyaddr> <reg>                Read ethernet phy reg.
+miiw <phyaddr> <reg> <value>        Write ethernet phy reg.
+cpufreq <freq num> / <m> <n>        Set CPU Freq <156~450>(freq has to be multiple of 6)
+ipaddr <ip addr>                    Change modem's IP.
+httpd                               Start Web Server
+ddrdrv <..>                         Change DDR driving length
+bldr> httpd
+PBUF_POOL_BUFSIZE = 256
+tcp_bind()
+Local Port = 0
+tcp_bind: bind to port 80
+bldr>
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>TC Rescue Page</title>
+<script language=JavaScript>
+function checkName(){
+if(!(document.FW.FWupload.value.match("tcboot.bin") || document.FW.FWupload.value.match("tclinux.bin"))){
+alert("Wrong File Name");
+return false;
+}
+else
+return true;
+}
+</script>
+</head>
+<body>
+<FORM ENCTYPE="multipart/form-data" METHOD="POST" name="FW"><h1>Upload firmware here:</h1>
+<INPUT TYPE="FILE" NAME="FWupload" SIZE="20" MAXLENGTH="128" style="FONT-SIZE: 10pt" contenteditable="false">&nbsp;
+<input type="submit" name="Upload" value="Upload" onclick="return checkName();">
+</FORM>
+</body>
+</html>

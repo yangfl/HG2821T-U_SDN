@@ -1,0 +1,1167 @@
+BGA IC
+Xtal:1
+DDR3 init.
+DRAMC init done. 
+Calculate size.
+DRAM size=512MB(supported max size)
+Set new TRFC.
+ddr-1066
+
+7512DRAMC V1.2.2 (0)
+Set SPI Flash Clock to 25 Mhz
+
+
+EN751221 at Tue Dec 19 07:26:18 CST 2017 version 1.1 free bootbase
+
+Memory size 512MB
+
+Set SPI Flash Clock to 25 Mhz
+spi_nand_probe: mfr_id=0x98, dev_id=0xcb
+Dected SPI NAND Flash : _SPI_NAND_DEVICE_ID_TC58CVG1S3H, Flash Size=0x10000000
+bmt pool size: 163 
+BMT & BBT Init Success 
+
+Press any key in 3 secs to enter boot command mode.
+............................................................
+
+Decompress to 80002000 free_mem_ptr=80780000 free_mem_ptr_end=807B0000
+bootflag=0
+rootflag=0
+75xx: 0x0
+Uncompressing [LZMA] ...  done.
+Initializing cgroup subsys cpuset
+Initializing cgroup subsys cpu
+Initializing cgroup subsys cpuacct
+Linux version 3.18.21+ (xmli@compiler) (gcc version 4.9.3 (Buildroot 2015.08.1) ) #6 SMP Thu May 31 12:39:01 CST 2018
+ISPRAM0: PA=00540000,Size=00010000,enabled
+
+go into __init prom_init
+ ******************** 
+rootflag=0 
+*bufaddr=0 
+bufaddr=80001fff 
+ROOT_FLAG_ADDR=80001fff 
+
+ ******************** 
+memsize:440MB
+EcoNet EN751221 SOC prom init
+bootconsole [early0] enabled
+CPU0 revision is: 00019558 (MIPS 34Kc)
+Determined physical RAM map:
+ memory: 1b7fe000 @ 00002000 (usable)
+Wasting 64 bytes for tracking 2 unused pages
+Zone ranges:
+  Normal   [mem 0x00002000-0x1b7fffff]
+Movable zone start for each node
+Early memory node ranges
+  node   0: [mem 0x00002000-0x1b7fffff]
+Initmem setup node 0 [mem 0x00002000-0x1b7fffff]
+Detected 1 available secondary CPU(s)
+Primary instruction cache 64kB, VIPT, 4-way, linesize 32 bytes.
+Primary data cache 32kB, 4-way, VIPT, cache aliases, linesize 32 bytes
+PERCPU: Embedded 9 pages/cpu @81374000 s5728 r8192 d22944 u36864
+Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 111758
+Kernel command line: root=ubi0:Rootfs rootfstype=ubifs ubi.mtd=3 rw init=/etc/preinit.sh es=1
+PID hash table entries: 2048 (order: 1, 8192 bytes)
+Dentry cache hash table entries: 65536 (order: 6, 262144 bytes)
+Inode-cache hash table entries: 32768 (order: 5, 131072 bytes)
+Writing ErrCtl register=0005fb16
+Readback ErrCtl register=0005fb16
+nmi base is 813f4200
+allocated 901104 bytes of page_cgroup
+please try 'cgroup_disable=memory' option if you don't want memory cgroups
+Memory: 438380K/450552K available (5432K kernel code, 331K rwdata, 1000K rodata, 192K init, 295K bss, 12172K reserved)
+SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+Hierarchical RCU implementation.
+NR_IRQS:64
+
+tc3162_time_init: Init bus timeout and watchdog
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 0, irq = 10
+plat_set_irq_affinity: irq num 10 
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 0, irq = 33
+plat_set_irq_affinity: irq num 33 
+CPU frequency 900.00 MHz
+plat_time_init: Entered, mips_timer_ack ptr is [80006f34]
+ Using 200.000 MHz high precision timer.
+r4k_clockevent_init: setup_irq OK, irq is [31]
+console [ttyS0] enabled
+console [ttyS0] enabled
+bootconsole [early0] disabled
+bootconsole [early0] disabled
+Calibrating delay loop... 597.60 BogoMIPS (lpj=2988032)
+pid_max: default: 32768 minimum: 301
+Mount-cache hash table entries: 1024 (order: 0, 4096 bytes)
+Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes)
+Initializing cgroup subsys memory
+Initializing cgroup subsys devices
+Initializing cgroup subsys freezer
+Initializing cgroup subsys blkio
+34K sync es set to 1.
+Config7: 0x80080500
+ISPRAM0: PA=00540000,Size=00010000,enabled
+Primary instruction cache 64kB, VIPT, 4-way, linesize 32 bytes.
+Primary data cache 32kB, 4-way, VIPT, cache aliases, linesize 32 bytes
+CPU1 revision is: 00019558 (MIPS 34Kc)
+Synchronize counters for CPU 1: done.
+Brought up 2 CPUs
+NET: Registered protocol family 16
+MT7512_pcie_init
+check pcie link up status: 
+isRC0_LINKUP=1 
+isRC1_LINKUP=1 
+registering PCI controller with io_map_base unset
+usbcore: registered new interface driver usbfs
+usbcore: registered new interface driver hub
+usbcore: registered new device driver usb
+PCI host bridge to bus 0000:00
+pci_bus 0000:00: root bus resource [mem 0x20000000-0x2fffffff]
+pci_bus 0000:00: root bus resource [io  0x1f600000-0x1f61ffff]
+pci_bus 0000:00: No busn resource found for root bus, will use [bus 00-ff]
+pci 0000:00:00.0: bridge configuration invalid ([bus 00-00]), reconfiguring
+pci 0000:00:01.0: bridge configuration invalid ([bus 00-00]), reconfiguring
+pci 0000:00:00.0: BAR 8: assigned [mem 0x20000000-0x201fffff]
+pci 0000:00:01.0: BAR 8: assigned [mem 0x20200000-0x202fffff]
+pci 0000:01:00.0: BAR 0: assigned [mem 0x20000000-0x200fffff 64bit]
+pci 0000:01:00.0: BAR 6: assigned [mem 0x20100000-0x2010ffff pref]
+pci 0000:00:00.0: PCI bridge to [bus 01]
+pci 0000:00:00.0:   bridge window [mem 0x20000000-0x201fffff]
+pci 0000:02:00.0: BAR 0: assigned [mem 0x20200000-0x202fffff]
+pci 0000:00:01.0: PCI bridge to [bus 02]
+pci 0000:00:01.0:   bridge window [mem 0x20200000-0x202fffff]
+NET: Registered protocol family 8
+NET: Registered protocol family 20
+Switched to clocksource MIPS
+NET: Registered protocol family 2
+TCP established hash table entries: 4096 (order: 2, 16384 bytes)
+TCP bind hash table entries: 4096 (order: 3, 32768 bytes)
+TCP: Hash tables configured (established 4096 bind 4096)
+TCP: reno registered
+UDP hash table entries: 256 (order: 1, 8192 bytes)
+UDP-Lite hash table entries: 256 (order: 1, 8192 bytes)
+NET: Registered protocol family 1
+
+ mt7512_pcie_fixup: 0x1438 = 20000015 
+ mt7512_pcie_fixup: 0x3438 = 20200014 
+ mt7512_pcie_rc1_retrain: 70 = 0045b811 80 = 01608c12
+TC3162 hardware watchdog module loaded.
+futex hash table entries: 512 (order: 2, 16384 bytes)
+squashfs: version 4.0 (2009/01/31) Phillip Lougher
+jffs2: version 2.2. (NAND) © 2001-2006 Red Hat, Inc.
+msgmni has been set to 856
+io scheduler noop registered (default)
+ttyS0 at I/O 0xbfbf0003 (irq = 1, base_baud = 7200) is a TC3162
+ECNT ring buffer init success
+brd: module loaded
+
+SPI Flash Init Start
+Found no SPI flash device
+IS_SPIFLASH=0x0, IS_NANDFLASH=0x2, (0xBFA10114)=0x6)
+SPI_NAND_Flash_init: before init, mtx_mode_tog=0xl9, manaul_en=0x1
+spi_nand_probe: mfr_id=0x98, dev_id=0xcb
+Dected SPI NAND Flash : _SPI_NAND_DEVICE_ID_TC58CVG1S3H, Flash Size=0x10000000
+spi nand flash
+tc3162: flash device 0x00400000 at 0x1fc00000
+EN7512 mtd init: spi nand probe enter
+[spi_nand_setup] : Enter 
+nand: device found, Manufacturer ID: 0x98, Chip ID: 0xcb
+nand: Toshiba _SPI_NAND_DEVICE_ID_TC58CVG1S3H
+nand: 256MiB, SLC, page size: 2048, OOB size: 64
+nand_scan_ident ok
+[spi_nand_setup]: chip size =  0x10000000, erase_shift=0x11
+calc_bmt_pool_size : need_valid_block_num=0xa3, total_block=0x800
+bmt pool size: 163 
+BMT & BBT Init Success 
+Creating 14 MTD partitions on "EN7512-SPI_NAND":
+0x000000000000-0x000000200000 : "boot"
+0x000000200000-0x000000600000 : "KernelA"
+0x000000600000-0x000002e00000 : "AppA"
+0x000002e00000-0x000003e00000 : "RootfsA"
+0x000003e00000-0x000004200000 : "KernelB"
+0x000004200000-0x000006a00000 : "AppB"
+0x000006a00000-0x000007a00000 : "RootfsB"
+0x000007a00000-0x000007c00000 : "ConfigurationA"
+0x000007c00000-0x000008600000 : "ConfigurationB"
+0x000008600000-0x000008a00000 : "UserLocalCT"
+0x000008a00000-0x000009000000 : "Userdata"
+0x000009000000-0x000009800000 : "Framework1"
+0x000009800000-0x00000a000000 : "Framework2"
+0x00000a000000-0x00000ea00000 : "Apps"
+  RootfsA
+PPP generic driver version 2.4.2
+PPP BSD Compression module registered
+PPP Deflate Compression module registered
+PPP MPPE Compression module registered
+NET: Registered protocol family 24
+PPTP driver version 0.8.5
+register rtpci
+PCI: Enabling device 0000:00:00.0 (0000 -> 0002)
+PCI: Enabling device 0000:01:00.0 (0000 -> 0002)
+
+
+=== pAd = c0201000, size = 1393104 ===
+
+<-- RTMPAllocTxRxRingMemory, Status=0
+<-- RTMPAllocAdapterBlock, Status=0
+pAd->CSRBaseAddress =0xc0100000, csr_addr=0xc0100000!
+device_id =0x7662
+==>rlt_wlan_chip_onoff(): OnOff:1, Reset= 1, pAd->WlanFunCtrl:0x0, Reg-WlanFunCtrl=0x20a
+get_dev_name_prefix(): dev_idx = 0, dev_name_prefix=rai
+*****run project phy.
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 151(0x00000097)
+FM detection done! loop = 1
+SR calibration value u1SrCalVal = 5
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+FM_OUT value: u4FmOut = 0(0x00000000)
+xhci-hcd xhci-hcd: xHCI Host Controller
+xhci-hcd xhci-hcd: new USB bus registered, assigned bus number 1
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: cpu 1 
+plat_set_irq_affinity: cpu 1 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 1, irq = 18
+plat_set_irq_affinity: irq num 18 
+xhci-hcd xhci-hcd: irq 18, io mem 0x1fb90000
+hub 1-0:1.0: USB hub found
+hub 1-0:1.0: 2 ports detected
+xhci-hcd xhci-hcd: xHCI Host Controller
+xhci-hcd xhci-hcd: new USB bus registered, assigned bus number 2
+hub 2-0:1.0: USB hub found
+hub 2-0:1.0: 1 port detected
+USB PHY config 1
+port 0 u2_slew_rate_calibration
+FM_OUT value = 154(0x0000009A)
+SR calibration value = 4
+port 1 u2_slew_rate_calibration
+FM_OUT value = 150(0x00000096)
+SR calibration value = 4
+USB driver version: 751221.2.20160516
+usbcore: registered new interface driver cdc_acm
+cdc_acm: USB Abstract Control Model driver for USB modems and ISDN adapters
+Netfilter messages via NETLINK v0.30.
+nf_conntrack version 0.5.0 (6849 buckets, 27396 max)
+ctnetlink v0.93: registering with nfnetlink.
+nf_conntrack_rtsp v0.7 loading
+nf_nat_rtsp v0.7 loading
+gre: GRE over IPv4 demultiplexor driver
+ip_gre: GRE over IPv4 tunneling driver
+ip_tables: (C) 2000-2006 Netfilter Core Team
+TCP: cubic registered
+NET: Registered protocol family 10
+ip6_tables: (C) 2000-2006 Netfilter Core Team
+sit: IPv6 over IPv4 tunneling driver
+NET: Registered protocol family 17
+l2tp_core: L2TP core driver, V2.0
+l2tp_ppp: PPPoL2TP kernel driver, V2.0
+8021q: 802.1Q VLAN Support v1.8
+UBI: attaching mtd3 to ubi0
+UBI: scanning is finished
+UBI warning: print_rsvd_warning: cannot reserve enough PEBs for bad PEB handling, reserved 0, need 37
+UBI: attached mtd3 (name "RootfsA", size 16 MiB) to ubi0
+UBI: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+UBI: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+UBI: VID header offset: 2048 (aligned 2048), data offset: 4096
+UBI: good PEBs: 128, bad PEBs: 0, corrupted PEBs: 0
+UBI: user volume: 1, internal volumes: 1, max. volumes count: 128
+UBI: max/mean erase counter: 2/0, WL threshold: 4096, image sequence number: 797424093
+UBI: available PEBs: 0, total reserved PEBs: 128, PEBs reserved for bad PEB handling: 0
+UBI: background thread "ubi_bgt0d" started, PID 38
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: cpu 1 
+plat_set_irq_affinity: cpu 1 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 1, irq = 1
+plat_set_irq_affinity: irq num 1 
+tc3162ser_startup 
+UBIFS: background thread "ubifs_bgt0_0" started, PID 39
+UBIFS: mounted UBI device 0, volume 0, name "Rootfs"
+UBIFS: LEB size: 126976 bytes (124 KiB), min./max. I/O unit sizes: 2048 bytes/2048 bytes
+UBIFS: FS size: 13967360 bytes (13 MiB, 110 LEBs), journal size 2285568 bytes (2 MiB, 18 LEBs)
+UBIFS: reserved for root: 0 bytes (0 KiB)
+UBIFS: media format: w4/r0 (latest is w4/r0), UUID 7556549B-8874-4221-87FB-7C8B8C5323FC, small LPT model
+VFS: Mounted root (ubifs filesystem) on device 0:11.
+Freeing unused kernel memory: 192K (806a0000 - 806d0000)
+Pre_initialization script
+Populating /dev using udev: udevd (52): /proc/52/oom_adj is deprecated, please use /proc/52/oom_score_adj instead.
+done
+bootfrom=bootfromA
+UBI: attaching mtd2 to ubi1
+UBI: scanning is finished
+UBI warning: print_rsvd_warning: cannot reserve enough PEBs for bad PEB handling, reserved 2, need 37
+UBI: attached mtd2 (name "AppA", size 40 MiB) to ubi1
+UBI: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+UBI: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+UBI: VID header offset: 2048 (aligned 2048), data offset: 4096
+UBI: good PEBs: 320, bad PEBs: 0, corrupted PEBs: 0
+UBI: user volume: 1, internal volumes: 1, max. volumes count: 128
+UBI: max/mean erase counter: 1/0, WL threshold: 4096, image sequence number: 1157208629
+UBI: available PEBs: 0, total reserved PEBs: 320, PEBs reserved for bad PEB handling: 2
+UBI devUBI: background thread "ubi_bgt1d" started, PID 65
+ice number 1, total 320 LEBs (40632320 bytes, 38.8 MiB), available 0 LEBs (0 bytes), LEB size 126976 bytes (124.0 KiB)
+UBIFS: mounted UBI device 1, volume 0, name "Appfs", R/O mode
+UBIFS: LEB size: 126976 bytes (124 KiB), min./max. I/O unit sizes: 2048 bytes/2048 bytes
+UBIFS: FS size: 37330944 bytes (35 MiB, 294 LEBs), journal size 5206016 bytes (4 MiB, 41 LEBs)
+UBIFS: reserved for root: 0 bytes (0 KiB)
+UBIFS: media format: w4/r0 (latest is w4/r0), UUID 16FFCBEA-69EB-46EA-A1C3-9EE7564ADBBF, small LPT model
+jffs2: Empty flash at 0x0069829c ends at 0x00698800
+jffs2: Empty flash at 0x0074978c ends at 0x00749800
+jffs2: Empty flash at 0x004026e8 ends at 0x00402800
+jffs2: jffs2_scan_inode_node(): CRC failed on node at 0x0040b7d0: Read 0xffffffff, calculated 0xe5edf3d2
+jffs2: Empty flash at 0x0040bea4 ends at 0x0040c000
+ln: /usr/local/fh/wrifh: File exists
+UBI: attaching mtd13 to ubi2
+UBI: scanning is finished
+UBI: attached mtd13 (name "Apps", size 74 MiB) to ubi2
+UBI: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+UBI: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+UBI: VID header offset: 2048 (aligned 2048), data offset: 4096
+UBI: good PEBs: 592, bad PEBs: 0, corrupted PEBs: 0
+UBI: user volume: 1, internal volumes: 1, max. volumes count: 128
+UBI: max/mean erase counter: 3/1, WL threshold: 4096, image sequence number: 3524503517
+jffs2: notice: (72) check_node_data: wrong data CRC in data node at 0x00697c60: read 0x68dcf685, calculated 0x29225a5a.
+UBI: available PEBs: 0, total reserved PEBs: 592, PEBs reserved for bad PEB handling: 37
+UBI: background thread "ubi_bgt2d" started, PID 82
+UBI device number 2, total 592 LEBs (75169792 bytes, 71.7 MiB), available 0 LEBs (0 bytes), LEB size 126976 bytes (124.0 KiB)
+UBIFS: background thread "ubifs_bgt2_0" started, PID 89
+UBIFS: recovery needed
+UBIFS: recovery completed
+UBIFS: mounted UBI device 2, volume 0, name "Apps_ubifs"
+UBIFS: LEB size: 126976 bytes (124 KiB), min./max. I/O unit sizes: 2048 bytes/2048 bytes
+UBIFS: FS size: 68694016 bytes (65 MiB, 541 LEBs), journal size 3428352 bytes (3 MiB, 27 LEBs)
+UBIFS: reserved for root: 3244587 bytes (3168 KiB)
+UBIFS: media format: w4/r0 (latest is w4/r0), UUID C2C2EC72-D8D3-48A5-B610-DF2545DB84CF, small LPT model
+UBIFS: background thread "ubifs_bgt0_0" stops
+Loading fhko modules
+
+|-----------------------  MTK: Load Driver Modules  --------------------module_sel: module license 'unspecified' taints kernel.
+Disabling lock debugging due to kernel taint
+-----|
+TC3162 LED Manager 0.1 init
+
+tcledctrl version: 20160424
+led path:/etc/led.conf
+tccicmd V1.1.0.0 (Mar 10 2016-21:12:47)
+ERROR!Create /etc/fwTCver.conf fail!
+
+SIFMaster 0.1 init
+
+Register sifm cmd
+macType = 0
+qdma_lan: physical_size is 0x00200000
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: cpu 1 
+plat_set_irq_affinity: cpu 1 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 1, irq = 22
+plat_set_irq_affinity: irq num 22 
+ether.c:v1.00-NAPI 29.Mar.2015
+netif_napi_add() called with weight 128 on device eth
+eth: FE MAC Ethernet address: 00:AA:BB:01:23:45
+User External switch ,type 10
+EN7512 TRGMII V1.0
+sdn igmp module init
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+ [tcPhyInit] in  [tcPhyInit] out , r31 = (0, 0x0) 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+ [tcPhyInit] in  [tcPhyInit] out , r31 = (1, 0x0) 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+ [tcPhyInit] in  [tcPhyInit] out , r31 = (2, 0x0) 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+ [tcPhyInit] in  [tcPhyInit] out , r31 = (3, 0x0) 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+ [tcPhyInit] in  [tcPhyInit] out , r31 = (4, 0x0) 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 9451 
+ 7512 Ge, 
+MCM MT7530 
+ [tcPhyInit] in  [tcPhyInit] out , r31 = (12, 0x0) 
+tcPhyVerLookUp 3939 9451 
+ 7512 Ge, 
+MCM MT7530 
+ [tcPhyInit] in  [tcPhyInit] out , r31 = (12, 0x0) 
+  GE Rext AnaCal Done! (1)(0x1f)  
+  GE Rext AnaCal Done! (1)(0x1f)  
+  GE R50 AnaCal Done! (2) (0x27)(0xa7) 
+  GE R50 AnaCal Done! (1) (0x28)(0xa8) 
+  GE R50 AnaCal Done! (1) (0x28)(0xa8) 
+  GE R50 AnaCal Done! (1) (0x28)(0xa8) 
+ GE Tx offset AnaCal Done! (5)(0x25)  
+ GE Tx offset AnaCal Done! (2)(0x22)  
+ GE Tx offset AnaCal Done! (5)(0x25)  
+ GE Tx offset AnaCal Done! (3)(0x23)  
+ GE Tx amp AnaCal Done! (pair-0)(0x12)(0x1420)
+ GE Tx amp AnaCal Done! (29) (0x3)
+ GE Tx amp AnaCal Done! (pair-1)(0x17)(0x620)
+ GE Tx amp AnaCal Done! (28) (0x4)
+ GE Tx amp AnaCal Done! (pair-2)(0x19)(0x620)
+ GE Tx amp AnaCal Done! (28) (0x4)
+ GE Tx amp AnaCal Saturation!  
+ GE Tx amp AnaCal Done! (32) (0x0)
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+tcPhyVerLookUp 3939 9412 
+ 7530 Ge, 0x1 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 0 
+MCM MT7530 
+tcPhyVerLookUp 3939 9451 
+ 7512 Ge, 
+MCM MT7530 
+eth: starting interface.
+netif_start_queue
+netif_stop_queue
+macType = 0
+qdma_wan: qdma_bmgr.c [2631]: HW_FWD physical size is not illegal, force setting to 4MB
+qdma_wan: physical_size is 0x00400000
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: cpu 1 
+plat_set_irq_affinity: cpu 1 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 1, irq = 23
+plat_set_irq_affinity: irq num 23 
+EN7570 found!
+FLASH matrix got
+TIAGAIN set 0x0
+ERC filter set
+MPD Current Offset = 0xec
+RSSI_Vref = 0x21c
+RSSI_V = 0x2a0
+Start EPON Tx Calibration
+Rx LOS is set
+CDR disabled
+T0/T1 delay = 0x47
+RGS_T0C = 0x39
+RGS_T1C = 0x40
+CDR enabled
+TGEN done
+Initial bias/mod current loaded from FLASH
+MPDL/MPDH loaded
+Tx SD set
+Switch to Single-closed Loop Mode
+Rogue ONU clear
+Internal DDMI Enabled
+TEC Enabled
+Bias offset = 0xffffff58
+ETC = 3
+BiasTracking Enabled
+EN7570 Initialization Done!
+PON PHY driver version is 160818.104.107
+xPON driver initialization
+Alloc data struct memory successful, 35296
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: cpu 1 
+plat_set_irq_affinity: cpu 1 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 1, irq = 19
+plat_set_irq_affinity: irq num 19 
+XPON Mapping Module init OK!
+
+qos_discipline_init
+
+
+write_irq_affinity new_value origin value is 00000007
+
+
+
+write_irq_affinity new_value changed value is 00000001
+
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 0, irq = 23
+plat_set_irq_affinity: irq num 23 
+SCSI subsystem initialized
+usbcore: registered new interface driver usb-storage
+fuse init (API version 7.23)
+Exec. Successful
+Exec. Successful
+Exec. Successful
+Exec. Successful
+Exec. Successful
+Exec. Successful
+[H[J
+#######      ##                        ##                                 
+##       ##  ##                        ##                                
+##           ##                        ##  wlan led timer init
+                               fh gpio setup
+random: nonblocking pool is initialized
+
+######   ##  #####     #####   ##  ##  ######     ####     ### ##    ##### 
+##       ##  ##  ##   ##   ##  ## ##   ##   ##   ##  ##   ## ## ##  ##   ##
+##       ##  ##   ##  ###set gpio 0 input !!
+button timer init
+### fh button setup
+  ###     ##   ##  ##    ##  ## ## ##  ###### 
+##       ##  ##  ##   ##       ##      ##   ##   ##  ##   ## ## ##  ##     
+##       ##  #####     ######  ##      ##   ##    ####    ## ## ##   ######
+
+5g is exist
+bob_type = 0x1
+cat /proc/fh_ver_info/cpu_type 
+gpio get 27 
+voip_loader check start 
+[1] PCM V2.4 (Fri Jul  7 10:49:09 CST 2017 Fri Jul  7 10:49:09 CST 2017) 
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: cpu 1 
+plat_set_irq_affinity: cpu 1 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 1, irq = 12
+plat_set_irq_affinity: irq num 12 
+[2] PCM V2.4 (Fri Jul  7 10:49:09 CST 2017 Fri Jul  7 10:49:09 CST 2017) 
+plat_set_irq_affinity: cpu 0 
+plat_set_irq_affinity: cpu 0 vpe_id 0 
+plat_set_irq_affinity: cpu 1 
+plat_set_irq_affinity: cpu 1 vpe_id 0 
+plat_set_irq_affinity: irq_vpe0 1 irq_vpe1 1, irq = 34
+plat_set_irq_affinity: irq num 34 
+Major Num:233, device: spi
+START CHECK ZARLIN ZSI, gBBTYPE=1
+cmd=/bin/insmod /lib/slic3.ko type=ZSI mode=IB
+init mod-slic3,interface:ZSI,devNum:1,gpio:2000
+ZSI
+set slic type: ===0===
+set interface_type: ===1===
+set slicid: ===0===
+======slic reset 7512======
+
+SPI_Reset
+======spi check zarlink======
+res_arr[0]:0x8 
+res_arr[1]:0x49
+le9641_deviceVerify RCNPCN success!
+param.data:le9641
+set slic type: ===0===
+set interface_type: ===1===
+set slicid: ===1===
+======slic reset 7512======
+
+SPI_Reset
+======spi check zarlink======
+res_arr[0]:0x0 
+res_arr[1]:0x0
+[zarlink] unknown slic type!
+param.data:
+PCM2 and SLIC Controller Module has been unloaded
+[SLIC] le9641
+clean mod-slic3
+[spi_ctrl] exit
+PCM1 and SLIC Controller Module has been unloaded
+SLIC_TYPE=le9641
+TEL_NUMX=1
+eth: starting interface.
+netif_start_queue
+ 7530 set 15R_L 
+ifconfig: SIOCSIFADDR: No such device
+interface eth0.1 does not exist!
+ifconfig: SIOCSIFADDR: No such device
+interface eth0.2 does not exist!
+ifconfig: SIOCSIFADDR: No such device
+interface eth0.3 does not exist!
+ifconfig: SIOCSIFADDR: No such device
+interface eth0.4 does not exist!
+mtphy[1]:Link-up at 100F.
+ALL 0x1E,0x9B =0x140
+ALL 0x1E,0x9C =0x4040
+BB1 lch_mse_mdcA =0x1
+BB2 lch_mse_mdcB =0x40
+BB3 lch_mse_mdcC =0x40
+BB4 lch_mse_mdcD =0x40
+interface eth0 does not exist!
+down to up.
+port 0 link up
+*reg=0000200c value:000fff10
+*reg=0000210c value:000fff10
+*reg=0000220c value:000fff10
+*reg=0000230c value:000fff10
+*reg=0000240c value:000fff10
+Initialize wlancfg... 
+xvr_thread!!
+set port1 FORWARDING
+set port2 FORWARDING
+App Framework Disabled.
+set port3 FORWARDING
+set port4 FORWARDING
+button_start test
+*reg=00000024 value:00160016 (ext_switch:1)
+*reg=0000001c value:60166016 (ext_switch:1)
+*reg=00000020 value:60166016 (ext_switch:1)
+*reg=0000001c value:00100010 (ext_switch:0)
+*reg=0000251c value:68010101 (ext_switch:0)
+Exec. Successful
+Exec. Successful
+pid 8's current affinity mask: 1
+Exec. Successful
+ifconfig: SIOCGIFFLAGS: No such device
+Exec. Successful
+can't delete bridge br0: Package not installed
+Exec. Successful
+Exec. Successful
+========build_init start========
+======================FACTORY=0======================
+=======0.start rem && ram========
+========1.create Managerment network namespace and channel========
+fh_net_api.c: 558 in fh_marvell_forward_route_add(): vid=46 vlanprio=0 bindport=1 dhcpen=1
+open fh_br_ctrl_dev_name: No such file or directory
+open fh_br_ctrl_dev_name: No such file or directory
+fh_net_api.c: 628 in fh_marvell_forward_route_add(): shellcmd=mtk_itf_fe_sample  wan  0C:6A:BC:XX:XX:C0
+set wan mac 0c:6a:bc:xx:xx:c0
+========cp default_flows.conf========
+========2.create internal fixed network namespace========
+read client config !...20110222_01
+Error: param error
+area_code flag:0,value:Shanghai
+default_username flag:0,value:fiberhome,length is:9
+default_password flag:0,value:fiberhome
+voip_1_username flag:0,value:admin,length is:5
+voip_1_password flag:0,value:admin,length is:5
+voip_2_username flag:0,value:admin
+voip_2_password flag:0,value:admin
+option_125_enable flag:0,value:no
+option_125_len flag:0,value:21
+Enterprise_number1 flag:0,value:1234
+data_len1 flag:0,value:16
+vendor_class_data1 flag:0,value:TELCOMITMSDHCPAA
+Gateway_ID flag:0,value:abcdefghijklmnopqrstuvwx
+option60_encry_enable flag:0,value:no,length is:2
+option60_add_gatewayid:0,value:yes,length is:3
+option60_valueMode flag:0,value:2
+option60_value flag:0,value:admin,admin
+option_125_string flag:0,value:TELCOMITMSDHCPAA
+read client config complete!....success
+client_option_config:option_125_enable:0,option_125_len:21,			Enterprise_number1:1234,data_len1:16,vendor_class_data1:TELCOMITMSDHCPAA
+,			default_username:fiberhome,default_password:fiberhome
+,voip_1_username:admin,			voip_1_password:admin
+,voip_2_username:admin,voip_2_password:admin,option60_encry_enable:0,option_125_string:TELCOMITMSDHCPAA
+Configure done**************************************
+option60 encry not enable.
+start for**********************************
+========3.do ovsdb init when first activate========
+compact ovsdb...
+compact ovsdb finished!
+========move LAN ports to MNG network namespace========
+========4.1 start ovsdb-server========
+========4.2 start ovs-vswitchd========
+1970-01-01T00:00:27Z|00001|ovs_numa|INFO|Discovered 0 NUMA nodes and 0 CPU cores
+1970-01-01T00:00:27Z|00002|reconnect|INFO|unix:/var/ovs/db.sock: connecting...
+1970-01-01T00:00:27Z|00003|reconnect|INFO|unix:/var/ovs/db.sock: connected
+1970-01-01T00:00:28Z|00004|bridge|INFO|xiaboy:before bridge_reconfigure(),idl_seqno_now=117,idl_seqno=0,vlan_splinters_changed=0,ifaces_changed=0
+1970-01-01T00:00:28Z|00005|bridge|INFO|addflow---->table=3,priority=110,idle_timeout=0,hard_timeout=0,in_port=1,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00006|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=1,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,actions=output:100,CONTROLLER:65535
+1970-01-01T00:00:28Z|00007|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,in_port=1,dl_type=0x0806,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00008|bridge|INFO|addflow---->table=4,priority=100,idle_timeout=0,hard_timeout=0,in_port=4,actions=output:100
+1970-01-01T00:00:28Z|00009|bridge|INFO|addflow---->table=7,priority=10,idle_timeout=0,hard_timeout=0,in_port=3,actions=output:200
+1970-01-01T00:00:28Z|00010|bridge|INFO|addflow---->table=7,priority=10,idle_timeout=0,hard_timeout=0,in_port=4,actions=output:200
+1970-01-01T00:00:28Z|00011|bridge|INFO|addflow---->table=7,priority=10,idle_timeout=0,hard_timeout=0,in_port=12,actions=output:200
+1970-01-01T00:00:28Z|00012|bridge|INFO|addflow---->table=3,priority=110,idle_timeout=0,hard_timeout=0,in_port=3,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00013|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,in_port=100,dl_type=0x0806,actions=drop
+1970-01-01T00:00:28Z|00014|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=100,dl_type=0x0800,nw_proto=17,udp_src=67,udp_dst=68,actions=output:1,output:2,output:3,output:4,output:11,output:12
+1970-01-01T00:00:28Z|00015|bridge|INFO|addflow---->table=1,priority=120,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=2,actions=goto_table:6
+1970-01-01T00:00:28Z|00016|bridge|INFO|addflow---->table=7,priority=10,idle_timeout=0,hard_timeout=0,in_port=2,actions=output:200
+1970-01-01T00:00:28Z|00017|bridge|INFO|addflow---->table=1,priority=10,idle_timeout=0,hard_timeout=0,actions=goto_table:7
+1970-01-01T00:00:28Z|00018|bridge|INFO|addflow---->table=7,priority=200,idle_timeout=0,hard_timeout=0,in_port=1,dl_type=0x0800,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00019|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=3,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=output:101
+1970-01-01T00:00:28Z|00020|bridge|INFO|addflow---->table=2,priority=101,idle_timeout=0,hard_timeout=0,in_port=1,dl_dst=0c:6a:bc:xx:xx:cf,actions=output:100,output:105,output:NORMAL
+1970-01-01T00:00:28Z|00021|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=200,dl_type=0x0800,nw_proto=17,udp_src=53,actions=output:101
+1970-01-01T00:00:28Z|00022|bridge|INFO|addflow---->table=7,priority=200,idle_timeout=0,hard_timeout=0,in_port=2,dl_type=0x0800,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00023|bridge|INFO|addflow---->table=0,priority=10,idle_timeout=0,hard_timeout=0,actions=goto_table:1
+1970-01-01T00:00:28Z|00024|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=3,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,actions=output:100,CONTROLLER:65535
+1970-01-01T00:00:28Z|00025|bridge|INFO|addflow---->table=1,priority=125,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=6,nw_src=192.168.1.0/24,nw_dst=192.168.1.1/32,tcp_dst=80,actions=goto_table:4
+1970-01-01T00:00:28Z|00026|bridge|INFO|addflow---->table=0,priority=150,idle_timeout=0,hard_timeout=0,in_port=200,dl_type=0x0800,nw_proto=17,nw_dst=192.168.1.254/32,udp_src=53,actions=goto_table:1
+1970-01-01T00:00:28Z|00027|bridge|INFO|addflow---->table=4,priority=100,idle_timeout=0,hard_timeout=0,in_port=1,actions=output:100
+1970-01-01T00:00:28Z|00028|bridge|INFO|addflow---->table=8,priority=100,idle_timeout=0,hard_timeout=0,actions=drop
+1970-01-01T00:00:28Z|00029|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,dl_type=0x0806,arp_spa=192.168.0.0/16,dl_vlan=85,actions=drop
+1970-01-01T00:00:28Z|00030|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=4,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,actions=output:100,CONTROLLER:65535
+1970-01-01T00:00:28Z|00031|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=2,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=output:101
+1970-01-01T00:00:28Z|00032|bridge|INFO|addflow---->table=2,priority=101,idle_timeout=0,hard_timeout=0,in_port=11,dl_dst=0c:6a:bc:xx:xx:cf,actions=output:100,output:105,output:NORMAL
+1970-01-01T00:00:28Z|00033|bridge|INFO|addflow---->table=1,priority=130,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=17,udp_src=67,udp_dst=68,actions=goto_table:3
+1970-01-01T00:00:28Z|00034|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=12,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=output:101
+1970-01-01T00:00:28Z|00035|bridge|INFO|addflow---->table=0,priority=200,tcp,tp_dst=0,actions=drop
+1970-01-01T00:00:28Z|00036|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=1,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=output:101
+1970-01-01T00:00:28Z|00037|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=85,dl_type=0x0800,nw_proto=17,udp_src=67,udp_dst=68,actions=mod_vlan_vid:85,output:1,output:2,output:3,output:4
+1970-01-01T00:00:28Z|00038|bridge|INFO|addflow---->table=5,priority=100,idle_timeout=0,hard_timeout=0,actions=output:NORMAL
+1970-01-01T00:00:28Z|00039|bridge|INFO|addflow---->table=7,priority=200,idle_timeout=0,hard_timeout=0,in_port=3,dl_type=0x0800,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00040|bridge|INFO|addflow---->table=7,priority=200,idle_timeout=0,hard_timeout=0,in_port=4,dl_type=0x0800,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00041|bridge|INFO|addflow---->table=0,priority=100,idle_timeout=0,hard_timeout=0,in_port=200,dl_type=0x0800,nw_dst=192.168.1.253/32,actions=drop
+1970-01-01T00:00:28Z|00042|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=101,dl_type=0x0800,nw_proto=17,udp_src=53,actions=output:NORMAL
+1970-01-01T00:00:28Z|00043|bridge|INFO|addflow---->table=4,priority=100,idle_timeout=0,hard_timeout=0,in_port=11,actions=output:100
+1970-01-01T00:00:28Z|00044|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,in_port=2,dl_type=0x0806,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00045|bridge|INFO|addflow---->table=6,priority=100,idle_timeout=0,hard_timeout=0,actions=output:NORMAL
+1970-01-01T00:00:28Z|00046|bridge|INFO|addflow---->table=1,priority=130,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=17,udp_src=53,actions=goto_table:9
+1970-01-01T00:00:28Z|00047|bridge|INFO|addflow---->table=2,priority=10,idle_timeout=0,hard_timeout=0,dl_type=0x0806,actions=output:NORMAL
+1970-01-01T00:00:28Z|00048|bridge|INFO|addflow---->table=1,priority=130,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,actions=goto_table:3
+1970-01-01T00:00:28Z|00049|bridge|INFO|addflow---->table=3,priority=110,idle_timeout=0,hard_timeout=0,in_port=2,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00050|bridge|INFO|addflow---->table=7,priority=10,idle_timeout=0,hard_timeout=0,in_port=1,actions=output:200
+1970-01-01T00:00:28Z|00051|bridge|INFO|addflow---->table=1,priority=125,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=6,nw_src=192.168.1.1/32,nw_dst=192.168.1.0/24,tcp_src=80,actions=goto_table:4
+1970-01-01T00:00:28Z|00052|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,in_port=51,dl_type=0x0806,actions=drop
+1970-01-01T00:00:28Z|00053|bridge|INFO|addflow---->table=1,priority=130,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=goto_table:9
+1970-01-01T00:00:28Z|00054|bridge|INFO|addflow---->table=0,priority=100,idle_timeout=0,hard_timeout=0,in_port=200,dl_type=0x0800,nw_dst=192.168.1.254/32,actions=drop
+1970-01-01T00:00:28Z|00055|bridge|INFO|addflow---->table=3,priority=110,in_port=85,udp,tp_src=67,tp_dst=68,dl_dst=ff:ff:ff:ff:ff:ff,actions=mod_vlan_vid:85,output:1,output:2,output:3,output:4,strip_vlan,output:1,output:2,output:3,output:4
+1970-01-01T00:00:28Z|00056|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=12,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,actions=output:100,CONTROLLER:65535
+1970-01-01T00:00:28Z|00057|bridge|INFO|addflow---->table=0,priority=200,udp,tp_dst=0,actions=drop
+1970-01-01T00:00:28Z|00058|bridge|INFO|addflow---->table=2,priority=101,idle_timeout=0,hard_timeout=0,in_port=2,dl_dst=0c:6a:bc:xx:xx:cf,actions=output:100,output:105,output:NORMAL
+1970-01-01T00:00:28Z|00059|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=4,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=output:101
+1970-01-01T00:00:28Z|00060|bridge|INFO|addflow---->table=2,priority=20,idle_timeout=0,hard_timeout=0,arp,arp_tpa=192.168.1.0/24,actions=output:100,output:105,output:150,NORMAL
+1970-01-01T00:00:28Z|00061|bridge|INFO|addflow---->table=2,priority=101,idle_timeout=0,hard_timeout=0,in_port=3,dl_dst=0c:6a:bc:xx:xx:cf,actions=output:100,output:105,output:NORMAL
+1970-01-01T00:00:28Z|00062|bridge|INFO|addflow---->table=4,priority=100,idle_timeout=0,hard_timeout=0,in_port=12,actions=output:100
+1970-01-01T00:00:28Z|00063|bridge|INFO|addflow---->table=7,priority=10,idle_timeout=0,hard_timeout=0,in_port=11,actions=output:200
+1970-01-01T00:00:28Z|00064|bridge|INFO|addflow---->table=2,priority=110,idle_timeout=0,hard_timeout=0,in_port=100,dl_dst=FF:FF:FF:FF:FF:FF,actions=output:NORMAL
+1970-01-01T00:00:28Z|00065|bridge|INFO|addflow---->table=2,priority=101,idle_timeout=0,hard_timeout=0,in_port=12,dl_dst=0c:6a:bc:xx:xx:cf,actions=output:100,output:105,output:NORMAL
+1970-01-01T00:00:28Z|00066|bridge|INFO|addflow---->table=1,priority=90,idle_timeout=0,hard_timeout=0,dl_dst=FF:FF:FF:FF:FF:FF,actions=goto_table:8
+1970-01-01T00:00:28Z|00067|bridge|INFO|addflow---->table=9,priority=50,idle_timeout=0,hard_timeout=0,in_port=101,dl_type=0x0800,nw_proto=17,udp_src=12345,udp_dst=12345,actions=drop
+1970-01-01T00:00:28Z|00068|bridge|INFO|addflow---->table=7,priority=200,idle_timeout=0,hard_timeout=0,in_port=51,actions=output:NORMAL
+1970-01-01T00:00:28Z|00069|bridge|INFO|addflow---->table=4,priority=100,idle_timeout=0,hard_timeout=0,in_port=100,actions=output:NORMAL
+1970-01-01T00:00:28Z|00070|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,in_port=4,dl_type=0x0806,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00071|bridge|INFO|addflow---->table=9,priority=50,idle_timeout=0,hard_timeout=0,in_port=101,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=output:200
+1970-01-01T00:00:28Z|00072|bridge|INFO|addflow---->table=9,priority=100,idle_timeout=0,hard_timeout=0,in_port=11,dl_type=0x0800,nw_proto=17,udp_dst=53,actions=output:101
+1970-01-01T00:00:28Z|00073|bridge|INFO|addflow---->table=3,priority=120,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,dl_vlan=85,actions=learn(table=10,priority=202,in_port=85,NXM_OF_ETH_DST[]=NXM_OF_ETH_SRC[],output:NXM_OF_IN_PORT[]),strip_vlan,output:85
+1970-01-01T00:00:28Z|00074|bridge|INFO|addflow---->table=2,priority=101,idle_timeout=0,hard_timeout=0,in_port=4,dl_dst=0c:6a:bc:xx:xx:cf,actions=output:100,output:105,output:NORMAL
+1970-01-01T00:00:28Z|00075|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,in_port=85,dl_type=0x0806,actions=mod_vlan_vid:85,goto_table:10
+1970-01-01T00:00:28Z|00076|bridge|INFO|addflow---->table=2,priority=100,idle_timeout=0,hard_timeout=0,in_port=3,dl_type=0x0806,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:28Z|00077|bridge|INFO|addflow---->table=2,priority=100,in_port=150,arp,actions=drop
+1970-01-01T00:00:29Z|00078|bridge|INFO|addflow---->table=1,priority=200,idle_timeout=0,hard_timeout=0,dl_type=0x0806,actions=goto_table:2
+1970-01-01T00:00:29Z|00079|bridge|INFO|addflow---->table=4,priority=100,idle_timeout=0,hard_timeout=0,in_port=3,actions=output:100
+1970-01-01T00:00:29Z|00080|bridge|INFO|addflow---->table=1,priority=130,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_proto=17,udp_src=12345,udp_dst=12345,actions=goto_table:9
+1970-01-01T00:00:29Z|00081|bridge|INFO|addflow---->table=3,priority=110,idle_timeout=0,hard_timeout=0,in_port=4,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,dl_vlan=85,actions=strip_vlan,output:85
+1970-01-01T00:00:29Z|00082|bridge|INFO|addflow---->table=7,priority=200,idle_timeout=0,hard_timeout=0,in_port=85,actions=mod_vlan_vid:85,goto_table:10
+1970-01-01T00:00:29Z|00083|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=11,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,actions=output:100,CONTROLLER:65535
+1970-01-01T00:00:29Z|00084|bridge|INFO|addflow---->table=4,priority=100,idle_timeout=0,hard_timeout=0,in_port=2,actions=output:100
+1970-01-01T00:00:29Z|00085|bridge|INFO|addflow---->table=7,priority=10,idle_timeout=0,hard_timeout=0,in_port=200,actions=output:NORMAL
+1970-01-01T00:00:29Z|00086|bridge|INFO|addflow---->table=3,priority=100,idle_timeout=0,hard_timeout=0,in_port=2,dl_type=0x0800,nw_proto=17,udp_src=68,udp_dst=67,actions=output:100,CONTROLLER:65535
+1970-01-01T00:00:29Z|00087|bridge|INFO|addflow---->table=1,priority=100,idle_timeout=0,hard_timeout=0,dl_type=0x0800,nw_src=192.168.1.0/24,nw_dst=192.168.1.0/24,actions=goto_table:5
+1970-01-01T00:00:29Z|00088|bridge|INFO|addflow end
+1970-01-01T00:00:29Z|00089|ofproto_dpif|INFO|system@ovs-system: Datapath supports recirculation
+1970-01-01T00:00:29Z|00090|ofproto_dpif|INFO|system@ovs-system: MPLS label stack length probed as 1
+1970-01-01T00:00:29Z|00091|ofproto_dpif|INFO|system@ovs-system: Datapath supports unique flow ids
+1970-01-01T00:00:29Z|00092|ofproto_dpif|INFO|system@ovs-system: Datapath supports ct_state
+1970-01-01T00:00:29Z|00093|ofproto_dpif|INFO|system@ovs-system: Datapath supports ct_zone
+1970-01-01T00:00:29Z|00094|ofproto_dpif|INFO|system@ovs-system: Datapath supports ct_mark
+1970-01-01T00:00:29Z|00095|ofproto_dpif|INFO|system@ovs-system: Datapath does not support ct_label
+1970-01-01T00:00:29Z|00001|ofproto_dpif_upcall(handler1)|INFO|received packet on unassociated datapath port 0
+1970-01-01T00:00:29Z|00096|bridge|INFO|bridge SDN-bridge: added interface appi on port 105
+1970-01-01T00:00:29Z|00097|bridge|INFO|bridge SDN-bridge: added interface eth0 on port 1
+1970-01-01T00:00:29Z|00098|bridge|INFO|bridge SDN-bridge: added interface si on port 100
+1970-01-01T00:00:29Z|00002|ofproto_dpif_upcall(handler1)|INFO|received packet on unassociated datapath port 2
+1970-01-01T00:00:29Z|00099|bridge|INFO|bridge SDN-bridge: added interface dtest on port 911
+1970-01-01T00:00:29Z|00100|bridge|WARN|could not open network device iptv.51 (No such device)
+1970-01-01T00:00:29Z|00101|bridge|INFO|bridge SDN-bridge: added interface eth3 on port 4
+1970-01-01T00:00:29Z|00102|bridge|INFO|bridge SDN-bridge: added interface SDN-out-default on port 200
+1970-01-01T00:00:29Z|00103|bridge|INFO|bridge SDN-bridge: added interface eth2 on port 3
+1970-01-01T00:00:29Z|00104|bridge|WARN|could not open network device iptv.85 (No such device)
+1970-01-01T00:00:29Z|00105|bridge|INFO|bridge SDN-bridge: added interface foi on port 101
+1970-01-01T00:00:29Z|00106|bridge|WARN|could not open network device ra0 (No such device)
+1970-01-01T00:00:29Z|00107|bridge|INFO|bridge SDN-bridge: added interface utest on port 150
+1970-01-01T00:00:29Z|00108|bridge|INFO|bridge SDN-bridge: added interface eth1 on port 2
+1970-01-01T00:00:29Z|00109|bridge|WARN|could not open network device rai0 (No such device)
+1970-01-01T00:00:29Z|00110|bridge|INFO|bridge SDN-bridge: added interface SDN-bridge on port 65534
+1970-01-01T00:00:29Z|00111|bridge|INFO|bridge SDN-bridge: using datapath ID 00000c6abcxxxxcf
+1970-01-01T00:00:29Z|00112|netdev_linux|WARN|query eth0 qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00113|netdev_linux|WARN|eth0: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00114|netdev_linux|WARN|query appi qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00115|netdev_linux|WARN|appi: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00116|netdev_linux|WARN|query si qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00117|netdev_linux|WARN|si: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00118|netdev_linux|WARN|query dtest qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00119|netdev_linux|WARN|dtest: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00120|netdev_linux|WARN|query eth3 qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00121|netdev_linux|WARN|eth3: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00122|netdev_linux|WARN|query SDN-out-default qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00123|netdev_linux|WARN|SDN-out-default: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00124|netdev_linux|WARN|query eth2 qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00125|netdev_linux|WARN|eth2: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00126|netdev_linux|WARN|query foi qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00127|netdev_linux|WARN|foi: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00128|netdev_linux|WARN|query eth1 qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00129|netdev_linux|WARN|eth1: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00130|netdev_linux|WARN|query utest qdisc failed (Operation not supported)
+1970-01-01T00:00:29Z|00131|netdev_linux|WARN|utest: removing policing failed: Operation not supported
+1970-01-01T00:00:29Z|00132|ofproto_dpif|INFO|mac learning static clean begin
+1970-01-01T00:00:29Z|00133|ofproto_dpif|INFO|mac learning static clean end
+1970-01-01T00:00:29Z|00134|ofproto_dpif|INFO|mac learning static insert begin (1: 0c6abcxxxxcf_0_200)
+1970-01-01T00:00:29Z|00135|ofproto_dpif|INFO|macaddr.ea[0]=0c
+1970-01-01T00:00:29Z|00136|ofproto_dpif|INFO|macaddr.ea[1]=6a
+1970-01-01T00:00:29Z|00137|ofproto_dpif|INFO|macaddr.ea[2]=bc
+1970-01-01T00:00:29Z|00138|ofproto_dpif|INFO|macaddr.ea[3]=5d
+1970-01-01T00:00:29Z|00139|ofproto_dpif|INFO|macaddr.ea[4]=a6
+1970-01-01T00:00:29Z|00140|ofproto_dpif|INFO|macaddr.ea[5]=cf
+1970-01-01T00:00:29Z|00141|ofproto_dpif|INFO|mac learning static insert start vlan=0, ofport=200
+1970-01-01T00:00:29Z|00142|ofproto_dpif|INFO|mac learning static insert end success(1: 0c6abcxxxxcf)
+1970-01-01T00:00:29Z|00143|connmgr|INFO|SDN-bridge: added service controller "punix:/var/ovs/SDN-bridge.mgmt"
+1970-01-01T00:00:29Z|00144|connmgr|WARN|SDN-bridge: unsupported controller ""
+1970-01-01T00:00:29Z|00145|connmgr|INFO|xiaboy> ofproto_flush_flows when set_fail_mode fail_mode=0 as first time set fail mode
+1970-01-01T00:00:29Z|00146|connmgr|INFO|=======connmgr_flushed_import_defaultflows jyh ======
+1970-01-01T00:00:29Z|00147|connmgr|INFO|parse default_flows.conf and get 83 flows
+1970-01-01T00:00:29Z|00148|ofproto_dpif_xlate|INFO|/proc/sys/net/core/netdev_max_backlog: open failed (No such file or directory)
+1970-01-01T00:00:29Z|00149|timeval|WARN|Unreasonably long 1870ms poll interval
+1970-01-01T00:00:29Z|00150|coverage|INFO|Event coverage, avg rate over last: 5 seconds, last minute, last hour,  hash=7f3e207d:
+1970-01-01T00:00:29Z|00151|coverage|INFO|netlink_sent               0.0/sec     0.000/sec        0.0000/sec   total: 175
+1970-01-01T00:00:29Z|00152|coverage|INFO|netlink_recv_jumbo         0.0/sec     0.000/sec        0.0000/sec   total: 8
+1970-01-01T00:00:29Z|00153|coverage|INFO|netlink_received           0.0/sec     0.000/sec        0.0000/sec   total: 202
+1970-01-01T00:00:29Z|00154|coverage|INFO|nln_changed                0.0/sec     0.000/sec        0.0000/sec   total: 8
+1970-01-01T00:00:29Z|00155|coverage|INFO|netdev_set_ethtool         0.0/sec     0.000/sec        0.0000/sec   total: 4
+1970-01-01T00:00:29Z|00156|coverage|INFO|netdev_get_ethtool         0.0/sec     0.000/sec        0.0000/sec   total: 12
+1970-01-01T00:00:29Z|00157|coverage|INFO|netdev_set_hwaddr          0.0/sec     0.000/sec        0.0000/sec   total: 1
+1970-01-01T00:00:29Z|00158|coverage|INFO|netdev_get_hwaddr          0.0/sec     0.000/sec        0.0000/sec   total: 12
+1970-01-01T00:00:29Z|00159|coverage|INFO|netdev_get_ifindex         0.0/sec     0.000/sec        0.0000/sec   total: 11
+1970-01-01T00:00:29Z|00160|coverage|INFO|netdev_set_policing        0.0/sec     0.000/sec        0.0000/sec   total: 11
+1970-01-01T00:00:29Z|00161|coverage|INFO|util_xalloc                0.0/sec     0.000/sec        0.0000/sec   total: 29249
+1970-01-01T00:00:29Z|00162|coverage|INFO|stream_open                0.0/sec     0.000/sec        0.0000/sec   total: 1
+1970-01-01T00:00:29Z|00163|coverage|INFO|pstream_open               0.0/sec     0.000/sec        0.0000/sec   total: 3
+1970-01-01T00:00:29Z|00164|coverage|INFO|seq_change                 0.0/sec     0.000/sec        0.0000/sec   total: 723
+1970-01-01T00:00:29Z|00165|coverage|INFO|poll_zero_timeout          0.0/sec     0.000/sec        0.0000/sec   total: 1
+1970-01-01T00:00:29Z|00166|coverage|INFO|poll_create_node           0.0/sec     0.000/sec        0.0000/sec   total: 60
+1970-01-01T00:00:29Z|00167|coverage|INFO|txn_incomplete             0.0/sec     0.000/sec        0.0000/sec   total: 3
+1970-01-01T00:00:30Z|00168|coverage|INFO|netdev_get_stats           0.0/sec     0.000/sec        0.0000/sec   total: 22
+1970-01-01T00:00:30Z|00169|coverage|INFO|mac_learning_learned       0.0/sec     0.000/sec        0.0000/sec   total: 1
+1970-01-01T00:00:30Z|00170|coverage|INFO|hmap_expand                0.0/sec     0.000/sec        0.0000/sec   total: 898
+1970-01-01T00:00:30Z|00171|coverage|INFO|hmap_pathological          0.0/sec     0.000/sec        0.0000/sec   total: 11
+1970-01-01T00:00:30Z|00172|coverage|INFO|miniflow_malloc            0.0/sec     0.000/sec        0.0000/sec   total: 125
+1970-01-01T00:00:30Z|00173|coverage|INFO|flow_extract               0.0/sec     0.000/sec        0.0000/sec   total: 4
+1970-01-01T00:00:30Z|00174|coverage|INFO|dpif_execute               0.0/sec     0.000/sec        0.0000/sec   total: 6
+1970-01-01T00:00:30Z|00175|coverage|INFO|dpif_flow_del              0.0/sec     0.000/sec        0.0000/sec   total: 6
+1970-01-01T00:00:30Z|00176|coverage|INFO|dpif_flow_put              0.0/sec     0.000/sec        0.0000/sec   total: 8
+1970-01-01T00:00:30Z|00177|coverage|INFO|dpif_flow_get              0.0/sec     0.000/sec        0.0000/sec   total: 6
+1970-01-01T00:00:30Z|00178|coverage|INFO|dpif_flow_flush            0.0/sec     0.000/sec        0.0000/sec   total: 2
+1970-01-01T00:00:30Z|00179|coverage|INFO|dpif_port_add              0.0/sec     0.000/sec        0.0000/sec   total: 11
+1970-01-01T00:00:30Z|00180|coverage|INFO|cmap_shrink                0.0/sec     0.000/sec        0.0000/sec   total: 5
+1970-01-01T00:00:30Z|00181|coverage|INFO|cmap_expand                0.0/sec     0.000/sec        0.0000/sec   total: 18
+1970-01-01T00:00:30Z|00182|coverage|INFO|xlate_actions              0.0/sec     0.000/sec        0.0000/sec   total: 4
+1970-01-01T00:00:30Z|00183|coverage|INFO|rev_rstp                   0.0/sec     0.000/sec        0.0000/sec   total: 1
+1970-01-01T00:00:30Z|00184|coverage|INFO|ofproto_update_port        0.0/sec     0.000/sec        0.0000/sec   total: 11
+1970-01-01T00:00:30Z|00185|coverage|INFO|ofproto_flush              0.0/sec     0.000/sec        0.0000/sec   total: 1
+1970-01-01T00:00:30Z|00186|coverage|INFO|bridge_reconfigure         0.0/sec     0.000/sec        0.0000/sec   total: 1
+1970-01-01T00:00:30Z|00187|coverage|INFO|64 events never hit
+1970-01-01T00:00:30Z|00188|bridge|INFO|xiaboy:before bridge_reconfigure(),idl_seqno_now=117,idl_seqno=117,vlan_splinters_changed=0,ifaces_changed=1
+1970-01-01T00:00:30Z|00189|bridge|WARN|could not open network device iptv.51 (No such device)
+1970-01-01T00:00:30Z|00190|bridge|WARN|could not open network device iptv.85 (No such device)
+1970-01-01T00:00:30Z|00191|bridge|WARN|could not open network device ra0 (No such device)
+1970-01-01T00:00:30Z|00192|bridge|WARN|could not open network device rai0 (No such device)
+1970-01-01T00:00:30Z|00193|ofproto_dpif|INFO|mac learning static clean begin
+1970-01-01T00:00:30Z|00194|ofproto_dpif|INFO|mac learning static clean end
+1970-01-01T00:00:30Z|00195|ofproto_dpif|INFO|mac learning static insert begin (1: 0c6abcxxxxcf_0_200)
+1970-01-01T00:00:30Z|00196|ofproto_dpif|INFO|macaddr.ea[0]=0c
+1970-01-01T00:00:30Z|00197|ofproto_dpif|INFO|macaddr.ea[1]=6a
+1970-01-01T00:00:30Z|00198|ofproto_dpif|INFO|macaddr.ea[2]=bc
+1970-01-01T00:00:30Z|00199|ofproto_dpif|INFO|macaddr.ea[3]=5d
+1970-01-01T00:00:30Z|00200|ofproto_dpif|INFO|macaddr.ea[4]=a6
+1970-01-01T00:00:30Z|00201|ofproto_dpif|INFO|macaddr.ea[5]=cf
+1970-01-01T00:00:30Z|00202|ofproto_dpif|INFO|mac learning static insert start vlan=0, ofport=200
+1970-01-01T00:00:30Z|00203|ofproto_dpif|INFO|mac learning static insert end success(1: 0c6abcxxxxcf)
+1970-01-01T00:00:30Z|00204|connmgr|WARN|SDN-bridge: unsupported controller ""
+========4.3 init SDN-bridge and fixed ports when needed========
+do nothing
+========move ovs created internal port to correct network namespace========
+========setting internal port mac and bring them up========
+========create utest & dtest internal port=========
+========11n WiFi module========
+========11ac WiFi module========
+========hw nat========
+done
+========import default configure to ovsdb when first activate========
+do nothing
+========start cm========
+command=/bin/ram
+cmd[0]=/bin/ram
+========start dm========
+ram: file locked!
+command=ip netns exec MNG /usr/ovs/sbin/dm -r sgwauth.edatahome.com -d 00000c6abcxxxxcf --pidfile
+cmd[0]=ip
+cmd[1]=netns
+cmd[2]=exec
+cmd[3]=MNG
+cmd[4]=/usr/ovs/sbin/dm
+cmd[5]=-r
+cmd[6]=sgwauth.edatahome.com
+cmd[7]=-d
+cmd[8]=00000c6abcxxxxcf
+cmd[9]=--pidfile
+========start inetd (micro_httpd & bftpd)========
+killall: telnetd: no process killed
+========start dnsmasqx========
+killall: dnsmasqx: no process killed
+=================build_init end====================
+SDN Init Accomplish!
+1970-01-01T00:00:33Z|00001|cm_devi_sys|INFO|dev_set_gw_light(),type = 1
+1970-01-01T00:00:33Z|00002|cm_dbi|INFO|cm_dbi_init() start...
+1970-01-01T00:00:33Z|00003|cm_dbi|INFO|set_cm_status() cm_status from 0 to 0.
+1970-01-01T00:00:33Z|00004|cm_dbi|INFO|cm_dbi_init() end
+1970-01-01T00:00:33Z|00005|cm|INFO|============STEP 2============
+1970-01-01T00:00:33Z|00006|cm|INFO|check loid
+1970-01-01T00:00:33Z|00007|cm|INFO|rxb:loid check failed.
+1970-01-01T00:00:33Z|00008|reconnect|INFO|unix:/var/ovs/db.sock: connecting...
+1970-01-01T00:00:33Z|00009|cm_dbi|INFO|neither idl has lock nor idl has ever connected 
+1970-01-01T00:00:33Z|00010|reconnect|INFO|unix:/var/ovs/db.sock: connected
+1970-01-01T00:00:33Z|00011|cm_dbi|INFO|neither idl has lock nor idl has ever connected 
+no need to start hgcsip process
+list if index name > 1: lo
+list if index name > 2: gre0
+list if index name > 3: gretap0
+list if index name > 4: sit0
+list if index name > 5: ip6tnl0
+list if index name > 15: foi
+>>>>>>> auto select interface foi (15) <<<<<<<<
+fd = 6, tcpfd = 5, udpfd = 4, rawfd = 7, if_index = 15
+dnsmasq: started, version 2.78 cache disabled
+dnsmasq: compile time options: no-IPv6 GNU-getopt no-DBus no-i18n no-IDN no-DHCP no-scripts no-TFTP no-conntrack no-ipset no-auth no-DNSSEC loop-detect inotify
+dnsmasq: warning: no upstream servers configured
+dnsmasq: read /etc/hosts - 1 addresses
+1970-01-01T00:00:33Z|00012|cm_dbi|INFO|neither idl has lock nor idl has ever connected 
+1970-01-01T00:00:33Z|00001|dm|INFO|create client to ovs db
+1970-01-01T00:00:33Z|00002|dm_lib|INFO|dm_jsonrpc_client_create path = 'unix:/var/ovs/db.sock'
+1970-01-01T00:00:33Z|00013|cm_dbi|INFO|neither idl has lock nor idl has ever connected 
+1970-01-01T00:00:33Z|00014|cm_dbi|INFO|connecting SDN controller manager channel
+1970-01-01T00:00:33Z|00015|cm_dbi|INFO|device_configue_first() start...
+1970-01-01T00:00:33Z|00016|cm_dbi|INFO|device_configue_first(): db has device already!
+1970-01-01T00:00:34Z|00017|cm_dbi|INFO|cm_device_init() start...
+1970-01-01T00:00:34Z|00018|cm_dbi|INFO|sn=0C6ABC-4A8310C6ABCXXXXC0,mac_address=0c:6a:bc:xx:xx:cf,fw_version=FH.1.0.4,hw_version=V1.0.0,model=HG2821T-U,start_time=0
+1970-01-01T00:00:34Z|00019|cm_dbi|INFO|create_db_netns() start
+1970-01-01T00:00:34Z|00020|cm_dbi|INFO|create_db_netns() end
+1970-01-01T00:00:34Z|00021|cm_dbi|INFO|cm_device_init() end...
+1970-01-01T00:00:34Z|00022|cm_dbi|ERR|cm_wlan_init do ovsrec_wlan_insert, db should be inited by init_script
+1970-01-01T00:00:34Z|00023|cm_dbi|INFO|set_cm_status() cm_status from 0 to 1.
+1970-01-01T00:00:34Z|00024|cm_dbi|INFO|rxb:DB changed. idl_seqno changed from 0 to 128
+1970-01-01T00:00:34Z|00025|cm_dbi|INFO|rxb:device changed. new idl_device_seqno = 25
+1970-01-01T00:00:34Z|00026|cm_dbi|INFO|rxb:wanconnection changed. new idl_wanconn_seqno = 19
+1970-01-01T00:00:34Z|00027|cm_dbi|INFO|xiaboy: find INSERT row,  row_wcon uuid is 2ff4e2df-30b7-4d73-8367-08bb624196d7 
+1970-01-01T00:00:34Z|00028|cm_devi_wan|INFO|create PPPoE wan connection binding to port 'SDN-out-default'
+1970-01-01T00:00:34Z|00029|cm_devi_sys|INFO|execle'ing /usr/init_scripts/create_WAN.sh
+fh_net_api.c: 558 in fh_marvell_forward_route_add(): vid=0 vlanprio=0 bindport=1 dhcpen=1
+open fh_br_ctrl_dev_name: No such file or directory
+open fh_br_ctrl_dev_name: No such file or directory
+fh_net_api.c: 628 in fh_marvell_forward_route_add(): shellcmd=mtk_itf_fe_sample  wan  0C:6A:BC:XX:XX:C0
+set wan mac 0c:6a:bc:xx:xx:c0
+No proccess to kill
+No proccess to kill
+cat: can't open '/rom/cfg/agentconf/hgcxml.conf': No such file or directory
+cat: can't open '/var/phyauthstates': No such file or directory
+sh: 1: unknown operand
+Plugin /usr/lib/rp-pppoe.so loaded.
+RP-PPPoE plugin version 3.3 compiled against pppd 2.4.3
+discovery area_code:Shanghai
+read_pppoe_session open file[/var/pppoe_session] failed!!
+Last PPP session is 0
+get session failedbridge_ppp_emulator_result pon0.4093 ERROR_ISP_TIME_OUT  
+
+xiaboy> send_cfmsg: sending message 'sendPADI padiAttempts:1 timeout 5
+cat: can't open '/var/run/ppp0/gw': No such file or directory
+BusyBox v1.17.2 (2018-05-31 12:49:13 CST) multi-call binary.
+
+Usage: route [{add|del|delete}]
+
+Edit kernel routing tables
+
+Options:
+	-n	Don't resolve names
+	-e	Display other/more information
+	-A inet{6}	Select address family
+
+1970-01-01T00:00:36Z|00030|cm_devi_wan|INFO|rxb:pppoe create failed
+1970-01-01T00:00:36Z|00031|cm_dbi|INFO|xiaboy: find INSERT row,  row_wcon uuid is 4f13e322-fb6e-4071-9324-139b0a39a7cb 
+1970-01-01T00:00:36Z|00032|cm_devi_wan|INFO|start create_wan_lvl2
+1970-01-01T00:00:36Z|00033|cm_devi_sys|INFO|>>> execvp '/usr/init_scripts/create_wan_lvl2.sh iptv.85 85 85'
+fh_net_api.c: 558 in fh_marvell_forward_route_add(): vid=85 vlanprio=0 bindport=1 dhcpen=1
+open fh_br_ctrl_dev_name: No such file or directory
+open fh_br_ctrl_dev_name: No such file or directory
+fh_net_api.c: 628 in fh_marvell_forward_route_add(): shellcmd=mtk_itf_fe_sample  wan  0C:6A:BC:XX:XX:C0
+set wan mac 0c:6a:bc:xx:xx:c0
+1970-01-01T00:00:38Z|00034|cm_devi_wan|INFO|create_wan_lvl2 end
+1970-01-01T00:00:38Z|00035|cm_dbi|INFO|xiaboy: find INSERT row,  row_wcon uuid is a6c727d2-b4ef-4f8b-a003-960775f0b14c 
+1970-01-01T00:00:38Z|00036|cm_devi_wan|INFO|start create_wan_lvl2
+1970-01-01T00:00:38Z|00037|cm_devi_sys|INFO|>>> execvp '/usr/init_scripts/create_wan_lvl2.sh iptv.51 51 51'
+fh_net_api.c: 558 in fh_marvell_forward_route_add(): vid=51 vlanprio=0 bindport=1 dhcpen=1
+open fh_br_ctrl_dev_name: No such file or directory
+open fh_br_ctrl_dev_name: No such file or directory
+fh_net_api.c: 628 in fh_marvell_forward_route_add(): shellcmd=mtk_itf_fe_sample  wan  0C:6A:BC:XX:XX:C0
+set wan mac 0c:6a:bc:xx:xx:c0
+1970-01-01T00:00:40Z|00038|cm_devi_wan|INFO|create_wan_lvl2 end
+1970-01-01T00:00:40Z|00039|cm_dbi|INFO|rxb:nat_config changed. new idl_nat_config_seqno = 22
+1970-01-01T00:00:40Z|00040|cm_dbi|INFO|xiaboy: find INSERT row,  row_nat uuid is dd0f2456-454c-435a-8ce2-dabd3323084c 
+1970-01-01T00:00:40Z|00041|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+1970-01-01T00:00:40Z|00042|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+1970-01-01T00:00:40Z|00043|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+1970-01-01T00:00:40Z|00044|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+Argument CMD is NULL or NAMESPACE is NULL!
+1970-01-01T00:00:40Z|00045|cm_dbi|INFO|rxb:application changed. new idl_app_seqno = 26
+1970-01-01T00:00:40Z|00046|cm_dbi|INFO|xiaboy: find INSERT row,  row_app uuid is bfd725f3-cbff-4583-89ae-c973648ec273 
+1970-01-01T00:00:40Z|00047|cm_dbi|INFO|dowith_application
+1970-01-01T00:00:40Z|00048|cm_devi_apps|INFO|modify_application start...
+1970-01-01T00:00:40Z|00049|cm_devi_apps|INFO|modify_application... app_name = 'dhcp_server'
+1970-01-01T00:00:40Z|00050|cm_devi_apps|INFO|modify_application_dhcp start...
+1970-01-01T00:00:40Z|00051|cm_devi_sys|INFO|execle'ing /usr/init_scripts/modify_dhcp.sh
+killall: udhcpd: no process killed
+1970-01-01T00:00:40Z|00052|cm_dbi|INFO|rxb:wlan_radio changed. new idl_wlan_radio_seqno = 21
+1970-01-01T00:00:40Z|00053|cm_dbi|INFO|xiaboy: find INSERT row,  row_wlan_radio uuid is 312aef87-a59c-4be4-8d43-6d0720e8a5a0 
+1970-01-01T00:00:40Z|00054|cm_devi_sys|INFO|cm_fhtool start
+1970-01-01T00:00:40Z|00055|cm_devi_sys|INFO|cm_fhtool do cmd 'fhtool getapmac_5g '
+1970-01-01T00:00:40Z|00056|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:40Z|00057|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg_5 MacAddress 0c:6a:bc:xx:xx:ce'
+1970-01-01T00:00:40Z|00058|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:40Z|00059|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg_5 AutoChannelSelect 3'
+1970-01-01T00:00:40Z|00060|cm_dbi|INFO|xiaboy: find INSERT row,  row_wlan_radio uuid is d15a13b0-c77c-4378-93a3-49483f151b66 
+1970-01-01T00:00:40Z|00061|cm_devi_sys|INFO|cm_fhtool start
+1970-01-01T00:00:40Z|00062|cm_devi_sys|INFO|cm_fhtool do cmd 'fhtool getapmac '
+1970-01-01T00:00:40Z|00063|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:40Z|00064|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg MacAddress 0c:6a:bc:xx:xx:cd'
+1970-01-01T00:00:40Z|00065|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:40Z|00066|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg AutoChannelSelect 3'
+1970-01-01T00:00:40Z|00067|cm_dbi|INFO|rxb:wlan_ssid changed. new idl_wlan_ssid_seqno = 28
+1970-01-01T00:00:40Z|00068|cm_dbi|INFO|xiaboy: find INSERT row,  row_wlan_ssid uuid is d3c206d9-6cc5-4911-84a1-0f49f748cd2e 
+1970-01-01T00:00:40Z|00069|cm_dbi|INFO|dowith_wlan_ssid start...
+1970-01-01T00:00:40Z|00070|cm_devi_wlan|INFO|modify_wlan_ssid start...
+1970-01-01T00:00:40Z|00071|cm_devi_wlan|INFO|modify_wlan_ssid(): ssid_index = 0
+1970-01-01T00:00:40Z|00072|cm_devi_sys|INFO|cm_fhtool start
+1970-01-01T00:00:40Z|00073|cm_devi_sys|INFO|cm_fhtool do cmd 'fhtool getapmac '
+PPPOE' 'ERROR_ISP_TIME_OUT'bridge_ppp_emulator_result pon0.4093 ERROR_ISP_TIME_OUT  
+
+xiaboy> send_cfmsg: sending message 'sendPADI padiAttempts:2 timeout 10
+1970-01-01T00:00:41Z|00074|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00075|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg MacAddress 0c:6a:bc:xx:xx:cd'
+1970-01-01T00:00:41Z|00076|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00077|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg AutoChannelSelect 3'
+1970-01-01T00:00:41Z|00078|cm_devi_wlan|INFO|modify_wlan_ssid start...
+1970-01-01T00:00:41Z|00079|cm_devi_wlan|INFO|modify_wlan_ssid(): ssid_index = 8
+1970-01-01T00:00:41Z|00080|cm_devi_sys|INFO|cm_fhtool start
+1970-01-01T00:00:41Z|00081|cm_devi_sys|INFO|cm_fhtool do cmd 'fhtool getapmac_5g '
+1970-01-01T00:00:41Z|00082|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00083|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg_5 MacAddress 0c:6a:bc:xx:xx:ce'
+1970-01-01T00:00:41Z|00084|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00085|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg_5 AutoChannelSelect 3'
+1970-01-01T00:00:41Z|00086|cm_dbi|INFO|xiaboy: find INSERT row,  row_wlan_ssid uuid is cb357791-47e2-4b91-8d96-4c8ef1045d5d 
+1970-01-01T00:00:41Z|00087|cm_dbi|INFO|dowith_wlan_ssid start...
+1970-01-01T00:00:41Z|00088|cm_devi_wlan|INFO|modify_wlan_ssid start...
+1970-01-01T00:00:41Z|00089|cm_devi_wlan|INFO|modify_wlan_ssid(): ssid_index = 0
+1970-01-01T00:00:41Z|00090|cm_devi_sys|INFO|cm_fhtool start
+1970-01-01T00:00:41Z|00091|cm_devi_sys|INFO|cm_fhtool do cmd 'fhtool getapmac '
+1970-01-01T00:00:41Z|00092|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00093|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg MacAddress 0c:6a:bc:xx:xx:cd'
+1970-01-01T00:00:41Z|00094|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00095|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg AutoChannelSelect 3'
+1970-01-01T00:00:41Z|00096|cm_devi_wlan|INFO|modify_wlan_ssid start...
+1970-01-01T00:00:41Z|00097|cm_devi_wlan|INFO|modify_wlan_ssid(): ssid_index = 8
+1970-01-01T00:00:41Z|00098|cm_devi_sys|INFO|cm_fhtool start
+1970-01-01T00:00:41Z|00099|cm_devi_sys|INFO|cm_fhtool do cmd 'fhtool getapmac_5g '
+1970-01-01T00:00:41Z|00100|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00101|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg_5 MacAddress 0c:6a:bc:xx:xx:ce'
+1970-01-01T00:00:41Z|00102|cm_devi_sys|INFO|cm_setcfgx start
+1970-01-01T00:00:41Z|00103|cm_devi_sys|INFO|cm_setcfgx do cmd 'setcfgx /var/wlan/apcfg_5 AutoChannelSelect 3'
+1970-01-01T00:00:41Z|00104|cm_devi_wlan|INFO|cm apply_wlan
+1970-01-01T00:00:41Z|00105|cm_devi|INFO|xiaboy: shell_name '/usr/init_scripts/wlan.sh 0
+'
+Cannot find device "ra0"
+1970-01-01T00:00:41Z|00106|cm_devi|INFO|xiaboy: shell_name '/usr/init_scripts/wlan11ac.sh 0
+'
+Cannot find device "rai0"
+1970-01-01T00:00:41Z|00107|cm_devi_sysmsg|INFO|get msg 'PPPOE', 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:00:41Z|00108|cm_dbi|INFO|setdb_pppd_updown name = PPPOE,value = ERROR_ISP_TIME_OUT
+1970-01-01T00:00:41Z|00109|cm_dbi|INFO|before:result = '(null)',status = '(null)',result = '(null)'
+1970-01-01T00:00:41Z|00110|cm_dbi|INFO|after:result = '(null)',status = '(null)',result = 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:00:41Z|00111|timeval|WARN|Unreasonably long 7398ms poll interval
+1970-01-01T00:00:41Z|00112|coverage|INFO|Event coverage, avg rate over last: 5 seconds, last minute, last hour,  hash=64ec5d61:
+1970-01-01T00:00:41Z|00113|coverage|INFO|util_xalloc              6355.0/sec   529.583/sec        8.8264/sec   total: 31775
+1970-01-01T00:00:41Z|00114|coverage|INFO|stream_open                0.2/sec     0.017/sec        0.0003/sec   total: 1
+1970-01-01T00:00:41Z|00115|coverage|INFO|pstream_open               0.2/sec     0.017/sec        0.0003/sec   total: 1
+1970-01-01T00:00:41Z|00116|coverage|INFO|seq_change                 0.6/sec     0.050/sec        0.0008/sec   total: 3
+1970-01-01T00:00:41Z|00117|coverage|INFO|poll_zero_timeout          0.2/sec     0.017/sec        0.0003/sec   total: 1
+1970-01-01T00:00:41Z|00118|coverage|INFO|poll_create_node           4.8/sec     0.400/sec        0.0067/sec   total: 24
+1970-01-01T00:00:41Z|00119|coverage|INFO|txn_incomplete             0.6/sec     0.050/sec        0.0008/sec   total: 3
+1970-01-01T00:00:41Z|00120|coverage|INFO|hmap_expand              154.8/sec    12.900/sec        0.2150/sec   total: 774
+1970-01-01T00:00:41Z|00121|coverage|INFO|hmap_pathological          5.4/sec     0.450/sec        0.0075/sec   total: 27
+1970-01-01T00:00:41Z|00122|coverage|INFO|60 events never hit
+1970-01-01T00:00:41Z|00123|cm_dbi|INFO|rxb:DB changed. idl_seqno changed from 128 to 140
+1970-01-01T00:00:41Z|00124|cm_dbi|INFO|rxb:wanconnection changed. new idl_wanconn_seqno = 140
+1970-01-01T00:00:41Z|00125|cm_dbi|INFO|rxb:nat_config changed. new idl_nat_config_seqno = 139
+1970-01-01T00:00:41Z|00126|cm_dbi|INFO|xiaboy: find MODIFY row,  row_nat uuid is dd0f2456-454c-435a-8ce2-dabd3323084c 
+1970-01-01T00:00:41Z|00127|cm_devi_sys|INFO|execle'ing /usr/init_scripts/clean_iptables.sh
+1970-01-01T00:00:41Z|00128|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+1970-01-01T00:00:41Z|00129|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+1970-01-01T00:00:41Z|00130|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+1970-01-01T00:00:41Z|00131|cm_devi_sys|INFO|execle'ing /usr/init_scripts/add_iptables.sh
+Argument CMD is NULL or NAMESPACE is NULL!
+1970-01-01T00:00:41Z|00132|cm_devi_sysmsg|INFO|get msg 'PPPOE', 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:00:41Z|00133|cm_dbi|INFO|setdb_pppd_updown name = PPPOE,value = ERROR_ISP_TIME_OUT
+1970-01-01T00:00:41Z|00134|cm_dbi|INFO|before:result = '(null)',status = '(null)',result = 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:00:41Z|00135|cm_dbi|INFO|after:result = '(null)',status = '(null)',result = 'ERROR_ISP_TIME_OUT'
+PPPOE' 'ERROR_ISP_TIME_OUT'bridge_ppp_emulator_result pon0.4093 ERROR_ISP_TIME_OUT  
+
+xiaboy> send_cfmsg: sending message 'sendPADI padiAttempts:3 timeout 20
+1970-01-01T00:00:51Z|00136|cm_devi_sysmsg|INFO|get msg 'PPPOE', 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:00:51Z|00137|cm_dbi|INFO|setdb_pppd_updown name = PPPOE,value = ERROR_ISP_TIME_OUT
+1970-01-01T00:00:51Z|00138|cm_dbi|INFO|before:result = '(null)',status = '(null)',result = 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:00:51Z|00139|cm_dbi|INFO|after:result = '(null)',status = '(null)',result = 'ERROR_ISP_TIME_OUT'
+start INIT_SELECTING*************************************************
+send discover sec 2534
+udhcpc:setFileInfo():fopen /var/diagnose/app_fail_reason.conf error.
+start for**********************************
+Error: param error
+start INIT_SELECTING*************************************************
+send discover sec 2534
+found the key=er=, Delete
+start for**********************************
+Error: param error
+PPPOE' 'ERROR_ISP_TIME_OUT'bridge_ppp_emulator_result pon0.4093 ERROR_ISP_TIME_OUT  
+
+xiaboy> send_cfmsg: sending message 'sendPADI padiAttempts:4 timeout 40
+1970-01-01T00:01:11Z|00140|cm_devi_sysmsg|INFO|get msg 'PPPOE', 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:01:11Z|00141|cm_dbi|INFO|setdb_pppd_updown name = PPPOE,value = ERROR_ISP_TIME_OUT
+1970-01-01T00:01:11Z|00142|cm_dbi|INFO|before:result = '(null)',status = '(null)',result = 'ERROR_ISP_TIME_OUT'
+1970-01-01T00:01:11Z|00143|cm_dbi|INFO|after:result = '(null)',status = '(null)',result = 'ERROR_ISP_TIME_OUT'
+start INIT_SELECTING*************************************************
+send discover sec 2534
+found the key=er=, Delete
+start for**********************************
+Error: param error
